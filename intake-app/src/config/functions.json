@@ -1,0 +1,855 @@
+{
+  "jobCategories": [
+    {
+      "id": "information-oriented",
+      "name": "Information-Oriented Functions"
+    },
+    {
+      "id": "things-oriented",
+      "name": "Things-Oriented Functions"
+    },
+    {
+      "id": "people-oriented",
+      "name": "People-Oriented Functions"
+    }
+  ],
+  "categories": [
+    {
+      "id": "creating-designing-and-using-imagination",
+      "name": "Creating, Designing, and Using Imagination",
+      "jobCategory": "information-oriented",
+      "jobCategoryName": "Information-Oriented Functions",
+      "branch": null,
+      "branchName": null,
+      "items": [
+        {
+          "id": "creating-designing-and-using-imagination__01",
+          "label": "Generating ideas, creating, inventing, imagining"
+        },
+        {
+          "id": "creating-designing-and-using-imagination__02",
+          "label": "Asking new questions, pioneering new ideas"
+        },
+        {
+          "id": "creating-designing-and-using-imagination__03",
+          "label": "Brainstorming"
+        },
+        {
+          "id": "creating-designing-and-using-imagination__04",
+          "label": "Drawing, painting, filming, photographing"
+        },
+        {
+          "id": "creating-designing-and-using-imagination__05",
+          "label": "Creating original works of art, including music"
+        },
+        {
+          "id": "creating-designing-and-using-imagination__06",
+          "label": "Creating visual or written presentations, or presentations using other media"
+        },
+        {
+          "id": "creating-designing-and-using-imagination__07",
+          "label": "Creating marketing materials, advertisements, promotional campaigns"
+        },
+        {
+          "id": "creating-designing-and-using-imagination__08",
+          "label": "Creating activities, games, or other experiential learning activities"
+        },
+        {
+          "id": "creating-designing-and-using-imagination__09",
+          "label": "Designing events or educational experiences"
+        },
+        {
+          "id": "creating-designing-and-using-imagination__10",
+          "label": "Writing fiction, creative writing (poetry, essays, novels, scripts)"
+        },
+        {
+          "id": "creating-designing-and-using-imagination__11",
+          "label": "Performing, acting"
+        },
+        {
+          "id": "creating-designing-and-using-imagination__12",
+          "label": "Presenting to people via TV, films, seminars, speeches"
+        },
+        {
+          "id": "creating-designing-and-using-imagination__13",
+          "label": "Information engineering, database design, computer programming"
+        },
+        {
+          "id": "creating-designing-and-using-imagination__14",
+          "label": "Information architecture, such as in website design"
+        },
+        {
+          "id": "creating-designing-and-using-imagination__15",
+          "label": "Creating software or similar works"
+        },
+        {
+          "id": "creating-designing-and-using-imagination__16",
+          "label": "Designing research experiments to make new discoveries"
+        }
+      ],
+      "hasOther": true,
+      "walkIndex": 1
+    },
+    {
+      "id": "problem-solving-researching-investigating",
+      "name": "Problem Solving, Researching, Investigating",
+      "jobCategory": "information-oriented",
+      "jobCategoryName": "Information-Oriented Functions",
+      "branch": null,
+      "branchName": null,
+      "items": [
+        {
+          "id": "problem-solving-researching-investigating__01",
+          "label": "Diagnosing by seeing the relationship between clues"
+        },
+        {
+          "id": "problem-solving-researching-investigating__02",
+          "label": "Analyzing by perceiving patterns in data, events, or processes, or accurately evaluating information"
+        },
+        {
+          "id": "problem-solving-researching-investigating__03",
+          "label": "Seeing through masses of information to the central principles or most important facts"
+        },
+        {
+          "id": "problem-solving-researching-investigating__04",
+          "label": "Breaking down masses of data into component parts, analyzing"
+        },
+        {
+          "id": "problem-solving-researching-investigating__05",
+          "label": "Synthesizing: combining parts to form a whole"
+        },
+        {
+          "id": "problem-solving-researching-investigating__06",
+          "label": "Systematizing, prioritizing, categorizing, or organizing information"
+        },
+        {
+          "id": "problem-solving-researching-investigating__07",
+          "label": "Deciding what data or information to collect"
+        },
+        {
+          "id": "problem-solving-researching-investigating__08",
+          "label": "Conducting research to develop new ideas, theories"
+        },
+        {
+          "id": "problem-solving-researching-investigating__09",
+          "label": "Researching by observing behavior or phenomena"
+        },
+        {
+          "id": "problem-solving-researching-investigating__10",
+          "label": "Researching by gathering or compiling information"
+        },
+        {
+          "id": "problem-solving-researching-investigating__11",
+          "label": "Making decisions based on the meaning of data or information"
+        }
+      ],
+      "hasOther": true,
+      "walkIndex": 2
+    },
+    {
+      "id": "reading-learning-mastering-a-body-of-knowledge",
+      "name": "Reading, Learning, Mastering a Body of Knowledge",
+      "jobCategory": "information-oriented",
+      "jobCategoryName": "Information-Oriented Functions",
+      "branch": null,
+      "branchName": null,
+      "items": [
+        {
+          "id": "reading-learning-mastering-a-body-of-knowledge__01",
+          "label": "Reading, learning, gathering information"
+        },
+        {
+          "id": "reading-learning-mastering-a-body-of-knowledge__02",
+          "label": "Interpreting other people's concepts, ideas"
+        },
+        {
+          "id": "reading-learning-mastering-a-body-of-knowledge__03",
+          "label": "Adapting information to suit another purpose"
+        },
+        {
+          "id": "reading-learning-mastering-a-body-of-knowledge__04",
+          "label": "Combining existing ideas or concepts into new ones"
+        },
+        {
+          "id": "reading-learning-mastering-a-body-of-knowledge__05",
+          "label": "Mastering a specialized body of knowledge, expertise, wisdom, lore"
+        }
+      ],
+      "hasOther": true,
+      "walkIndex": 3
+    },
+    {
+      "id": "critiquing-evaluating-making-recommendations",
+      "name": "Critiquing, Evaluating, Making Recommendations",
+      "jobCategory": "information-oriented",
+      "jobCategoryName": "Information-Oriented Functions",
+      "branch": null,
+      "branchName": null,
+      "items": [
+        {
+          "id": "critiquing-evaluating-making-recommendations__01",
+          "label": "Critiquing other people's ideas"
+        },
+        {
+          "id": "critiquing-evaluating-making-recommendations__02",
+          "label": "Critiquing works of art, such as in script reading, book reviews, film reviews"
+        },
+        {
+          "id": "critiquing-evaluating-making-recommendations__03",
+          "label": "Critical writing, such as nonfiction, journalism, and science writing"
+        },
+        {
+          "id": "critiquing-evaluating-making-recommendations__04",
+          "label": "Technical writing, such as in business, law, technology, medicine, public policy"
+        },
+        {
+          "id": "critiquing-evaluating-making-recommendations__05",
+          "label": "Judging, evaluating, or appraising information"
+        },
+        {
+          "id": "critiquing-evaluating-making-recommendations__06",
+          "label": "Using physical senses to evaluate"
+        },
+        {
+          "id": "critiquing-evaluating-making-recommendations__07",
+          "label": "Process improvement, making systems more efficient"
+        },
+        {
+          "id": "critiquing-evaluating-making-recommendations__08",
+          "label": "Risk and opportunity cost analysis"
+        },
+        {
+          "id": "critiquing-evaluating-making-recommendations__09",
+          "label": "Making recommendations, providing solutions"
+        },
+        {
+          "id": "critiquing-evaluating-making-recommendations__10",
+          "label": "Troubleshooting, debugging, and maintaining software"
+        },
+        {
+          "id": "critiquing-evaluating-making-recommendations__11",
+          "label": "Editing to improve content"
+        },
+        {
+          "id": "critiquing-evaluating-making-recommendations__12",
+          "label": "Using mathematics, numbers, statistics, working with formulas to evaluate"
+        }
+      ],
+      "hasOther": true,
+      "walkIndex": 4
+    },
+    {
+      "id": "organizing-planning-improving-other-general-admi",
+      "name": "Organizing, Planning, Improving, Other General Administrative Activities",
+      "jobCategory": "information-oriented",
+      "jobCategoryName": "Information-Oriented Functions",
+      "branch": null,
+      "branchName": null,
+      "items": [
+        {
+          "id": "organizing-planning-improving-other-general-admi__01",
+          "label": "Organizing information, projects, or events"
+        },
+        {
+          "id": "organizing-planning-improving-other-general-admi__02",
+          "label": "Project management, setting goals and milestones, budgeting, status reporting"
+        },
+        {
+          "id": "organizing-planning-improving-other-general-admi__03",
+          "label": "Planning, strategizing, forecasting"
+        },
+        {
+          "id": "organizing-planning-improving-other-general-admi__04",
+          "label": "Translating, interpreting information to another language, medium, or style"
+        },
+        {
+          "id": "organizing-planning-improving-other-general-admi__05",
+          "label": "Copy editing to improve grammar, syntax"
+        },
+        {
+          "id": "organizing-planning-improving-other-general-admi__06",
+          "label": "Retrieving or finding information, researching, compiling information"
+        },
+        {
+          "id": "organizing-planning-improving-other-general-admi__07",
+          "label": "Entering data into a computer, data entry, word processing"
+        },
+        {
+          "id": "organizing-planning-improving-other-general-admi__08",
+          "label": "Comparing, proofing"
+        },
+        {
+          "id": "organizing-planning-improving-other-general-admi__09",
+          "label": "Accounting, bookkeeping, business mathematics"
+        },
+        {
+          "id": "organizing-planning-improving-other-general-admi__10",
+          "label": "Record keeping, storing, filing"
+        }
+      ],
+      "hasOther": true,
+      "walkIndex": 5
+    },
+    {
+      "id": "problem-solving-and-understanding-complex-physic",
+      "name": "Problem-Solving and Understanding Complex Physical Systems",
+      "jobCategory": "things-oriented",
+      "jobCategoryName": "Things-Oriented Functions",
+      "branch": null,
+      "branchName": null,
+      "items": [
+        {
+          "id": "problem-solving-and-understanding-complex-physic__01",
+          "label": "Understanding complex physical systems such as in the physical sciences, medicine, engineering, and technology"
+        },
+        {
+          "id": "problem-solving-and-understanding-complex-physic__02",
+          "label": "Diagnosing and analyzing complex mechanical systems, like a mechanic, engineer, physician, or veterinarian does"
+        },
+        {
+          "id": "problem-solving-and-understanding-complex-physic__03",
+          "label": "Repairing or improving complex mechanical systems"
+        }
+      ],
+      "hasOther": true,
+      "walkIndex": 6
+    },
+    {
+      "id": "creating-designing-inventing-physical-objects-in",
+      "name": "Creating, Designing, Inventing Physical Objects, Including Art",
+      "jobCategory": "things-oriented",
+      "jobCategoryName": "Things-Oriented Functions",
+      "branch": null,
+      "branchName": null,
+      "items": [
+        {
+          "id": "creating-designing-inventing-physical-objects-in__01",
+          "label": "Designing complex physical systems"
+        },
+        {
+          "id": "creating-designing-inventing-physical-objects-in__02",
+          "label": "Creating new theories, understanding or interpreting physical systems"
+        },
+        {
+          "id": "creating-designing-inventing-physical-objects-in__03",
+          "label": "Inventing, creating, designing original devices or objects"
+        },
+        {
+          "id": "creating-designing-inventing-physical-objects-in__04",
+          "label": "Directing films or plays, choreographing scenes, storyboarding"
+        },
+        {
+          "id": "creating-designing-inventing-physical-objects-in__05",
+          "label": "Creating works of three-dimensional art"
+        }
+      ],
+      "hasOther": true,
+      "walkIndex": 7
+    },
+    {
+      "id": "evaluating-critiquing-fixing-and-repairing-objec",
+      "name": "Evaluating, Critiquing, Fixing, and Repairing Objects and Things",
+      "jobCategory": "things-oriented",
+      "jobCategoryName": "Things-Oriented Functions",
+      "branch": null,
+      "branchName": null,
+      "items": [
+        {
+          "id": "evaluating-critiquing-fixing-and-repairing-objec__01",
+          "label": "Evaluating and critiquing physical objects, including food, arts, design, or the human body"
+        },
+        {
+          "id": "evaluating-critiquing-fixing-and-repairing-objec__02",
+          "label": "Appraising and judging physical objects, including food, arts, design, or the human body"
+        },
+        {
+          "id": "evaluating-critiquing-fixing-and-repairing-objec__03",
+          "label": "Repairing, restoring, or maintaining things"
+        },
+        {
+          "id": "evaluating-critiquing-fixing-and-repairing-objec__04",
+          "label": "Assembling"
+        }
+      ],
+      "hasOther": true,
+      "walkIndex": 8
+    },
+    {
+      "id": "crafting-beautifying-using-tools-to-produce-obje",
+      "name": "Crafting, Beautifying, Using Tools to Produce Objects",
+      "jobCategory": "things-oriented",
+      "jobCategoryName": "Things-Oriented Functions",
+      "branch": null,
+      "branchName": null,
+      "items": [
+        {
+          "id": "crafting-beautifying-using-tools-to-produce-obje__01",
+          "label": "Sculpting, shaping, tooling"
+        },
+        {
+          "id": "crafting-beautifying-using-tools-to-produce-obje__02",
+          "label": "Crafting (combining artistic and motor skills to fashion things)"
+        },
+        {
+          "id": "crafting-beautifying-using-tools-to-produce-obje__03",
+          "label": "Employing fine hand dexterity (as used by surgeon, dentist, craftsman, artist, musician)"
+        },
+        {
+          "id": "crafting-beautifying-using-tools-to-produce-obje__04",
+          "label": "Precision use of tools"
+        },
+        {
+          "id": "crafting-beautifying-using-tools-to-produce-obje__05",
+          "label": "Manufacturing or mass-producing objects"
+        },
+        {
+          "id": "crafting-beautifying-using-tools-to-produce-obje__06",
+          "label": "Cooking, preparing, or displaying food"
+        },
+        {
+          "id": "crafting-beautifying-using-tools-to-produce-obje__07",
+          "label": "Choosing, arranging objects artistically"
+        },
+        {
+          "id": "crafting-beautifying-using-tools-to-produce-obje__08",
+          "label": "Utilizing eye for design, color, texture, or proportion"
+        },
+        {
+          "id": "crafting-beautifying-using-tools-to-produce-obje__09",
+          "label": "Sensual acuity of sight, sound, smell, taste, or feel"
+        }
+      ],
+      "hasOther": true,
+      "walkIndex": 9
+    },
+    {
+      "id": "athletics-performing-expertly-with-the-body-mani",
+      "name": "Athletics, Performing Expertly with the Body, Manipulating the Human Anatomy",
+      "jobCategory": "things-oriented",
+      "jobCategoryName": "Things-Oriented Functions",
+      "branch": null,
+      "branchName": null,
+      "items": [
+        {
+          "id": "athletics-performing-expertly-with-the-body-mani__01",
+          "label": "Dancing or choreographing dance routines"
+        },
+        {
+          "id": "athletics-performing-expertly-with-the-body-mani__02",
+          "label": "Use physical agility, fine sensory-motor skills, strength, and dexterity in athletics and other fields such as law enforcement, firefighting, emergency, medicine"
+        },
+        {
+          "id": "athletics-performing-expertly-with-the-body-mani__03",
+          "label": "Using spatial visualization for gymnastics, figure skating, diving, and other sports that require visualizing body movements"
+        },
+        {
+          "id": "athletics-performing-expertly-with-the-body-mani__04",
+          "label": "Performing stunts or other extreme physical feats"
+        },
+        {
+          "id": "athletics-performing-expertly-with-the-body-mani__05",
+          "label": "Massaging, adjusting, touching, hands-on healing"
+        }
+      ],
+      "hasOther": true,
+      "walkIndex": 10
+    },
+    {
+      "id": "operating-machines-and-equipment",
+      "name": "Operating Machines and Equipment",
+      "jobCategory": "things-oriented",
+      "jobCategoryName": "Things-Oriented Functions",
+      "branch": null,
+      "branchName": null,
+      "items": [
+        {
+          "id": "operating-machines-and-equipment__01",
+          "label": "Operating an airplane, ship or boat, truck or car, motorcycle or bicycle"
+        },
+        {
+          "id": "operating-machines-and-equipment__02",
+          "label": "Using large tools such as bulldozers and other construction machinery, tanks"
+        },
+        {
+          "id": "operating-machines-and-equipment__03",
+          "label": "Constructing buildings or other large objects, such as bridges and roads"
+        },
+        {
+          "id": "operating-machines-and-equipment__04",
+          "label": "Operating, controlling, or guiding machines"
+        },
+        {
+          "id": "operating-machines-and-equipment__05",
+          "label": "Tending machines"
+        },
+        {
+          "id": "operating-machines-and-equipment__06",
+          "label": "Fighting, using firearms or other weapons"
+        },
+        {
+          "id": "operating-machines-and-equipment__07",
+          "label": "Installing"
+        },
+        {
+          "id": "operating-machines-and-equipment__08",
+          "label": "Cleaning, preparing, washing, dusting"
+        },
+        {
+          "id": "operating-machines-and-equipment__09",
+          "label": "Moving, storing, warehousing, carrying, lifting, handling"
+        }
+      ],
+      "hasOther": true,
+      "walkIndex": 11
+    },
+    {
+      "id": "interacting-with-the-physical-world-including-na",
+      "name": "Interacting with the Physical World, Including Nature",
+      "jobCategory": "things-oriented",
+      "jobCategoryName": "Things-Oriented Functions",
+      "branch": null,
+      "branchName": null,
+      "items": [
+        {
+          "id": "interacting-with-the-physical-world-including-na__01",
+          "label": "Navigating, orienteering, pathfinding, exploring"
+        },
+        {
+          "id": "interacting-with-the-physical-world-including-na__02",
+          "label": "Farming, gardening, growing or tending plants or animals"
+        },
+        {
+          "id": "interacting-with-the-physical-world-including-na__03",
+          "label": "Acute awareness of surroundings, physical environment, nature"
+        },
+        {
+          "id": "interacting-with-the-physical-world-including-na__04",
+          "label": "Using street wisdom, acute alertness to threats to survival"
+        },
+        {
+          "id": "interacting-with-the-physical-world-including-na__05",
+          "label": "Hunting, trapping, fishing"
+        }
+      ],
+      "hasOther": true,
+      "walkIndex": 12
+    },
+    {
+      "id": "problem-solving-providing-expert-advice",
+      "name": "Problem Solving, Providing Expert Advice",
+      "jobCategory": "people-oriented",
+      "jobCategoryName": "People-Oriented Functions",
+      "branch": "one-on-one",
+      "branchName": "Primarily One-on-One",
+      "items": [
+        {
+          "id": "problem-solving-providing-expert-advice__01",
+          "label": "Mentoring, one-on-one teaching, instructing, training, tutoring"
+        },
+        {
+          "id": "problem-solving-providing-expert-advice__02",
+          "label": "Counseling, coaching, guiding, empowering"
+        },
+        {
+          "id": "problem-solving-providing-expert-advice__03",
+          "label": "Healing, treating the diseases or problems of, rehabilitating"
+        },
+        {
+          "id": "problem-solving-providing-expert-advice__04",
+          "label": "Advising, consulting with"
+        },
+        {
+          "id": "problem-solving-providing-expert-advice__05",
+          "label": "Assessing, evaluating"
+        },
+        {
+          "id": "problem-solving-providing-expert-advice__06",
+          "label": "Diagnosing, analyzing, or understanding an individual's needs, mood, motives, responses, behavior, and so on"
+        },
+        {
+          "id": "problem-solving-providing-expert-advice__07",
+          "label": "Using intuition or nonverbal clues to understand individuals"
+        },
+        {
+          "id": "problem-solving-providing-expert-advice__08",
+          "label": "Observing, studying behaviors"
+        }
+      ],
+      "hasOther": true,
+      "walkIndex": 13
+    },
+    {
+      "id": "supporting-enabling-hosting-entertaining",
+      "name": "Supporting, Enabling, Hosting, Entertaining",
+      "jobCategory": "people-oriented",
+      "jobCategoryName": "People-Oriented Functions",
+      "branch": "one-on-one",
+      "branchName": "Primarily One-on-One",
+      "items": [
+        {
+          "id": "supporting-enabling-hosting-entertaining__01",
+          "label": "Encouraging, supporting"
+        },
+        {
+          "id": "supporting-enabling-hosting-entertaining__02",
+          "label": "Providing emotional support"
+        },
+        {
+          "id": "supporting-enabling-hosting-entertaining__03",
+          "label": "Promoting, being an agent for others"
+        },
+        {
+          "id": "supporting-enabling-hosting-entertaining__04",
+          "label": "Listening"
+        },
+        {
+          "id": "supporting-enabling-hosting-entertaining__05",
+          "label": "Being understanding and patient with others"
+        },
+        {
+          "id": "supporting-enabling-hosting-entertaining__06",
+          "label": "Enabling, assisting other people to locate information"
+        },
+        {
+          "id": "supporting-enabling-hosting-entertaining__07",
+          "label": "Helping, serving, providing needs of individuals"
+        },
+        {
+          "id": "supporting-enabling-hosting-entertaining__08",
+          "label": "Assisting, caretaking"
+        },
+        {
+          "id": "supporting-enabling-hosting-entertaining__09",
+          "label": "Hosting"
+        },
+        {
+          "id": "supporting-enabling-hosting-entertaining__10",
+          "label": "Entertaining, amusing, conversing with"
+        },
+        {
+          "id": "supporting-enabling-hosting-entertaining__11",
+          "label": "Giving pleasure to"
+        },
+        {
+          "id": "supporting-enabling-hosting-entertaining__12",
+          "label": "Using your personal charisma"
+        }
+      ],
+      "hasOther": true,
+      "walkIndex": 14
+    },
+    {
+      "id": "managing-informing-selling-general-administrativ",
+      "name": "Managing, Informing, Selling, General Administrative Activities",
+      "jobCategory": "people-oriented",
+      "jobCategoryName": "People-Oriented Functions",
+      "branch": "one-on-one",
+      "branchName": "Primarily One-on-One",
+      "items": [
+        {
+          "id": "managing-informing-selling-general-administrativ__01",
+          "label": "Cultivating and maintaining relationships"
+        },
+        {
+          "id": "managing-informing-selling-general-administrativ__02",
+          "label": "Selecting, screening, hiring"
+        },
+        {
+          "id": "managing-informing-selling-general-administrativ__03",
+          "label": "Managing, supervising"
+        },
+        {
+          "id": "managing-informing-selling-general-administrativ__04",
+          "label": "Giving instructions, providing information to"
+        },
+        {
+          "id": "managing-informing-selling-general-administrativ__05",
+          "label": "Persuading, selling, motivating, influencing, enrolling, recruiting"
+        },
+        {
+          "id": "managing-informing-selling-general-administrativ__06",
+          "label": "Interviewing"
+        },
+        {
+          "id": "managing-informing-selling-general-administrativ__07",
+          "label": "Communicating verbally with"
+        },
+        {
+          "id": "managing-informing-selling-general-administrativ__08",
+          "label": "Bringing together, introducing"
+        },
+        {
+          "id": "managing-informing-selling-general-administrativ__09",
+          "label": "Networking, building alliances and relationships"
+        },
+        {
+          "id": "managing-informing-selling-general-administrativ__10",
+          "label": "Negotiating between individuals, arbitrating"
+        }
+      ],
+      "hasOther": true,
+      "walkIndex": 15
+    },
+    {
+      "id": "problem-solving-providing-expert-advice-to-a-gro",
+      "name": "Problem Solving, Providing Expert Advice to a Group",
+      "jobCategory": "people-oriented",
+      "jobCategoryName": "People-Oriented Functions",
+      "branch": "group",
+      "branchName": "Primarily with Groups, Organizations, The Public, Or Humanity",
+      "items": [
+        {
+          "id": "problem-solving-providing-expert-advice-to-a-gro__01",
+          "label": "Empowering, enabling a group"
+        },
+        {
+          "id": "problem-solving-providing-expert-advice-to-a-gro__02",
+          "label": "Instructing, teaching, training a group"
+        },
+        {
+          "id": "problem-solving-providing-expert-advice-to-a-gro__03",
+          "label": "Guiding a group through a healing process"
+        },
+        {
+          "id": "problem-solving-providing-expert-advice-to-a-gro__04",
+          "label": "Diagnosing, analyzing, or understanding a group's existing or potential needs, moods, motives, responses, behavior"
+        },
+        {
+          "id": "problem-solving-providing-expert-advice-to-a-gro__05",
+          "label": "Using intuition or nonverbal clues to understand a group or individuals in a group setting"
+        },
+        {
+          "id": "problem-solving-providing-expert-advice-to-a-gro__06",
+          "label": "Consulting to affect a group's or organization's productivity, behavior"
+        },
+        {
+          "id": "problem-solving-providing-expert-advice-to-a-gro__07",
+          "label": "Advising a group, providing expertise"
+        },
+        {
+          "id": "problem-solving-providing-expert-advice-to-a-gro__08",
+          "label": "Designing events or educational experiences"
+        },
+        {
+          "id": "problem-solving-providing-expert-advice-to-a-gro__09",
+          "label": "Creating activities, games"
+        }
+      ],
+      "hasOther": true,
+      "walkIndex": 16
+    },
+    {
+      "id": "managing-leading-interacting-with-a-group",
+      "name": "Managing, Leading, Interacting with a Group",
+      "jobCategory": "people-oriented",
+      "jobCategoryName": "People-Oriented Functions",
+      "branch": "group",
+      "branchName": "Primarily with Groups, Organizations, The Public, Or Humanity",
+      "items": [
+        {
+          "id": "managing-leading-interacting-with-a-group__01",
+          "label": "Managing, leading a group, organization, company"
+        },
+        {
+          "id": "managing-leading-interacting-with-a-group__02",
+          "label": "Initiating, creating, founding a group of people or a company"
+        },
+        {
+          "id": "managing-leading-interacting-with-a-group__03",
+          "label": "Supervising, captaining a group or team"
+        },
+        {
+          "id": "managing-leading-interacting-with-a-group__04",
+          "label": "Being a team member such as a member of a work group, athlete, orchestra member"
+        },
+        {
+          "id": "managing-leading-interacting-with-a-group__05",
+          "label": "Leading a group in recreation, games, exercise, travel, rehabilitation"
+        },
+        {
+          "id": "managing-leading-interacting-with-a-group__06",
+          "label": "Negotiating between groups, resolving conflicts or disputes, bringing conflicting groups together, inspiring a group"
+        },
+        {
+          "id": "managing-leading-interacting-with-a-group__07",
+          "label": "Facilitating, guiding a group"
+        }
+      ],
+      "hasOther": true,
+      "walkIndex": 17
+    },
+    {
+      "id": "influencing-and-persuading-a-group",
+      "name": "Influencing and Persuading a Group",
+      "jobCategory": "people-oriented",
+      "jobCategoryName": "People-Oriented Functions",
+      "branch": "group",
+      "branchName": "Primarily with Groups, Organizations, The Public, Or Humanity",
+      "items": [
+        {
+          "id": "influencing-and-persuading-a-group__01",
+          "label": "Persuading, motivating, convincing, or selling to a group"
+        },
+        {
+          "id": "influencing-and-persuading-a-group__02",
+          "label": "Using personal charisma"
+        },
+        {
+          "id": "influencing-and-persuading-a-group__03",
+          "label": "Networking with groups"
+        },
+        {
+          "id": "influencing-and-persuading-a-group__04",
+          "label": "Communicating verbally with groups, public speaking, or communicating verbally through the media"
+        },
+        {
+          "id": "influencing-and-persuading-a-group__05",
+          "label": "Communicating with people via art, music, writing, film, or other art forms"
+        }
+      ],
+      "hasOther": true,
+      "walkIndex": 18
+    },
+    {
+      "id": "entertaining-and-hosting-group-functions",
+      "name": "Entertaining and Hosting Group Functions",
+      "jobCategory": "people-oriented",
+      "jobCategoryName": "People-Oriented Functions",
+      "branch": "group",
+      "branchName": "Primarily with Groups, Organizations, The Public, Or Humanity",
+      "items": [
+        {
+          "id": "entertaining-and-hosting-group-functions__01",
+          "label": "Hosting, entertaining socially"
+        },
+        {
+          "id": "entertaining-and-hosting-group-functions__02",
+          "label": "Amusing, providing entertainment or pleasure"
+        },
+        {
+          "id": "entertaining-and-hosting-group-functions__03",
+          "label": "Performing, acting"
+        },
+        {
+          "id": "entertaining-and-hosting-group-functions__04",
+          "label": "Presenting to people via TV, films, seminars, speeches"
+        },
+        {
+          "id": "entertaining-and-hosting-group-functions__05",
+          "label": "Selecting, screening prospective members or employees"
+        },
+        {
+          "id": "entertaining-and-hosting-group-functions__06",
+          "label": "Assisting, serving, helping"
+        }
+      ],
+      "hasOther": true,
+      "walkIndex": 19
+    }
+  ],
+  "meta": {
+    "categoryCount": 19,
+    "itemCount": 151,
+    "source": "docs/functions-values-source.md"
+  }
+}

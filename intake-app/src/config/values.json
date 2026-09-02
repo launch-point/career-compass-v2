@@ -1,0 +1,385 @@
+{
+  "values": [
+    {
+      "id": "accomplishment",
+      "label": "Accomplishment"
+    },
+    {
+      "id": "achievement",
+      "label": "Achievement"
+    },
+    {
+      "id": "adventure",
+      "label": "Adventure"
+    },
+    {
+      "id": "affection",
+      "label": "Affection"
+    },
+    {
+      "id": "affiliation",
+      "label": "Affiliation"
+    },
+    {
+      "id": "ambitious",
+      "label": "Ambitious"
+    },
+    {
+      "id": "assisting-others",
+      "label": "Assisting Others"
+    },
+    {
+      "id": "authority",
+      "label": "Authority"
+    },
+    {
+      "id": "beauty",
+      "label": "Beauty"
+    },
+    {
+      "id": "belonging",
+      "label": "Belonging"
+    },
+    {
+      "id": "broad-minded",
+      "label": "Broad-Minded"
+    },
+    {
+      "id": "caring",
+      "label": "Caring"
+    },
+    {
+      "id": "challenge",
+      "label": "Challenge"
+    },
+    {
+      "id": "cheerful",
+      "label": "Cheerful"
+    },
+    {
+      "id": "clean",
+      "label": "Clean"
+    },
+    {
+      "id": "comfortable-life",
+      "label": "Comfortable Life"
+    },
+    {
+      "id": "companionship",
+      "label": "Companionship"
+    },
+    {
+      "id": "compassion",
+      "label": "Compassion"
+    },
+    {
+      "id": "competent",
+      "label": "Competent"
+    },
+    {
+      "id": "competitiveness",
+      "label": "Competitiveness"
+    },
+    {
+      "id": "contribution-to-others",
+      "label": "Contribution to Others"
+    },
+    {
+      "id": "conformity",
+      "label": "Conformity"
+    },
+    {
+      "id": "contentedness",
+      "label": "Contentedness"
+    },
+    {
+      "id": "control",
+      "label": "Control"
+    },
+    {
+      "id": "cooperation",
+      "label": "Cooperation"
+    },
+    {
+      "id": "courageous",
+      "label": "Courageous"
+    },
+    {
+      "id": "courteous",
+      "label": "Courteous"
+    },
+    {
+      "id": "creativity",
+      "label": "Creativity"
+    },
+    {
+      "id": "dependable",
+      "label": "Dependable"
+    },
+    {
+      "id": "disciplined",
+      "label": "Disciplined"
+    },
+    {
+      "id": "economic-security",
+      "label": "Economic Security"
+    },
+    {
+      "id": "effective",
+      "label": "Effective"
+    },
+    {
+      "id": "equality",
+      "label": "Equality"
+    },
+    {
+      "id": "excitement",
+      "label": "Excitement"
+    },
+    {
+      "id": "family-happiness",
+      "label": "Family Happiness"
+    },
+    {
+      "id": "family-security",
+      "label": "Family Security"
+    },
+    {
+      "id": "forgiving",
+      "label": "Forgiving"
+    },
+    {
+      "id": "free-choice",
+      "label": "Free Choice"
+    },
+    {
+      "id": "freedom",
+      "label": "Freedom"
+    },
+    {
+      "id": "friendship",
+      "label": "Friendship"
+    },
+    {
+      "id": "fun",
+      "label": "Fun"
+    },
+    {
+      "id": "genuineness",
+      "label": "Genuineness"
+    },
+    {
+      "id": "happiness",
+      "label": "Happiness"
+    },
+    {
+      "id": "health",
+      "label": "Health"
+    },
+    {
+      "id": "helpfulness",
+      "label": "Helpfulness"
+    },
+    {
+      "id": "honesty",
+      "label": "Honesty"
+    },
+    {
+      "id": "hope",
+      "label": "Hope"
+    },
+    {
+      "id": "independence",
+      "label": "Independence"
+    },
+    {
+      "id": "improving-society",
+      "label": "Improving Society"
+    },
+    {
+      "id": "innovative",
+      "label": "Innovative"
+    },
+    {
+      "id": "integrity",
+      "label": "Integrity"
+    },
+    {
+      "id": "intellectual",
+      "label": "Intellectual"
+    },
+    {
+      "id": "involvement",
+      "label": "Involvement"
+    },
+    {
+      "id": "imagination",
+      "label": "Imagination"
+    },
+    {
+      "id": "joy",
+      "label": "Joy"
+    },
+    {
+      "id": "leisurely",
+      "label": "Leisurely"
+    },
+    {
+      "id": "logical",
+      "label": "Logical"
+    },
+    {
+      "id": "love",
+      "label": "Love"
+    },
+    {
+      "id": "loving",
+      "label": "Loving"
+    },
+    {
+      "id": "mature-love",
+      "label": "Mature Love"
+    },
+    {
+      "id": "national-security",
+      "label": "National Security"
+    },
+    {
+      "id": "nature",
+      "label": "Nature"
+    },
+    {
+      "id": "obedient",
+      "label": "Obedient"
+    },
+    {
+      "id": "order",
+      "label": "Order"
+    },
+    {
+      "id": "peace",
+      "label": "Peace"
+    },
+    {
+      "id": "personal-development",
+      "label": "Personal Development"
+    },
+    {
+      "id": "pleasure",
+      "label": "Pleasure"
+    },
+    {
+      "id": "polite",
+      "label": "Polite"
+    },
+    {
+      "id": "power",
+      "label": "Power"
+    },
+    {
+      "id": "pride",
+      "label": "Pride"
+    },
+    {
+      "id": "rational",
+      "label": "Rational"
+    },
+    {
+      "id": "recognition",
+      "label": "Recognition"
+    },
+    {
+      "id": "reliable",
+      "label": "Reliable"
+    },
+    {
+      "id": "religion",
+      "label": "Religion"
+    },
+    {
+      "id": "respectful",
+      "label": "Respectful"
+    },
+    {
+      "id": "responsible",
+      "label": "Responsible"
+    },
+    {
+      "id": "restrained",
+      "label": "Restrained"
+    },
+    {
+      "id": "salvation",
+      "label": "Salvation"
+    },
+    {
+      "id": "self-controlled",
+      "label": "Self-Controlled"
+    },
+    {
+      "id": "self-reliance",
+      "label": "Self-Reliance"
+    },
+    {
+      "id": "self-respect",
+      "label": "Self-Respect"
+    },
+    {
+      "id": "sincerity",
+      "label": "Sincerity"
+    },
+    {
+      "id": "spirituality",
+      "label": "Spirituality"
+    },
+    {
+      "id": "stability",
+      "label": "Stability"
+    },
+    {
+      "id": "status",
+      "label": "Status"
+    },
+    {
+      "id": "success",
+      "label": "Success"
+    },
+    {
+      "id": "symbolic",
+      "label": "Symbolic"
+    },
+    {
+      "id": "taking-risks",
+      "label": "Taking Risks"
+    },
+    {
+      "id": "teamwork",
+      "label": "Teamwork"
+    },
+    {
+      "id": "tidy",
+      "label": "Tidy"
+    },
+    {
+      "id": "tender",
+      "label": "Tender"
+    },
+    {
+      "id": "tranquility",
+      "label": "Tranquility"
+    },
+    {
+      "id": "wealth",
+      "label": "Wealth"
+    },
+    {
+      "id": "wisdom",
+      "label": "Wisdom"
+    }
+  ],
+  "hasOther": true,
+  "meta": {
+    "valueCount": 94,
+    "source": "docs/functions-values-source.md"
+  }
+}
