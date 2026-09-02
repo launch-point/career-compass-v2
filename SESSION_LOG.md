@@ -35,6 +35,37 @@ Append-only. Don't rewrite or clean up past entries — the record of what was t
 **Patterns I'm noticing (tentative):**
 - Verification here splits cleanly into "pipeline/data shape" (fully automatable, done) vs "interactive UI" (needs a browser). Worth having a standing way to do the browser half — e.g. Todd walks it, or a Playwright harness — so completion claims aren't gated on manual clicking.
 
+---
+
+## Session 1 (continued) — 2026-09-02
+
+*Same session, next day. Covers the two browser walkthroughs Todd ran, the refinement pass, and the stories-gate fix. Earlier entries above are left as-written (append-only).*
+
+**Resolution of the earlier "in-browser walk not machine-verified" gap:**
+- Todd ran the browser walkthroughs himself. **First walkthrough passed end to end** (full flow + submission + "waiting on coach" state). After the refinement pass, **second walkthrough also passed** and both gate fixes were confirmed working. So the interactive UI is now confirmed by Todd's own walkthroughs — the automated backend verification + Todd's walkthrough together are what closed verification this session.
+- Note for future: there is no "Cursor Browser" tool in this Claude Code environment; browser automation = the Chrome extension only (Todd declined extending it to his primary Chrome for a local dev test). Interactive UI verification this session = Todd walking it manually.
+
+**Refinement pass (after walkthrough 1) — UI/copy only, gates untouched:**
+- Brand accent `#2f5d62` → `#CF631D` (one CSS token). Todd's call: **keep the semantic success greens green** (submitted ✓, completed counters, success notices) — only the brand action color changed.
+- Added a prominent per-phase instruction callout (`PhaseIntro`) at the top of every functions + values screen, with Todd-supplied copy, plus transition "eyebrow" labels so rating/top-10/top-5 read as a *new task on the same items*, not identical-looking screens.
+- New Functions→Values interstitial screen (no gate); wizard flow grew 31 → 32 steps.
+- Review restructure: "Top Functions" box split into **Top 5** and **Next 5 (6–10)** (display-only regroup of the existing top-10 data — no stored ranking); functions + values review lists changed numbered → **bulleted** (numbering implied a 1–5 rank that was never assigned).
+- Confirmation heading → "Your Career Compass is Submitted!".
+- **Declined (Todd):** a persistent "Back to Review" button on post-Review screens — editing routes back through the flow normally.
+
+**Corrections from Todd (this pass):**
+- Rating-screen copy said "in the drop down boxes," but the UI uses 1–5 buttons → changed to "using the rating buttons." Lesson: copy that names a UI control must match the actual control.
+- Elimination copy: confirmed wording is "…come naturally to you, **or** express what you do best" (a dictated word came through garbled; confirmed rather than guessed).
+
+**Stories-gate fix (after walkthrough 2) — validation logic:**
+- Found via walkthrough: a user could click Next on Story 1/2/3 with all four fields blank. Added a per-screen `advanceGate` `case 'story'`: **Stories 1–3 require all four fields before Next**; Story 4 stays optional (consistent with the existing ≥3-of-4 submit gate, which was left exactly as built). Reused the existing `{ok, reason}` gate pattern so Next disables + an inline non-punitive message appears automatically — no new UX pattern.
+- Also: the **Submit button is now disabled (grayed out) until the submission gate is met** (5 functions + 5 values + ≥3 stories), instead of staying clickable next to a warning. Server-side gate unchanged.
+
+**Patterns I'm noticing (tentative):**
+- Todd keeps gate/logic changes strictly separate from copy/styling changes, and says so explicitly ("this is validation, not copy"). Worth mirroring that separation in how work is proposed and committed.
+- Walkthroughs surface exactly the class of bug automated backend checks can't: per-screen interaction gates (the blank-story Next). The two verification halves are complementary, not redundant.
+- Copy is dictated and arrives with occasional garbled words / UI-mismatched control names — confirm wording rather than guess, and check copy against the actual UI element it references.
+
 <!--
 Entry format:
 
