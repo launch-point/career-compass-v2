@@ -66,6 +66,30 @@ Append-only. Don't rewrite or clean up past entries — the record of what was t
 - Walkthroughs surface exactly the class of bug automated backend checks can't: per-screen interaction gates (the blank-story Next). The two verification halves are complementary, not redundant.
 - Copy is dictated and arrives with occasional garbled words / UI-mismatched control names — confirm wording rather than guess, and check copy against the actual UI element it references.
 
+---
+
+## Session 1 (continued) — 2026-09-02 — Live Supabase setup
+
+*Todd added real Supabase credentials to `intake-app/.env.local` (legacy JWT-based anon + service_role keys) and asked to apply the migration + verify the live DB. Full arc below.*
+
+**What happened / actions:**
+- Confirmed `.env.local` has the 3 expected vars (presence only, values never printed). No Postgres connection string present.
+- **I cannot run DDL with the provided keys.** service_role is a REST/Auth key; PostgREST does not execute DDL, and there's no DB connection string / PAT. So the migration had to be applied by Todd in the Supabase **SQL Editor** (chosen over sharing the DB connection string). Applied in two runs: schema, then a grants block.
+- After schema + grants, `verify-supabase-live.mjs` passed fully against the live DB.
+
+**Corrections / gotchas (candidates for MEMORY at review):**
+1. **False "tables exist" from a HEAD probe.** My `supabase-check.mjs` used `select('*', {count:'exact', head:true})` and reported "EXISTS" with **`count=null`** — which is NOT the signature of a real empty table (that returns `count=0`). The authoritative write test later returned `PGRST205 table not in schema cache`. Lesson: **don't trust a HEAD/count probe for table existence — do a real write (or read a row) to confirm.** I over-trusted the probe and had to walk back the "tables already exist" claim.
+2. **Migration grants gap → `42501 permission denied for table`.** After the tables were created, service_role still couldn't insert. Root cause: the migration relied on Supabase's *implicit default privileges*, which did NOT apply for this project, so service_role had no table GRANT. Note: "permission denied for table" = missing GRANT, distinct from RLS's "new row violates row-level security policy." Fix: added explicit `grant usage on schema` + table privileges (service_role full; anon/authenticated gated by RLS) directly in `0001_init.sql` — **migrations must grant service_role explicitly, never assume Supabase default privileges.**
+3. `PGRST205 (schema cache)` resolved once the tables were actually created in the editor (running DDL reloads PostgREST's cache); I can't force a cache reload without SQL access.
+
+**Confirmed live results (real output, then self-cleaned):**
+- Real submission landed: client + intake_submissions rows inserted, `status=submitted`, `locked=true`, `submitted_at` set, `answers` jsonb persisted (`salaryMin=91000`, 5 top-5 functions, 4 story slots), read back via service_role.
+- `updated_at` trigger fired on update; `unique(client_id)` index blocked a 2nd submission (`23505`).
+- **RLS enforced:** with the anon key, SELECT on both tables returned **0 rows** and INSERT was **blocked by the RLS policy (`42501`)**, while service_role saw the row. Clean proof RLS is doing the work (anon has grants but no rows pass).
+- Scope still open: only the **database** path is live-verified. The **Sheets append** and **orchestrator webhook** side-effects still need real creds (`GOOGLE_SERVICE_ACCOUNT_*`, `ORCHESTRATOR_WEBHOOK_URL`) to verify for real.
+
+**Pattern (tentative):** For managed-Postgres/Supabase, "the SQL ran" ≠ "the app role can use it" — grants + RLS + schema-cache are separate layers, each needs its own behavioral check. Verify with a real write as the app's actual role, not an introspection/HEAD probe.
+
 <!--
 Entry format:
 
