@@ -48,7 +48,19 @@ create trigger trg_intake_submissions_updated_at
   before update on public.intake_submissions
   for each row execute function public.set_updated_at();
 
+-- Grants. The app connects as `service_role`, which also bypasses RLS (BYPASSRLS)
+-- but still needs table privileges. anon/authenticated are granted too, but RLS
+-- (enabled below, with NO policies) denies them every row — so they can reach
+-- nothing. We grant explicitly rather than rely on Supabase's implicit default
+-- privileges, which do not apply consistently to every project.
+grant usage on schema public to anon, authenticated, service_role;
+grant all privileges on public.clients to service_role;
+grant all privileges on public.intake_submissions to service_role;
+grant select, insert, update, delete on public.clients to anon, authenticated;
+grant select, insert, update, delete on public.intake_submissions to anon, authenticated;
+
 alter table public.clients enable row level security;
 alter table public.intake_submissions enable row level security;
--- No policies added on purpose: service-role (server) bypasses RLS; everything
--- else is denied. Add per-email policies here if client-direct access is ever needed.
+-- No policies added on purpose: service_role bypasses RLS; anon/authenticated have
+-- grants but RLS denies every row (that is what the RLS check verifies). Add
+-- per-email policies here if client-direct access is ever needed.
