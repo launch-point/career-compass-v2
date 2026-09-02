@@ -9,6 +9,7 @@ import {
   type Step,
 } from '@/lib/steps';
 import { advanceGate } from '@/lib/wizardGating';
+import { submissionGate } from '@/lib/answers';
 import { useIntakeStore } from '@/store/intakeStore';
 import { Button, Notice, ProgressBar } from '@/components/ui';
 import {
@@ -85,6 +86,9 @@ export function Wizard() {
   const idx = stepIndex(step.id);
   const gate = advanceGate(step, answers);
   const isReview = step.kind === 'review';
+  // Submit is only enabled once the submission gate is satisfied (5 fns + 5 vals
+  // + >=3 complete stories). Same gate the server enforces.
+  const submitReady = submissionGate(answers).ok;
 
   const goBack = () => {
     if (idx > 0) setCurrentStep(STEPS[idx - 1].id);
@@ -188,7 +192,7 @@ export function Wizard() {
           ← Back
         </Button>
         {isReview ? (
-          <Button onClick={submit} disabled={submitting}>
+          <Button onClick={submit} disabled={submitting || !submitReady}>
             {submitting ? 'Submitting…' : 'Submit intake'}
           </Button>
         ) : (

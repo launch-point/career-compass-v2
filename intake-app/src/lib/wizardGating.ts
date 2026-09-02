@@ -11,6 +11,7 @@ import {
   functionIdsRatedHigh,
   functionTop10Ids,
   functionTop5Ids,
+  isStoryComplete,
   unratedCheckedFunctionIds,
   valueTop10Ids,
   valueTop5Ids,
@@ -59,7 +60,24 @@ export function advanceGate(step: Step, a: IntakeAnswers): AdvanceGate {
       const n = valueTop5Ids(a).length;
       return n === TOP5_COUNT ? { ok: true } : { ok: false, reason: `Choose exactly ${TOP5_COUNT} (currently ${n}).` };
     }
-    // Category walk, requirements, stories, review: free to advance.
+    case 'story': {
+      // Per-screen gate: Stories 1–3 must have all four fields before advancing.
+      // Story 4 (index 3) stays optional, consistent with the >=3-of-4 submit gate.
+      if (step.storyIndex != null && step.storyIndex < 3) {
+        const story = a.stories[step.storyIndex];
+        if (!isStoryComplete(story)) {
+          const blanks = [story.moment, story.involvement, story.actions, story.enjoyment].filter(
+            (v) => v.trim() === '',
+          ).length;
+          return {
+            ok: false,
+            reason: `Please answer all four questions for this story before continuing (${blanks} still blank). Story 4 can be left blank later, but the first three each need all four answers.`,
+          };
+        }
+      }
+      return { ok: true };
+    }
+    // Category walk, requirements, review: free to advance.
     default:
       return { ok: true };
   }
