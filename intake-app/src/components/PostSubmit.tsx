@@ -11,7 +11,7 @@ export function PostSubmit() {
       <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-2xl text-emerald-700">
         ✓
       </div>
-      <h1 className="text-2xl font-bold">Your intake is submitted</h1>
+      <h1 className="text-2xl font-bold">Your Career Compass is Submitted!</h1>
       <p className="mt-2 text-sm text-muted">
         Thanks — we’ve got everything we need to get started.
       </p>

@@ -9,7 +9,7 @@ import {
   valueTop10Ids,
 } from '@/lib/answers';
 import { useIntakeStore } from '@/store/intakeStore';
-import { CheckPill, Counter, TextField } from '@/components/ui';
+import { CheckPill, Counter, PhaseIntro, TextField } from '@/components/ui';
 
 // Values Phase 1 — flat elimination checklist (min 10).
 export function ValuesEliminationScreen() {
@@ -22,12 +22,14 @@ export function ValuesEliminationScreen() {
 
   return (
     <div className="space-y-4">
+      <PhaseIntro eyebrow="Values · Step 1 of 3 · Check">
+        Place a check mark next to the Values that you feel describe what is important to you in
+        yourself, other people, and work, and culture.
+      </PhaseIntro>
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold">Which values resonate?</h2>
-          <p className="mt-1 text-sm text-muted">
-            Check every value that genuinely resonates with you. Check at least {MIN_VALUES_CHECKED}.
-          </p>
+          <p className="mt-1 text-sm text-muted">Check at least {MIN_VALUES_CHECKED}.</p>
         </div>
         <Counter n={n} max={MIN_VALUES_CHECKED} noun="min" />
       </div>
@@ -68,10 +70,13 @@ export function ValuesTop10Screen() {
 
   return (
     <div className="space-y-4">
+      <PhaseIntro eyebrow="Values · Step 2 of 3 · Top 10">
+        Examine all the ones you marked and narrow down to your top 10 values.
+      </PhaseIntro>
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold">Choose your top 10 values</h2>
-          <p className="mt-1 text-sm text-muted">From the values you checked, pick the 10 that matter most.</p>
+          <p className="mt-1 text-sm text-muted">From the values you checked.</p>
         </div>
         <Counter n={selected.length} max={TOP10_COUNT} noun="" />
       </div>
@@ -110,6 +115,9 @@ export function ValuesTop5Screen() {
 
   return (
     <div className="space-y-4">
+      <PhaseIntro eyebrow="Values · Step 3 of 3 · Top 5">
+        Narrow down from ten to a five final top values.
+      </PhaseIntro>
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold">Choose your top 5 values</h2>

@@ -2,6 +2,7 @@
 import { functionItemLabel, valueLabel } from '@/lib/config';
 import {
   completedStoryCount,
+  functionTop10Ids,
   functionTop5Ids,
   isStoryComplete,
   submissionGate,
@@ -24,6 +25,10 @@ export function ReviewScreen({ onEdit }: { onEdit: (stepId: string) => void }) {
   const gate = submissionGate(answers);
 
   const top5Fns = functionTop5Ids(answers).map((id) => functionItemLabel[id]);
+  // "Next 5" = the top-10 minus the top-5 (display-only regroup; no stored ranking).
+  const next5Fns = functionTop10Ids(answers)
+    .filter((id) => !answers.functions.items[id]?.top5)
+    .map((id) => functionItemLabel[id]);
   const top5Vals = valueTop5Ids(answers).map((id) => valueLabel[id]);
 
   return (
@@ -49,15 +54,26 @@ export function ReviewScreen({ onEdit }: { onEdit: (stepId: string) => void }) {
 
       <Card>
         <div className="mb-2 flex items-center justify-between">
-          <h3 className="font-semibold">Top 5 functions</h3>
+          <h3 className="font-semibold">Top Functions</h3>
           <EditLink onClick={() => onEdit('functions-top5')} />
         </div>
+        <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted">Top 5</p>
         {top5Fns.length ? (
-          <ol className="list-decimal space-y-1 pl-5 text-sm">
+          <ul className="mb-3 list-disc space-y-1 pl-5 text-sm">
             {top5Fns.map((l) => (
               <li key={l}>{l}</li>
             ))}
-          </ol>
+          </ul>
+        ) : (
+          <p className="mb-3 text-sm text-muted">Not selected yet.</p>
+        )}
+        <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted">Next 5 (6–10)</p>
+        {next5Fns.length ? (
+          <ul className="list-disc space-y-1 pl-5 text-sm">
+            {next5Fns.map((l) => (
+              <li key={l}>{l}</li>
+            ))}
+          </ul>
         ) : (
           <p className="text-sm text-muted">Not selected yet.</p>
         )}
@@ -69,11 +85,11 @@ export function ReviewScreen({ onEdit }: { onEdit: (stepId: string) => void }) {
           <EditLink onClick={() => onEdit('values-top5')} />
         </div>
         {top5Vals.length ? (
-          <ol className="list-decimal space-y-1 pl-5 text-sm">
+          <ul className="list-disc space-y-1 pl-5 text-sm">
             {top5Vals.map((l) => (
               <li key={l}>{l}</li>
             ))}
-          </ol>
+          </ul>
         ) : (
           <p className="text-sm text-muted">Not selected yet.</p>
         )}

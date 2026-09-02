@@ -140,6 +140,19 @@ export function Notice({
   return <div className={`rounded-lg border px-4 py-3 text-sm ${styles}`}>{children}</div>;
 }
 
+/** Prominent per-phase instruction shown at the top of a screen. The optional
+ *  eyebrow gives transition context (e.g. "Step 2 · Rating"). */
+export function PhaseIntro({ eyebrow, children }: { eyebrow?: string; children: ReactNode }) {
+  return (
+    <div className="rounded-xl border border-brand/30 border-l-4 border-l-brand bg-brand/5 p-4">
+      {eyebrow && (
+        <p className="mb-1 text-xs font-bold uppercase tracking-wide text-brand">{eyebrow}</p>
+      )}
+      <p className="text-[15px] font-medium leading-relaxed text-foreground">{children}</p>
+    </div>
+  );
+}
+
 export function TextField({
   label,
   value,

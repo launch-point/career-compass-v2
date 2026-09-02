@@ -10,7 +10,7 @@ import {
   functionTop10Ids,
 } from '@/lib/answers';
 import { useIntakeStore } from '@/store/intakeStore';
-import { CheckPill, Counter, Notice, ProgressBar, RatingRow, TextField } from '@/components/ui';
+import { CheckPill, Counter, Notice, PhaseIntro, ProgressBar, RatingRow, TextField } from '@/components/ui';
 
 // Phase 1 — one category screen (one of 19 in the walk).
 export function FunctionsCategoryScreen({ categoryId }: { categoryId: string }) {
@@ -22,16 +22,17 @@ export function FunctionsCategoryScreen({ categoryId }: { categoryId: string }) 
 
   return (
     <div className="space-y-4">
+      <PhaseIntro eyebrow="Functions · Step 1 of 4 · Check">
+        Place a check mark in front of the functions that you have done in prior jobs, come naturally
+        to you, or express what you do best. Be selective and just mark the most important stuff. Do
+        your best to limit your selections to just a few.
+      </PhaseIntro>
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-muted">
           {cat.jobCategoryName}
           {cat.branchName ? ` · ${cat.branchName}` : ''} · Category {cat.walkIndex} of 19
         </p>
         <h2 className="mt-1 text-xl font-bold">{cat.name}</h2>
-        <p className="mt-1 text-sm text-muted">
-          Check every function you have done before in a <strong>paid job</strong>. Don’t judge skill
-          or enjoyment yet — just “have I done this.”
-        </p>
       </div>
       <div className="space-y-2">
         {cat.items.map((it) => (
@@ -82,11 +83,17 @@ export function FunctionsRatingScreen() {
 
   return (
     <div className="space-y-4">
+      <PhaseIntro eyebrow="Functions · Step 2 of 4 · Rate">
+        Go back over the functions again. Examine all the ones you marked and rate your estimated
+        natural ability for each using the rating buttons. One is the lowest rating; five is the
+        highest. This way you will have a guide to your top functions based on your sense of fit,
+        appeal, and talent.
+      </PhaseIntro>
       <div>
         <h2 className="text-xl font-bold">Rate your natural ability</h2>
         <p className="mt-1 text-sm text-muted">
-          For each function, rate how naturally it comes to you: <strong>5 = highest</strong> natural
-          ability. You’ll need at least 10 rated 4 or 5 to continue.
+          These are the functions you just checked — now rate each one. You’ll need at least 10 rated
+          4 or 5 to continue.
         </p>
       </div>
       {checked.length >= LARGE_CHECK_NUDGE && (
@@ -152,12 +159,15 @@ export function FunctionsTop10Screen() {
 
   return (
     <div className="space-y-4">
+      <PhaseIntro eyebrow="Functions · Step 3 of 4 · Top 10">
+        Narrow down your top functions to a maximum of ten by looking at the functions that you rated
+        as 4 or 5 only.
+      </PhaseIntro>
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold">Choose your top 10 functions</h2>
           <p className="mt-1 text-sm text-muted">
-            From the functions you rated 4 or 5, pick the 10 you enjoy most. This is a gut call —
-            weigh how much you like doing them.
+            From the functions you rated 4 or 5 — pick the 10 you enjoy most.
           </p>
         </div>
         <Counter n={selected.length} max={TOP10_COUNT} noun="" />
@@ -197,13 +207,17 @@ export function FunctionsTop5Screen() {
 
   return (
     <div className="space-y-4">
+      <PhaseIntro eyebrow="Functions · Step 4 of 4 · Top 5">
+        Narrow down from ten to a five final, most important, most fitting functions from the entire
+        list. Get to the real essentials. If you have difficulty getting to 5, one way to reduce the
+        number of your selections is to imagine performing them for several hours each day forever. Do
+        any of them lose their appeal when put to the volume test? Push yourself to get past the
+        romance of functions that may sound good, but only for a few hours a week or less.
+      </PhaseIntro>
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold">Choose your top 5 functions</h2>
-          <p className="mt-1 text-sm text-muted">
-            Imagine performing each of these for several hours a day, for the rest of your working
-            life. If it loses its appeal under that lens, don’t include it.
-          </p>
+          <p className="mt-1 text-sm text-muted">From your top 10 — get to the five that matter most.</p>
         </div>
         <Counter n={selected.length} max={TOP5_COUNT} noun="" />
       </div>

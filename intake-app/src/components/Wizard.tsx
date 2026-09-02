@@ -25,6 +25,7 @@ import {
 import { RequirementsScreen } from '@/components/screens/RequirementsScreen';
 import { StoryScreen } from '@/components/screens/StoryScreen';
 import { ReviewScreen } from '@/components/screens/ReviewScreen';
+import { TransitionScreen } from '@/components/screens/TransitionScreen';
 import type { Submission } from '@/lib/types';
 
 function renderScreen(step: Step, onEdit: (id: string) => void) {
@@ -37,6 +38,8 @@ function renderScreen(step: Step, onEdit: (id: string) => void) {
       return <FunctionsTop10Screen />;
     case 'functions-top5':
       return <FunctionsTop5Screen />;
+    case 'functions-values-transition':
+      return <TransitionScreen />;
     case 'values-elimination':
       return <ValuesEliminationScreen />;
     case 'values-top10':

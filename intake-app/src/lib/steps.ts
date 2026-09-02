@@ -16,6 +16,7 @@ export type StepKind =
   | 'functions-rating' // Phase 2: paginated 1–5 rating of checked items
   | 'functions-top10' // Phase 3: narrow rated-4/5 pool to 10
   | 'functions-top5' // Phase 4: narrow 10 to 5
+  | 'functions-values-transition' // interstitial between the two tracks
   | 'values-elimination' // Values Phase 1
   | 'values-top10' // Values Phase 2
   | 'values-top5' // Values Phase 3
@@ -51,6 +52,9 @@ function buildSteps(): Step[] {
   steps.push({ id: 'functions-rating', kind: 'functions-rating', section: 'functions', title: 'Rate your natural ability' });
   steps.push({ id: 'functions-top10', kind: 'functions-top10', section: 'functions', title: 'Choose your top 10 functions' });
   steps.push({ id: 'functions-top5', kind: 'functions-top5', section: 'functions', title: 'Choose your top 5 functions' });
+
+  // Interstitial — hand-off from functions to values (no gate).
+  steps.push({ id: 'functions-values-transition', kind: 'functions-values-transition', section: 'values', title: 'Now, your values' });
 
   // Section B — Values.
   steps.push({ id: 'values-elimination', kind: 'values-elimination', section: 'values', title: 'Which values resonate?' });
