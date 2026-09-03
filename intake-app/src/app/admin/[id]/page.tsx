@@ -40,16 +40,16 @@ export default async function AdminSubmissionPage({ params }: { params: Promise<
 
       <Section title="Top 5 functions">
         <ol className="list-decimal space-y-1 pl-5 text-sm">
-          {p.functions.top5.map((f) => (
-            <li key={f.id}>{f.label}</li>
+          {p.functions.top5.map((label) => (
+            <li key={label}>{label}</li>
           ))}
         </ol>
       </Section>
 
       <Section title="Top 5 values">
         <ol className="list-decimal space-y-1 pl-5 text-sm">
-          {p.values.top5.map((v) => (
-            <li key={v.id}>{v.label}</li>
+          {p.values.top5.map((label) => (
+            <li key={label}>{label}</li>
           ))}
         </ol>
       </Section>
