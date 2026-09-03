@@ -79,17 +79,18 @@ Payload shape (`WebhookPayload` in `serialize.ts`):
   "locked": true,
   "submittedAt": "2026-09-02T02:14:35.137Z",
   "functions": {
-    "top5":  [{ "id": "…__01", "label": "Generating ideas, creating, inventing, imagining" }],
-    "top10": [{ "id": "…", "label": "…" }],
+    // top5 + next5 are plain label strings, exactly 5 each, non-overlapping.
+    "top5":  ["Generating ideas, creating, inventing, imagining", "Diagnosing…", "…", "…", "…"],
+    "next5": ["Networking, building alliances and relationships", "Mentoring…", "…", "…", "…"], // items 6–10
     "all":   [{ "id": "…", "label": "…", "categoryId": "…", "categoryName": "…",
                "jobCategory": "Information-Oriented Functions",
-               "rating": 5, "top10": true, "top5": true }],  // every CHECKED function
+               "rating": 5, "top10": true, "top5": true }],  // every CHECKED function (full detail)
     "categoryOther": { "creating-designing-and-using-imagination": "Facilitated a strategy offsite" }
   },
   "values": {
-    "top5":    [{ "id": "achievement", "label": "Achievement" }],
-    "top10":   [{ "id": "…", "label": "…" }],
-    "checked": [{ "id": "…", "label": "…" }],
+    "top5":    ["Achievement", "…", "…", "…", "…"],   // 5 label strings
+    "next5":   ["…", "…", "…", "…", "…"],             // items 6–10, 5 label strings
+    "checked": [{ "id": "…", "label": "…" }],         // full checked list, id+label (unchanged)
     "other":   "Stewardship"
   },
   "requirements": { "currentJobTitle": "…", "salaryMin": 85000, "salaryPeriod": "annual", … },
@@ -120,6 +121,9 @@ story4_actions, story4_enjoyment, locked
 ```
 
 - List columns (`functions_top5`, etc.) are `" | "`-joined labels.
+- **Sheets columns are unchanged by the webhook `top5`/`next5` refactor.** The `*_top10` columns
+  still hold the full 10 labels — `buildSheetsRow` reconstructs them as `top5 + next5`. (The Sheets
+  side is slated for deprecation; this keeps it from silently breaking. Flagged, not silently changed.)
 - `functions_ratings_json` is the full `functions.all` array as JSON (rating + grouping preserved).
 - `locked` is `TRUE`/`FALSE`.
 - Header row is the app's responsibility to ensure once in the real sheet (dev sink includes it).

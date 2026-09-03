@@ -45,16 +45,20 @@ export interface WebhookPayload {
   locked: boolean;
   submittedAt: string | null;
   functions: {
-    top5: { id: string; label: string }[];
-    top10: { id: string; label: string }[];
+    /** The client's final top 5, as plain label strings (for easy downstream use). */
+    top5: string[];
+    /** Items 6–10 (top 10 minus top 5) — a distinct, non-overlapping list of label strings. */
+    next5: string[];
     /** Every CHECKED function with its rating + selection flags + grouping. */
     all: FunctionSelection[];
     /** Per-category free-text "Other" entries (only non-empty ones). */
     categoryOther: Record<string, string>;
   };
   values: {
-    top5: { id: string; label: string }[];
-    top10: { id: string; label: string }[];
+    /** Top 5 values, as plain label strings. */
+    top5: string[];
+    /** Items 6–10 (top 10 minus top 5), non-overlapping label strings. */
+    next5: string[];
     checked: { id: string; label: string }[];
     other: string;
   };
@@ -64,6 +68,10 @@ export interface WebhookPayload {
 
 function labelPairs(ids: string[], lookup: Record<string, string>) {
   return ids.map((id) => ({ id, label: lookup[id] ?? id }));
+}
+
+function labelsOnly(ids: string[], lookup: Record<string, string>): string[] {
+  return ids.map((id) => lookup[id] ?? id);
 }
 
 export function storyFields(sub: Submission): Record<string, string> {
@@ -100,6 +108,12 @@ export function buildWebhookPayload(sub: Submission): WebhookPayload {
     if (text && text.trim()) categoryOther[cid] = text.trim();
   }
 
+  // top5 and next5 are distinct, non-overlapping 5-item lists (next5 = top10 minus top5).
+  const fnTop5 = functionTop5Ids(a);
+  const fnNext5 = functionTop10Ids(a).filter((id) => !fnTop5.includes(id));
+  const valTop5 = valueTop5Ids(a);
+  const valNext5 = valueTop10Ids(a).filter((id) => !valTop5.includes(id));
+
   return {
     clientId: sub.clientId,
     email: sub.email,
@@ -108,14 +122,14 @@ export function buildWebhookPayload(sub: Submission): WebhookPayload {
     locked: sub.locked,
     submittedAt: sub.submittedAt,
     functions: {
-      top5: labelPairs(functionTop5Ids(a), functionItemLabel),
-      top10: labelPairs(functionTop10Ids(a), functionItemLabel),
+      top5: labelsOnly(fnTop5, functionItemLabel),
+      next5: labelsOnly(fnNext5, functionItemLabel),
       all,
       categoryOther,
     },
     values: {
-      top5: labelPairs(valueTop5Ids(a), valueLabel),
-      top10: labelPairs(valueTop10Ids(a), valueLabel),
+      top5: labelsOnly(valTop5, valueLabel),
+      next5: labelsOnly(valNext5, valueLabel),
       checked: labelPairs(checkedValueIds(a), valueLabel),
       other: a.values.other,
     },
@@ -169,6 +183,7 @@ export function buildSheetsRow(sub: Submission): (string | number)[] {
   const r = sub.answers.requirements;
   const stories = p.stories;
   const joinLabels = (arr: { label: string }[]) => arr.map((x) => x.label).join(' | ');
+  const joinStr = (arr: string[]) => arr.join(' | ');
   return [
     sub.submittedAt ?? '',
     sub.clientId,
@@ -182,10 +197,11 @@ export function buildSheetsRow(sub: Submission): (string | number)[] {
     r.advancedDegrees,
     r.yearsInWorkforce,
     r.otherNotes,
-    joinLabels(p.functions.top5),
-    joinLabels(p.functions.top10),
-    joinLabels(p.values.top5),
-    joinLabels(p.values.top10),
+    joinStr(p.functions.top5),
+    // functions_top10 column keeps its original meaning (the full 10) = top5 + next5.
+    joinStr([...p.functions.top5, ...p.functions.next5]),
+    joinStr(p.values.top5),
+    joinStr([...p.values.top5, ...p.values.next5]),
     joinLabels(p.values.checked),
     JSON.stringify(p.functions.all),
     stories.story1_moment,
