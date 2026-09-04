@@ -39,6 +39,16 @@ FUNCTIONS = [
 ]
 SENIORITY = ["Specialist", "Integrator", "Strategist"]  # y=0 bottom -> y=2 top
 
+# Labels for the compact (in-PDF, top-right of a role page) variant. Full words
+# everywhere they fit; the two longest wrap to two lines. "Ops" and "HR" stay
+# abbreviated because they are already short and unambiguous. Horizontal text
+# cannot work here — "Communications" needs ~2.5pt to sit inside an 18pt column —
+# so these are rotated 40°, which trades vertical space for horizontal room.
+FUNCTIONS_COMPACT = [
+    "Product", "Marketing", "Sales", "Customer\nExperience", "Ops", "HR",
+    "Finance and\nAccounting", "Legal", "Communications",
+]
+
 # ─── Brand ───────────────────────────────────────────────────────────────────
 ORANGE = "#CF631D"
 CHARCOAL = "#343432"
@@ -59,6 +69,14 @@ DOT_COLOR = ORANGE
 SIZE_OVERVIEW = 520
 SIZE_TARGET = 700        # highlighted role, per-role mode
 SIZE_CONTEXT = 170       # the other four, per-role mode
+
+# Compact mode is saved at exactly this figsize (no tight bbox — see render()),
+# rather than rendered large and scaled down, so these point sizes are what
+# actually reach the page and every role page places an identically sized box.
+COMPACT_W = 2.8          # inches — the slot beside the role-page header
+COMPACT_H = 1.90         # measured minimum: at 1.85 the rotated labels clip
+COMPACT_SIZE_TARGET = 80   # small enough not to occlude a cell-mate at this
+COMPACT_SIZE_CONTEXT = 38  # grid pitch; emphasis carried mostly by colour
 
 # Horizontal padding (in cell widths) added outside the grid so a dot in the
 # first or last function column is never pressed against the frame.
@@ -169,7 +187,7 @@ def _positions(roles):
     return pos
 
 
-def _draw_grid(ax):
+def _draw_grid(ax, compact=False):
     # Pad beyond the grid frame so a dot in the first or last function column
     # (especially an offset one sharing a cell) is never pressed against the
     # edge. The frame itself is still drawn at the true cell bounds below.
@@ -186,10 +204,15 @@ def _draw_grid(ax):
     for y in range(len(SENIORITY) + 1):
         ax.axhline(y - 0.5, color=SAGE, linewidth=0.7, zorder=1)
     ax.set_xticks(range(len(FUNCTIONS)))
-    ax.set_xticklabels(FUNCTIONS, rotation=32, ha="right", fontsize=8.5,
-                       fontfamily=FONT_BODY, color=CHARCOAL)
+    if compact:
+        ax.set_xticklabels(FUNCTIONS_COMPACT, rotation=40, ha="right", fontsize=5.8,
+                           fontfamily=FONT_BODY, color=CHARCOAL)
+    else:
+        ax.set_xticklabels(FUNCTIONS, rotation=32, ha="right", fontsize=8.5,
+                           fontfamily=FONT_BODY, color=CHARCOAL)
     ax.set_yticks(range(len(SENIORITY)))
-    ax.set_yticklabels(SENIORITY, fontsize=10, fontfamily=FONT_HEAD, color=CHARCOAL)
+    ax.set_yticklabels(SENIORITY, fontsize=5.8 if compact else 10,
+                       fontfamily=FONT_HEAD, color=CHARCOAL)
     ax.tick_params(length=0)
     for spine in ax.spines.values():
         spine.set_visible(False)
@@ -232,34 +255,50 @@ def render(roles, mode, role_rank, out_path):
                      fontweight="bold", transform=lax.transAxes)
             lax.text(0.05, yy + 0.02, r["role_title"], va="center", fontsize=10.5,
                      fontfamily=FONT_BODY, color=CHARCOAL, transform=lax.transAxes)
-    else:  # role mode
+    else:  # role / compact mode — same content, two physical sizes
         if role_rank is None:
-            raise ValueError("--role-rank is required for --mode role")
-        fig = plt.figure(figsize=(9.0, 4.2), dpi=300)
-        ax = fig.add_axes([0.13, 0.22, 0.83, 0.74])
-        _draw_grid(ax)
+            raise ValueError(f"--role-rank is required for --mode {mode}")
+        compact = mode == "compact"
+        if compact:
+            fig = plt.figure(figsize=(COMPACT_W, COMPACT_H), dpi=300)
+            ax = fig.add_axes([0.17, 0.31, 0.81, 0.65])
+            ctx_size, tgt_size = COMPACT_SIZE_CONTEXT, COMPACT_SIZE_TARGET
+            ctx_fs, tgt_fs = 4.0, 6.5
+        else:
+            fig = plt.figure(figsize=(9.0, 4.2), dpi=300)
+            ax = fig.add_axes([0.13, 0.22, 0.83, 0.74])
+            ctx_size, tgt_size = SIZE_CONTEXT, SIZE_TARGET
+            ctx_fs, tgt_fs = 8, 14
+        _draw_grid(ax, compact=compact)
         # others first (small, gray), target last (big, colored) so it sits on top
         for r in roles:
             if r["rank"] == role_rank:
                 continue
             x, y = pos[r["rank"]]
-            _draw_dot(ax, x, y, r["rank"], GRAY_DOT, size=SIZE_CONTEXT,
-                      text_color=GRAY_TEXT, fontsize=8, alpha=0.9)
+            _draw_dot(ax, x, y, r["rank"], GRAY_DOT, size=ctx_size,
+                      text_color=GRAY_TEXT, fontsize=ctx_fs, alpha=0.9)
         target = next((r for r in roles if r["rank"] == role_rank), None)
         if target is None:
             raise ValueError(f"no role with rank {role_rank} in graph data")
         x, y = pos[target["rank"]]
         _draw_dot(ax, x, y, target["rank"], DOT_COLOR,
-                  size=SIZE_TARGET, fontsize=14)
+                  size=tgt_size, fontsize=tgt_fs)
 
-    fig.savefig(out_path, dpi=300, facecolor="white", bbox_inches="tight", pad_inches=0.15)
+    if mode == "compact":
+        # Exact figsize. Tight-cropping follows content, so output width would
+        # vary with where the dots fall — different-sized graphs on different
+        # role pages. Pinning it makes COMPACT_W the real placed width.
+        fig.savefig(out_path, dpi=300, facecolor="white")
+    else:
+        fig.savefig(out_path, dpi=300, facecolor="white",
+                    bbox_inches="tight", pad_inches=0.15)
     plt.close(fig)
 
 
 def main():
     ap = argparse.ArgumentParser(description="Career Compass function/seniority graph")
     ap.add_argument("graph_json")
-    ap.add_argument("--mode", choices=["overview", "role"], default="overview")
+    ap.add_argument("--mode", choices=["overview", "role", "compact"], default="overview")
     ap.add_argument("--role-rank", type=int, default=None)
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
