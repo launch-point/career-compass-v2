@@ -277,3 +277,17 @@ Run before telling Todd anything is done. Show real output, never a description.
   has only been judged on screen, never on paper.
 - **`actions_taken` grouping** is inferred: the source gives flat bullets, and the
   parser makes each bullet its own group with its lead sentence as the label.
+
+- **Brand fonts are blocked in Claude Code remote sessions.**
+  `graph_generator.py` fetches DM Sans and Inter from
+  `github.com/google/fonts/raw/...`; the remote session's egress policy denies
+  that host with a 403, and it is not routable around. Graphs still render —
+  structurally correct, but in DejaVu Sans, announced only by a single `NOTE:`
+  line that is easy to scroll past. **Treat any graph built in a remote session
+  as not client-deliverable.** Local runs are unaffected. Verified Sept 2026;
+  fixing it means allowlisting the font host, not changing the code.
+
+- **`role` mode dimensions under the font fallback** came out 2554x1097 against
+  the 2541x1280 documented above. Most likely DejaVu's metrics shifting the
+  `bbox_inches="tight"` crop rather than a defect — but unconfirmed. Re-check
+  against real fonts before concluding the documented size is wrong.
