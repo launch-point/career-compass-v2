@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Career Compass Report — Parameterized Template
-Multi-page PDF with title page, TOC, intro, and 20 job type detail pages.
+Multi-page PDF with title page, TOC, intro, and 5 job type detail pages.
 Brand colors: #CF631D (orange), #343432 (charcoal), #CCD0C8 (sage)
 
 USAGE:
@@ -341,7 +341,7 @@ def build_intro_page(story, client_name):
     s_intro_bullet = ParagraphStyle("IntroBullet", parent=s_intro_tight, leftIndent=16, firstLineIndent=-12, spaceAfter=4)
 
     story.append(Paragraph(
-        f"This Career Compass report identifies 20 marketplace job types that align with {client_name}\u2019s unique combination of values, job functions, and work preferences. The Client Profile on the following page summarizes the inputs that drive every recommendation. Each role has been individually researched and evaluated for fit.",
+        f"This Career Compass report identifies 5 marketplace job types that align with {client_name}\u2019s unique combination of values, job functions, and work preferences. The Client Profile on the following page summarizes the inputs that drive every recommendation. Each role has been individually researched and evaluated for fit.",
         s_intro_tight
     ))
 
@@ -359,7 +359,7 @@ def build_intro_page(story, client_name):
 
     story.append(Paragraph("How to Read the Rankings", s_intro_head_tight))
     story.append(Paragraph(
-        "Roles are ranked 1\u201320 based on function alignment, value alignment, salary fit, and experience transferability. Higher-ranked roles represent a stronger overall match, but every role on this list is a viable career path. The rankings are a starting point for conversation \u2014 personal interests, geographic preferences, and networking opportunities may elevate a lower-ranked role above a higher-ranked one.",
+        "Roles are ranked 1\u20135 based on function alignment, value alignment, salary fit, and experience transferability. Higher-ranked roles represent a stronger overall match, but every role on this list is a viable career path. The rankings are a starting point for conversation \u2014 personal interests, geographic preferences, and networking opportunities may elevate a lower-ranked role above a higher-ranked one.",
         s_intro_tight
     ))
 
@@ -878,17 +878,19 @@ def main():
         output_path = sys.argv[2]
     else:
         safe_name = client_name.lower().replace(" ", "_")
-        output_path = f"/home/user/workspace/{safe_name}_career_compass_report.pdf"
+        reports_dir = Path.cwd() / "reports"
+        reports_dir.mkdir(parents=True, exist_ok=True)
+        output_path = str(reports_dir / f"{safe_name}_career_compass_report.pdf")
 
-    # Resolve logo paths — look in skill assets directory (same dir as this script), then workspace root
+    # Resolve logo paths — brand assets live in the skill assets directory (same dir as this script)
     script_dir = Path(__file__).parent
-    orange_logo = str(script_dir / "Orange.jpg")
-    black_logo = str(script_dir / "Black-2.jpg")
-    # Fallback to workspace root
-    if not Path(orange_logo).exists():
-        orange_logo = "/home/user/workspace/Orange.jpg"
-    if not Path(black_logo).exists():
-        black_logo = "/home/user/workspace/Black-2.jpg"
+    orange_logo = str(script_dir / "assets" / "Orange.jpg")
+    black_logo = str(script_dir / "assets" / "Black-2.jpg")
+    # Brand assets ship alongside this script; fail loudly rather than
+    # silently rendering a report with missing logos.
+    for asset in (orange_logo, black_logo):
+        if not Path(asset).exists():
+            raise FileNotFoundError(f"Brand asset missing: {asset}")
 
     # Two-pass build: first pass calculates page numbers, second pass writes final PDF
     import tempfile, pdfplumber
@@ -909,12 +911,12 @@ def main():
 
     # Pass 1: build with placeholder page numbers to measure actual pages
     print("Pass 1: measuring page layout...")
-    placeholder_map = {r: 0 for r in range(1, 21)}
+    placeholder_map = {r: 0 for r in range(1, len(roles) + 1)}
     tmp_path = tempfile.mktemp(suffix=".pdf")
     doc1 = SimpleDocTemplate(
         tmp_path, pagesize=letter,
         title=f"Career Compass Results \u2014 {client_name}",
-        author="Perplexity Computer",
+        author="Launch Group, LLC",
         leftMargin=MARGIN_L, rightMargin=MARGIN_R,
         topMargin=MARGIN_T, bottomMargin=MARGIN_B,
     )
@@ -929,7 +931,7 @@ def main():
             for line in text.split("\n")[:8]:
                 if re.match(r"^\d{1,2}$", line.strip()):
                     num = int(line.strip())
-                    if 1 <= num <= 20 and num not in job_page_map:
+                    if 1 <= num <= len(roles) and num not in job_page_map:
                         job_page_map[num] = i + 1
     print(f"  Page map: {job_page_map}")
 
@@ -941,7 +943,7 @@ def main():
     doc2 = SimpleDocTemplate(
         output_path, pagesize=letter,
         title=f"Career Compass Results \u2014 {client_name}",
-        author="Perplexity Computer",
+        author="Launch Group, LLC",
         leftMargin=MARGIN_L, rightMargin=MARGIN_R,
         topMargin=MARGIN_T, bottomMargin=MARGIN_B,
     )
