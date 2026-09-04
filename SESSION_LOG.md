@@ -133,3 +133,31 @@ Entry format:
 After each review, add a marker line:
 — reviewed YYYY-MM-DD, sessions N–N —
 -->
+
+---
+
+## 2026-09-04 — Observation: research gap in Scheiwe Stage-2 round
+
+**Not confirmed. Raw observation for the next review — do not treat as settled.**
+
+Austin Scheiwe's first-listed Top 5 function — "Seeing through masses of
+information to the central principles or most important facts" — scores **0% on
+all five researched roles** in `Scheiwe_Roles_1-5.md`. It appears in no role's
+Functional Mix.
+
+Yet the same document's Session Summary repeatedly cites "systems-thinking" as a
+lead reason for recommending these roles, and Director of Operations'
+bias-prevention note names that exact function verbatim as the thing the fit
+"traces directly to."
+
+Those two statements contradict each other. Either the function belongs in
+several roles' Functional Mix and was omitted, or the summary is overstating a
+connection the scoring doesn't support.
+
+Todd's read: a real gap in how this round of research was done, not a parsing
+error on Claude Code's side. Flagged for whoever runs the next research pass,
+deliberately NOT patched in Austin's JSON — the JSON reflects the source
+document exactly.
+
+Worth watching for on the next client: whether the Functional Mix scoring
+consistently drops a client's stated top function.
