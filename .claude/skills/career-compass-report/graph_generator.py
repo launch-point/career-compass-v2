@@ -47,15 +47,22 @@ SAGE_VERY_LIGHT = "#F2F4F0"
 GRAY_DOT = "#BFC4BB"      # grayed-out dots (per-role mode)
 GRAY_TEXT = "#8A8A88"
 
-# Per-rank signature colors (consistent across both modes). Drawn from the brand
-# orange + the existing report function palette so it stays on-system.
-RANK_COLORS = {
-    1: "#CF631D",  # brand orange
-    2: "#B8530D",  # burnt sienna
-    3: "#8B6B2F",  # dark gold
-    4: "#2E7D6F",  # teal
-    5: "#4A6FA5",  # steel blue
-}
+# Rank is NOT encoded by hue. Every dot is brand orange; the numeral inside the
+# dot (plus the legend in overview mode) carries rank on its own. Hue-encoding
+# rank would need a third palette kept permanently distinct from FUNC_COLORS and
+# VAL_COLORS in report_template.py, for no information the numeral doesn't
+# already give the reader.
+DOT_COLOR = ORANGE
+
+# Dot sizes (matplotlib scatter `s`, points^2). Sized so two dots sharing one
+# cell stay clear of each other and of the grid edge — see _positions().
+SIZE_OVERVIEW = 520
+SIZE_TARGET = 700        # highlighted role, per-role mode
+SIZE_CONTEXT = 170       # the other four, per-role mode
+
+# Horizontal padding (in cell widths) added outside the grid so a dot in the
+# first or last function column is never pressed against the frame.
+EDGE_PAD = 0.18
 
 FONT_HEAD = "DejaVu Sans"  # replaced by DM Sans if the font loads
 FONT_BODY = "DejaVu Sans"  # replaced by Inter if the font loads
@@ -93,10 +100,40 @@ def ensure_fonts():
 
 
 def load_graph(path):
+    """Load role placement data.
+
+    Accepts either form:
+      * the full client report JSON — {"roles": [{rank, title, function,
+        seniority_level, ...}]} — so graph placement lives as per-role fields
+        in the same file the PDF is built from, not a second file kept in sync
+        by hand;
+      * a flat list of {rank, role_title, function, seniority_level} objects,
+        which is what the standalone regression fixture uses.
+    """
     with open(path) as f:
         data = json.load(f)
+
+    if isinstance(data, dict) and "roles" in data:
+        data = [
+            {
+                "rank": r.get("rank"),
+                "role_title": r.get("title", r.get("role_title")),
+                "function": r.get("function"),
+                "seniority_level": r.get("seniority_level"),
+            }
+            for r in data["roles"]
+        ]
     if not isinstance(data, list):
-        raise ValueError("graph JSON must be a list of role objects")
+        raise ValueError(
+            "graph JSON must be a list of role objects, or an object with a 'roles' list"
+        )
+    missing = [r.get("rank") for r in data
+               if r.get("function") is None or r.get("seniority_level") is None]
+    if missing:
+        raise ValueError(
+            "roles missing graph placement fields (function / seniority_level): "
+            + ", ".join(f"rank {m}" for m in missing)
+        )
     errors = []
     for r in data:
         if r.get("function") not in FUNCTIONS:
@@ -120,8 +157,12 @@ def _positions(roles):
         if n == 1:
             pos[ranks[0]] = (x, y)
         else:
-            # spread evenly within the cell, centered
-            span = 0.34
+            # Spread evenly within the cell, centered. The gap has to clear the
+            # *enlarged* target dot, not the small context dots — at the old
+            # fixed 0.34 an enlarged dot overlapped its cell-mate. Scale the
+            # span with occupancy, capped so dots stay inside the cell.
+            gap = 0.42
+            span = min(gap * (n - 1), 0.88)
             offs = [(-span / 2) + span * i / (n - 1) for i in range(n)]
             for rank, off in zip(sorted(ranks), offs):
                 pos[rank] = (x + off, y)
@@ -129,7 +170,10 @@ def _positions(roles):
 
 
 def _draw_grid(ax):
-    ax.set_xlim(-0.5, len(FUNCTIONS) - 0.5)
+    # Pad beyond the grid frame so a dot in the first or last function column
+    # (especially an offset one sharing a cell) is never pressed against the
+    # edge. The frame itself is still drawn at the true cell bounds below.
+    ax.set_xlim(-0.5 - EDGE_PAD, len(FUNCTIONS) - 0.5 + EDGE_PAD)
     ax.set_ylim(-0.5, len(SENIORITY) - 0.5)
     # alternating row shading for readability
     for y in range(len(SENIORITY)):
@@ -169,8 +213,8 @@ def render(roles, mode, role_rank, out_path):
         _draw_grid(ax)
         for r in roles:
             x, y = pos[r["rank"]]
-            _draw_dot(ax, x, y, r["rank"], RANK_COLORS.get(r["rank"], ORANGE),
-                      size=620, fontsize=12)
+            _draw_dot(ax, x, y, r["rank"], DOT_COLOR,
+                      size=SIZE_OVERVIEW, fontsize=12)
         # legend area
         lax = fig.add_axes([0.13, 0.02, 0.83, 0.32])
         lax.axis("off")
@@ -181,8 +225,7 @@ def render(roles, mode, role_rank, out_path):
                  transform=lax.transAxes)
         for i, r in enumerate(roles):
             yy = 0.82 - i * 0.17
-            color = RANK_COLORS.get(r["rank"], ORANGE)
-            lax.scatter([0.015], [yy + 0.02], s=210, c=color, edgecolors="white",
+            lax.scatter([0.015], [yy + 0.02], s=210, c=DOT_COLOR, edgecolors="white",
                         linewidths=1.0, transform=lax.transAxes, clip_on=False)
             lax.text(0.015, yy + 0.02, str(r["rank"]), ha="center", va="center",
                      color="white", fontsize=8.5, fontfamily=FONT_HEAD,
@@ -200,14 +243,14 @@ def render(roles, mode, role_rank, out_path):
             if r["rank"] == role_rank:
                 continue
             x, y = pos[r["rank"]]
-            _draw_dot(ax, x, y, r["rank"], GRAY_DOT, size=190, text_color=GRAY_TEXT,
-                      fontsize=8, alpha=0.9)
+            _draw_dot(ax, x, y, r["rank"], GRAY_DOT, size=SIZE_CONTEXT,
+                      text_color=GRAY_TEXT, fontsize=8, alpha=0.9)
         target = next((r for r in roles if r["rank"] == role_rank), None)
         if target is None:
             raise ValueError(f"no role with rank {role_rank} in graph data")
         x, y = pos[target["rank"]]
-        _draw_dot(ax, x, y, target["rank"], RANK_COLORS.get(target["rank"], ORANGE),
-                  size=900, fontsize=14)
+        _draw_dot(ax, x, y, target["rank"], DOT_COLOR,
+                  size=SIZE_TARGET, fontsize=14)
 
     fig.savefig(out_path, dpi=300, facecolor="white", bbox_inches="tight", pad_inches=0.15)
     plt.close(fig)
