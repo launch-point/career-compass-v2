@@ -297,10 +297,12 @@ def build_toc_page(story, roles, job_page_map):
 
     toc_rows = []
 
-    # Front matter entries (fixed pages: cover=1, TOC=2, HowToRead=3, WhatToDo=4, Profile=5)
+    # Front matter entries (fixed pages: cover=1, TOC=2, HowToRead=3, WhatToDo=4,
+    # Profile=5, Role Landscape graph=6)
     toc_rows.append(_toc_row("How to Read This Report", 3))
     toc_rows.append(_toc_row("What to Do With This Report", 4))
     toc_rows.append(_toc_row("Your Job Search Profile", 5))
+    toc_rows.append(_toc_row("Your Role Landscape", 6))
 
     # Divider row with spacing
     toc_rows.append([Spacer(1, 4), Spacer(1, 4)])
@@ -596,7 +598,37 @@ def _build_additional_functions_table(additional_functions):
     return tbl
 
 
-def build_job_page(story, role, values, functions):
+def _scaled_image(path, target_w):
+    """Image scaled to target_w, preserving the source aspect ratio."""
+    img = Image(path)
+    img.drawHeight = img.imageHeight * (target_w / img.imageWidth)
+    img.drawWidth = target_w
+    return img
+
+
+def build_graph_page(story, overview_png):
+    """Full-page overview graph: all 5 roles on the fixed 9x3 grid.
+
+    Placed after the client profile and before the first role entry, per the
+    build spec — its own page, not folded into the profile.
+    """
+    story.append(Spacer(1, 0.2 * inch))
+    story.append(Paragraph("YOUR ROLE LANDSCAPE", s_intro_title))
+    story.append(AccentLine(width=60, height=3))
+    story.append(Spacer(1, 0.15 * inch))
+    story.append(Paragraph(
+        "Each of the five roles below is plotted by the business function it sits in "
+        "and the level of seniority it operates at. Roles higher on the grid carry more "
+        "strategic scope; roles further along it sit in different parts of an "
+        "organization. The numbers match the rankings used throughout this report.",
+        s_intro_body
+    ))
+    story.append(Spacer(1, 0.2 * inch))
+    story.append(_scaled_image(overview_png, CONTENT_W))
+    story.append(PageBreak())
+
+
+def build_job_page(story, role, values, functions, compact_png):
     """v15: Build a single job role as 3 pages.
 
     Page 1: Header + Salary + Function Alignment (Top 5 table + Additional table + coverage line)
@@ -610,15 +642,38 @@ def build_job_page(story, role, values, functions):
 
     rank_display = f'<font name="{FONT_HEAD}" size="32" color="#CF631D">{rank:02d}</font>'
     story.append(Spacer(1, 0.15 * inch))
-    story.append(Paragraph(rank_display, ParagraphStyle(
-        f"Rank{rank}", fontName=FONT_HEAD, fontSize=32, leading=36, textColor=ORANGE
-    )))
-    story.append(Spacer(1, 2))
-    story.append(Paragraph(title, s_page_title))
 
     alt_titles_safe = [sanitize_html(t) for t in role["alt_titles"]]
     alt_str = " &nbsp;|&nbsp; ".join(alt_titles_safe)
-    story.append(Paragraph(f'Also known as: {alt_str}', s_page_subtitle))
+
+    # Header is a two-column row: identity on the left, this role's position on
+    # the function/seniority grid top-right (per the build spec). The row grows
+    # to whichever side is taller — watch for the graph pushing the salary table
+    # down if the title/alt-titles are short.
+    header_left = [
+        Paragraph(rank_display, ParagraphStyle(
+            f"Rank{rank}", fontName=FONT_HEAD, fontSize=32, leading=36, textColor=ORANGE
+        )),
+        Spacer(1, 2),
+        Paragraph(title, s_page_title),
+        Paragraph(f'Also known as: {alt_str}', s_page_subtitle),
+    ]
+    graph_w = 2.8 * inch
+    header_tbl = Table(
+        [[header_left, _scaled_image(compact_png, graph_w)]],
+        colWidths=[CONTENT_W - 3.0 * inch, 3.0 * inch],
+    )
+    header_tbl.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (0, 0), "TOP"),
+        ("VALIGN", (1, 0), (1, 0), "TOP"),
+        ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+    ]))
+    story.append(header_tbl)
+    story.append(Spacer(1, 6))
 
     story.append(AccentLine(width=CONTENT_W, height=2))
     story.append(Spacer(1, 10))
@@ -892,8 +947,25 @@ def main():
         if not Path(asset).exists():
             raise FileNotFoundError(f"Brand asset missing: {asset}")
 
-    # Two-pass build: first pass calculates page numbers, second pass writes final PDF
+    # Graph images are generated once, up front — before either build pass.
+    # A graph present in only one pass would change pagination between passes
+    # and silently corrupt the TOC page numbers.
     import tempfile, pdfplumber
+    import graph_generator as gg
+
+    graph_dir = Path(tempfile.mkdtemp(prefix="cc_graphs_"))
+    gg.ensure_fonts()
+    graph_roles = gg.load_graph(json_path)
+    overview_png = str(graph_dir / "overview.png")
+    gg.render(graph_roles, "overview", None, overview_png)
+    compact_png = {}
+    for r in roles:
+        p = str(graph_dir / f"compact_{r['rank']}.png")
+        gg.render(graph_roles, "compact", r["rank"], p)
+        compact_png[r["rank"]] = p
+    print(f"Graphs: overview + {len(compact_png)} compact -> {graph_dir}")
+
+    # Two-pass build: first pass calculates page numbers, second pass writes final PDF
 
     on_first_page = make_cover_page_bg(orange_logo)
     on_later_pages = make_later_pages_bg(client_name, report_date, black_logo)
@@ -905,8 +977,9 @@ def main():
         build_intro_page(story, client_name)
         build_action_page(story)
         build_profile_page(story, client_name, values, functions, work_preferences)
+        build_graph_page(story, overview_png)
         for role in roles:
-            build_job_page(story, role, values, functions)
+            build_job_page(story, role, values, functions, compact_png[role["rank"]])
         return story
 
     # Pass 1: build with placeholder page numbers to measure actual pages
