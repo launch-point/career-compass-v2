@@ -90,6 +90,29 @@ Append-only. Don't rewrite or clean up past entries — the record of what was t
 
 **Pattern (tentative):** For managed-Postgres/Supabase, "the SQL ran" ≠ "the app role can use it" — grants + RLS + schema-cache are separate layers, each needs its own behavioral check. Verify with a real write as the app's actual role, not an introspection/HEAD probe.
 
+---
+
+## Session 1 (continued) — 2026-09-03 — Webhook payload refactor, admin env fix, Phase 2 report-build kickoff
+
+**Decisions / work:**
+- **Webhook payload refactor (serialization only, no schema/gate change):** `functions` and `values` in the webhook payload now expose `top5` + `next5` as flat **label-string arrays** (5 each, non-overlapping); the old `top10` (which nested top5 inside it) is removed. `functions.all` and `values.checked` kept as-is. Sheets `*_top10` columns preserved by reconstructing them as `top5 + next5` (Sheets is being deprecated — flagged, not silently changed). `docs/api-contracts.md` updated. Purpose: easier downstream consumption in Make.com / Slack. Verified via `verify-e2e` (real payload shape + HMAC recomputes and matches).
+- **`ADMIN_EMAILS`:** code + `.env.example` were already correct; the bug was `.env.local` using singular `ADMIN_EMAIL`. Renamed the key (value preserved). Verified `adminEmails()`/`isAdminEmail()` resolve correctly against the real file.
+- **Phase 2 (report PDF) STARTED** — Todd moved on from Phase 1. Placed the proven v15 `career-compass-report` skill into the repo (`docs/report-build/` reference copies; `.claude/skills/career-compass-report/{report_template.py, assets}`). Plan approved: adapt for v2 = **20→5 roles** + a **function/seniority graph** (9 business functions × 3 seniority bands, two display modes), as a **standalone skill** whose only input is a **markdown research file** (no Supabase/pipeline dependency). Built the Python venv + `graph_generator.py`. **Not yet verified** — interrupted before generating the first PNGs.
+
+**Corrections / choices from Todd (this stretch):**
+- Graph placement data lives in a **separate `{client}_graph.json`** (`[{rank, role_title, function, seniority_level}]`), not embedded in the role JSON.
+- Todd will **provide the real/sample markdown** research file himself — markdown→JSON parse verification (spec §7.1) is gated on that; Python tools verified against a JSON fixture meanwhile.
+- Report outputs → gitignored `reports/` at repo root (the v15 template's hardcoded `/home/user/workspace/` doesn't exist here).
+
+**Didn't work as expected / gotchas:**
+- **A verify-e2e run POSTed one test submission to the real `ORCHESTRATOR_WEBHOOK_URL`.** `.env.local` had that URL set (Todd wiring Make.com); I didn't realize before the first run, so a `verify@example.com` test payload hit the live endpoint (returned non-2xx). Lesson: before running e2e, check `.env.local` for real side-effect URLs (webhook/Sheets) and blank them inline so the webhook routes to the dev sink.
+- **reportlab 5.0.1** installed (newer major than the v15 template targeted) — watch for platypus API changes when the template first runs in Step D.
+- v15 `report_template.py` hardcodes `/home/user/workspace/` and several **20-role assumptions** (`range(1,21)`, pdfplumber `num<=20`, intro copy "20 job types / ranked 1–20") — all being adapted to 5.
+
+**Patterns (tentative):**
+- Todd cleanly separates change classes and says so: "payload/serialization only, not schema or gates." Mirror that separation in proposals + commits.
+- Verification now spans three classes: automatable backend/data (e2e), interactive UI (browser walkthrough — Todd does it), and **visual artifact** (the graph image / PDF — inspect the real rendered file). The report build adds the third.
+
 <!--
 Entry format:
 
