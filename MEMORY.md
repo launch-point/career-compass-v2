@@ -16,8 +16,12 @@ Keep this file short. If it's getting long, that usually means something belongs
 
 ## Current Status
 
-**Phase:** 1 — Intake form + minimal admin view
-**State:** Not started. Repo initialized, spec written, awaiting plan mode.
+**Phase:** 2 — Report PDF template (in progress)
+**State:**
+- **Phase 1 (intake form + minimal admin view): built and deployed.** Live in production at `career.ministrytomarketplace.co`. Supabase-verified (writes and RLS confirmed against the live project).
+- **Phase 2 (report build): in progress** on branch `phase-2-report`. Report skill scaffolding and the standalone graph generator are committed but not yet verified.
+
+*(Status confirmed by Todd, Sept 4 2026.)*
 
 ---
 
