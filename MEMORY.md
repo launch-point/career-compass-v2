@@ -51,7 +51,7 @@ Keep this file short. If it's getting long, that usually means something belongs
 
 *Things that cost time to figure out once and shouldn't cost time again.*
 
-- (empty — add as encountered)
+- **matplotlib: `scatter(..., transform=ax.transAxes)` still autoscales the axes' *data* limits from the raw offset values.** It does not "opt out" of data space the way it looks like it should. Consequence: on an `axis("off")` legend axes, those scatter calls silently collapsed the data limits to `(-0.055, 0.055)`, and a sibling `text()` left in data coords at `y=1.0` was flung to figure-fraction y=3.07 — three figure-heights above the canvas. `bbox_inches="tight"` then grew the saved PNG to ~20in tall to contain it. **Rule: on any axes used purely for layout, pin `set_xlim(0,1)`/`set_ylim(0,1)` and give *every* artist an explicit `transform=`. Mixing coordinate systems on one axes is the trap.** Cost a full diagnostic cycle in the Phase 2 graph generator; regression fixture at `.claude/skills/career-compass-report/fixtures/`. (Sept 4 2026)
 
 ---
 
