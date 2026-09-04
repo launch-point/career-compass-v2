@@ -30,6 +30,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Personal Claude Code overrides (permissions etc.) — not team config
+.claude/settings.local.json
+
 # Report skill (Python) + generated client artifacts
 reports/
 .claude/skills/career-compass-report/.venv/
