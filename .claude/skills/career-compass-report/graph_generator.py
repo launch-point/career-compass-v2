@@ -46,7 +46,17 @@ SENIORITY = ["Specialist", "Integrator", "Strategist"]  # y=0 bottom -> y=2 top
 # so these are rotated 40°, which trades vertical space for horizontal room.
 FUNCTIONS_COMPACT = [
     "Product", "Marketing", "Sales", "Customer\nExperience", "Ops", "HR",
-    "Finance and\nAccounting", "Legal", "Communications",
+    "Finance and\nAccounting", "Legal", "Comms",
+]
+
+# Display labels for the full-size (overview / role) graphs. Horizontal and
+# centred under their column, wrapping to two lines where needed. Kept separate
+# from FUNCTIONS above, which is the *data* vocabulary that role placements are
+# validated against and must stay verbatim — only the rendered label is
+# shortened here ("Finance and Accounting" -> "Finance").
+FUNCTIONS_DISPLAY = [
+    "Product", "Marketing", "Sales", "Customer\nExperience", "Operations",
+    "Human\nResources", "Finance", "Legal", "Communications",
 ]
 
 # ─── Brand ───────────────────────────────────────────────────────────────────
@@ -208,7 +218,10 @@ def _draw_grid(ax, compact=False):
         ax.set_xticklabels(FUNCTIONS_COMPACT, rotation=40, ha="right", fontsize=5.8,
                            fontfamily=FONT_BODY, color=CHARCOAL)
     else:
-        ax.set_xticklabels(FUNCTIONS, rotation=32, ha="right", fontsize=8.5,
+        # Horizontal, centred, wrapped. 7.0pt is the measured maximum at which
+        # "Communications" (the widest single line) fits inside a 59.8pt column
+        # with a 4pt gutter; at 7.5pt it overruns into its neighbour.
+        ax.set_xticklabels(FUNCTIONS_DISPLAY, rotation=0, ha="center", fontsize=7.0,
                            fontfamily=FONT_BODY, color=CHARCOAL)
     ax.set_yticks(range(len(SENIORITY)))
     ax.set_yticklabels(SENIORITY, fontsize=5.8 if compact else 10,
