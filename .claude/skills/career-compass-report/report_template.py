@@ -470,7 +470,6 @@ def build_profile_page(story, client_name, values, functions, work_preferences):
         ("Maximum Travel", wp["max_travel_days"]),
         ("Advanced Degrees", wp["advanced_degree"]),
         ("Years in Workforce (Full-Time)", wp["years_workforce"]),
-        ("Years in Similar/Aspirational Work", wp["years_similar_work"]),
     ]
     pref_rows = [[Paragraph("Preference", s_table_header), Paragraph("Response", s_table_header)]]
     for label, value in prefs:
@@ -513,7 +512,10 @@ def _build_top5_functions_table(role, functions):
     rows = [header]
     for j, func in enumerate(functions):
         fc = FUNC_COLORS[j]
-        short_func = func if len(func) <= 48 else func[:45] + "..."
+        # No character cap: client function vocabulary is sentence-length, and a
+        # mid-word "..." in a client-facing table reads as a defect. ReportLab
+        # wraps the Paragraph inside the cell instead.
+        short_func = func
         pct = pcts[j] if j < len(pcts) else 0
         desc = sanitize_html(descs[j]) if j < len(descs) else ""
         if not pct or pct == 0:
@@ -566,8 +568,6 @@ def _build_additional_functions_table(additional_functions):
     rows = [header]
     for item in additional_functions:
         name = sanitize_html(item.get("name", ""))
-        if len(name) > 48:
-            name = name[:45] + "..."
         pct = item.get("pct", 0)
         desc = sanitize_html(item.get("description", ""))
         pct_cell = f"{pct}%" if pct else "\u2014"
@@ -678,6 +678,18 @@ def build_job_page(story, role, values, functions, compact_png):
     story.append(AccentLine(width=CONTENT_W, height=2))
     story.append(Spacer(1, 10))
 
+    # Optional level caveat — rendered only for roles that carry one, so a
+    # blended or provisional seniority reading is stated on the page rather
+    # than left implied by the graph's dot position.
+    seniority_note = (role.get("seniority_note") or "").strip()
+    if seniority_note:
+        story.append(Paragraph(
+            f'<font name="{FONT_HEAD}" size="9" color="#CF631D">A NOTE ON LEVEL</font><br/>'
+            f'<font name="{FONT_BODY}" size="9" color="#5A5A58">{sanitize_html(seniority_note)}</font>',
+            ParagraphStyle("SeniorityNote", fontName=FONT_BODY, fontSize=9,
+                           leading=12.5, spaceAfter=10)
+        ))
+
     # Salary row
     sal_data = [
         [Paragraph("SALARY RANGE", s_label), Paragraph("", s_label), Paragraph("", s_label)],
@@ -706,6 +718,23 @@ def build_job_page(story, role, values, functions, compact_png):
     # Top 5 Functions Alignment
     story.append(Paragraph("TOP 5 FUNCTIONS ALIGNMENT", s_section_head))
     story.append(_build_top5_functions_table(role, functions))
+
+    # Methodology note, rendered only where at least one Top 5 function scores
+    # zero — so it explains the em-dash rows it sits under, rather than becoming
+    # boilerplate on pages where nothing needs explaining.
+    top5_pcts = role.get("function_pcts_top5", []) or []
+    if any((p or 0) == 0 for p in top5_pcts[:5]):
+        note_style = ParagraphStyle(
+            "FunctionMethodNote", parent=s_body, fontSize=8.5, leading=11.5,
+            textColor=TEXT_MID, alignment=TA_LEFT, spaceBefore=6
+        )
+        story.append(Paragraph(
+            "A function showing “—” above means it did not surface as a meaningful "
+            "part of this specific role in the research reviewed — not that it is "
+            "unimportant to you generally. Your top functions are weighted consistently "
+            "across all five roles; some naturally show up more in certain roles than others.",
+            note_style
+        ))
     story.append(Spacer(1, 12))
 
     # Additional Functions Alignment (conditional)
@@ -746,15 +775,28 @@ def build_job_page(story, role, values, functions, compact_png):
         "ValueP2", parent=s_body_justify, fontSize=10, leading=14, spaceAfter=10
     )
     val_alignments = role.get("value_alignments", [])
-    for j, val in enumerate(values):
-        vc = VAL_COLORS[j]
-        alignment_text = val_alignments[j] if j < len(val_alignments) else ""
-        alignment_text_safe = sanitize_html(alignment_text)
+    if not any((v or "").strip() for v in val_alignments):
+        # Whole-role case: research found no value connection at all.
         story.append(Paragraph(
-            f'<font name="{FONT_HEAD}" size="11" color="{vc}">{val}</font><br/>'
-            f'<font name="{FONT_BODY}" size="10" color="#2B2B29">{alignment_text_safe}</font>',
+            "No Top 5 value connects strongly to this role's core purpose. This is the "
+            "research finding for this role, not a gap in the analysis — its fit rests "
+            "on function alignment rather than value alignment.",
             val_style
         ))
+    else:
+        for j, val in enumerate(values):
+            vc = VAL_COLORS[j]
+            alignment_text = (val_alignments[j] if j < len(val_alignments) else "").strip()
+            # Per-value case: an unaddressed value reads as a rendering bug if
+            # left silent, so state the finding instead.
+            if not alignment_text:
+                alignment_text = "Not a significant factor in this role."
+            alignment_text_safe = sanitize_html(alignment_text)
+            story.append(Paragraph(
+                f'<font name="{FONT_HEAD}" size="11" color="{vc}">{val}</font><br/>'
+                f'<font name="{FONT_BODY}" size="10" color="#2B2B29">{alignment_text_safe}</font>',
+                val_style
+            ))
 
     story.append(PageBreak())
 
