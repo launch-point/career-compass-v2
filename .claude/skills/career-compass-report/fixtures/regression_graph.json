@@ -1,0 +1,7 @@
+[
+  {"rank": 1, "role_title": "Director of People and Culture",     "function": "Human Resources",   "seniority_level": "Strategist"},
+  {"rank": 2, "role_title": "Director of Community Partnerships", "function": "Communications",    "seniority_level": "Strategist"},
+  {"rank": 3, "role_title": "Manager of Member Experience",       "function": "Customer Experience","seniority_level": "Integrator"},
+  {"rank": 4, "role_title": "Director of Talent Development",     "function": "Human Resources",   "seniority_level": "Strategist"},
+  {"rank": 5, "role_title": "Development Operations Specialist",  "function": "Operations",        "seniority_level": "Specialist"}
+]

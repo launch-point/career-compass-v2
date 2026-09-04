@@ -174,8 +174,11 @@ def render(roles, mode, role_rank, out_path):
         # legend area
         lax = fig.add_axes([0.13, 0.02, 0.83, 0.32])
         lax.axis("off")
+        lax.set_xlim(0, 1)  # pin data space so transAxes == data coords
+        lax.set_ylim(0, 1)  # and stray autoscaling can't move anything
         lax.text(0, 1.0, "ROLES", fontsize=10, fontfamily=FONT_HEAD,
-                 color=ORANGE, fontweight="bold", va="top")
+                 color=ORANGE, fontweight="bold", va="top",
+                 transform=lax.transAxes)
         for i, r in enumerate(roles):
             yy = 0.82 - i * 0.17
             color = RANK_COLORS.get(r["rank"], ORANGE)
