@@ -161,3 +161,98 @@ document exactly.
 
 Worth watching for on the next client: whether the Functional Mix scoring
 consistently drops a client's stated top function.
+
+---
+
+## Session 2 — 2026-09-04 — Phase 2 report build: graph, PDF integration, first real client report
+
+**Raw observations. Not authoritative — for the next 5-session review.**
+
+### What shipped (all committed on `phase-2-report`)
+
+- Graph generator: fixed an overview layout bug (~20in tall PNG), dropped
+  rank hue-encoding to a single brand orange, moved graph placement data into
+  the role JSON as per-role fields, fixed dot crowding and edge margins, added
+  a `compact` mode for in-PDF placement, switched axis labels to horizontal
+  wrapped text.
+- `report_template.py`: 20→5 roles, TOC bounds from `len(roles)`, stale author
+  metadata and dead workspace paths removed, graph embedding (overview page +
+  per-role compact), `seniority_note` field, `years_similar_work` removed from
+  the schema, Value Alignment empty-state handling, function-name truncation
+  removed, conditional methodology note.
+- New `parse_research_markdown.py` — markdown → v15 JSON, client-agnostic.
+- Brand logos replaced (PNG/RGBA, aspect 0.970 vs the old square 1.000).
+- Austin Scheiwe's real report built and verified: 26 pages.
+
+### Unfinished — carry into next session
+
+**`SKILL.md` was created this session** for `career-compass-report` (it did not
+previously exist, which is why the skill had never been registered or
+invokable). The core pipeline is documented: input format, parser, judgment
+file, graph modes, PDF build, the durable rules, the client-specific-vs-reusable
+distinction, verification steps, known gaps.
+
+**Two approved edits were never applied.** Both were fully reviewed and approved
+by Todd; three successive attempts were rejected at the permission prompt, cause
+unclear (the tool call returned "user doesn't want to proceed" each time). The
+content never reached disk. Verified absent: no `## Setup` heading, no
+`python3 -m venv`, no `reportlab==`, no `DejaVu Sans` in the file; mtime
+unchanged from the original write.
+
+This matters because **a fresh clone cannot run the pipeline as documented** —
+the venv is gitignored, so every command in SKILL.md fails with "no such file"
+until it is created, and SKILL.md currently does not say how.
+
+#### PENDING EDIT 1 — insert immediately before `## The Pipeline`
+
+    ## Setup (first run on a machine)
+
+    The venv is **gitignored**, so a fresh clone has none and every command below
+    will fail with "no such file" until you create it:
+
+    ```bash
+    python3 -m venv .claude/skills/career-compass-report/.venv
+    .claude/skills/career-compass-report/.venv/bin/pip install \
+        reportlab==5.0.1 pdfplumber==0.11.8 matplotlib==3.9.4 pillow==11.3.0
+    ```
+
+    Those are the versions this pipeline has actually been verified against, on
+    Python 3.9. `fonttools` arrives as a matplotlib dependency; it is not installed
+    directly. The pins are deliberate — if one fails to resolve on a different
+    machine, surface that as a finding rather than falling back to unpinned
+    installs. v15 targeted an older ReportLab, so version drift here is a real risk.
+
+    `graph_generator.py` downloads DM Sans and Inter to `/tmp/fonts` on first use.
+    Offline it falls back to DejaVu Sans and prints a NOTE line — the graph still
+    renders but is off-brand, so check for that line if the type looks wrong.
+
+Todd's explicit direction on the pins: keep exact versions, not loose package
+names. A pin failing on another machine is useful information to surface, not
+something to paper over.
+
+#### PENDING EDIT 2 — role-mode documentation (never attempted)
+
+`graph_generator.py` supports three modes, but SKILL.md's Graphs section
+documents only `overview` and `compact`. Add `role` — the large standalone
+per-role render (2541x1280), used for previewing a single role's placement
+outside the PDF; the PDF itself uses `compact`, not `role`. Exact wording was
+not drafted before the session ended.
+
+### Observations worth watching
+
+- Repeated permission-prompt rejections on `report_template.py` and `SKILL.md`
+  edits, sometimes several in a row on content already approved verbatim. Cost
+  real time re-confirming state. Worth watching whether this recurs.
+- A `.claude/settings.local.json` was created this session with an `ask` rule on
+  the two skill Python files. It may not be active — the settings watcher only
+  watches directories that had a settings file at session start, and neither
+  existed then. Unverified whether it is loaded.
+- Verification tests can produce false failures: a literal substring check on
+  role titles failed because titles now wrap in the narrower header column, and
+  flat `extract_text()` interleaves wrapped table cells with adjacent columns.
+  Both needed whitespace-normalised or cell-level extraction instead. Twice this
+  session a "failure" was the test, not the build.
+- The source markdown format drifted three times across revisions in one
+  session (merged/split Day-to-Day sections, `[cite:N]` markers appearing,
+  "Confirmed" → "Proposed" seniority). Diffing revisions caught changes the
+  document's own revision note did not mention.
