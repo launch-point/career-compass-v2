@@ -259,7 +259,57 @@ not drafted before the session ended.
 
 ---
 
-## Session 3 — 2026-09-05 — Pipeline smoke-test on a fresh remote clone
+## Session 3 — 2026-09-05 — Environment check only (no build work)
+
+**Raw observations. Not authoritative — for the next 5-session review.**
+
+Short session. No code written, no pipeline run. Todd asked what branch the
+session was on, whether the report skill was present, and what state the
+pipeline was in on a fresh remote clone.
+
+**Findings (all verified directly this session):**
+
+- Branch: `phase-2-report`, as designated.
+- `.claude/skills/career-compass-report/SKILL.md` present (13,298 bytes),
+  alongside `assets/`, `fixtures/`, and the three `.py` files. Recognized as an
+  available skill in the session's skill list.
+- **No `.venv`** at `.claude/skills/career-compass-report/.venv` — gitignored,
+  so absent from a fresh clone. Every pipeline command would fail until built.
+- **No `reports/` directory at all** — also gitignored. A repo-wide search for
+  `*research*`, `*Scheiwe*`, `*judgment*`, `*report_data*`, `*.pdf` returned
+  exactly one hit: `parse_research_markdown.py`, matched on its own filename.
+  No client artifacts of any kind travel with the clone.
+
+**Decisions made:**
+
+- Do not set up the pipeline in this remote session. Todd's call: since remote
+  graphs fall back to DejaVu and aren't client-deliverable, there is no benefit
+  to building the venv here. Real run happens locally on his Mac when an actual
+  research file exists.
+- The fresh-clone fact was promoted to `MEMORY.md` (Technical Notes & Gotchas)
+  at Todd's explicit direction — the "log that" path, not the review cycle.
+
+**Worth watching:**
+
+- Todd's framing when directing the entry was that non-deliverability from
+  remote is "a property of the repo's design ... regardless of which specific
+  remote environment it is." The MEMORY.md entry as written splits that: the
+  gitignore design causes the missing venv/artifacts (setup friction only),
+  while non-deliverability traces to the environment's font egress policy per
+  SKILL.md's Known Gaps. Flagged to Todd rather than logged as dictated. If he
+  reaffirms the stronger, environment-independent reading, the entry should be
+  strengthened to match.
+
+---
+
+## Session 3 (continued) — 2026-09-05 — Pipeline smoke-test on a fresh remote clone
+
+*Same session, later. The entry above closed with "do not set up the pipeline
+in this remote session." Todd then redirected: set up the venv and run the
+regression fixture, explicitly scoped as a structural check rather than a real
+build. That supersedes the earlier decision — it does not contradict its
+reasoning, since nothing client-deliverable was attempted. Earlier entry left
+as-written (append-only).*
 
 **Raw observations. Not authoritative — for the next 5-session review.**
 
