@@ -4,6 +4,22 @@
 
 ---
 
+> **Superseded in part — 2026-09-07.** This document is kept as the historical
+> record of what was specified for the original build; its body is deliberately
+> left as written. One thing has since changed: the **exactly-5 role count** it
+> specifies (sections 1, 4, 6 — the "exactly 5 full entries" and "role-rendering
+> loop should run exactly 5 times" statements) is no longer accurate. The report
+> now supports a **variable 5–10 roles**, while **graphs still cover the top 5
+> only** — roles past that cut-off get a full role page with a full-width header
+> and no graph. The graph specification itself is unchanged.
+>
+> Current behaviour is documented in the `career-compass-report` `SKILL.md`
+> ("Role count and the graph cut-off") and enforced by `GRAPH_ROLE_COUNT`,
+> `MIN_ROLES` and `MAX_ROLES` in `report_template.py`. Read those, not this
+> document, for how the build works today.
+
+---
+
 ## 1. Context
 
 The existing v15 skill produces a 20-role, 3-page-per-role branded PDF from a structured JSON file, using a Python/ReportLab template (`report_template.py`). It's fully working and battle-tested — brand colors, typography, two-pass TOC page numbering, sanitization, all proven.

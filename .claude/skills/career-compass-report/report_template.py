@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 Career Compass Report — Parameterized Template
-Multi-page PDF with title page, TOC, intro, and 5 job type detail pages.
+Multi-page PDF with title page, TOC, intro, and one detail entry per job type
+(5-10 roles; see GRAPH_ROLE_COUNT for which of them carry graphs).
 Brand colors: #CF631D (orange), #343432 (charcoal), #CCD0C8 (sage)
 
 USAGE:
@@ -91,6 +92,18 @@ MARGIN_T = 0.75 * inch
 MARGIN_B = 0.85 * inch
 
 CONTENT_W = PAGE_W - MARGIN_L - MARGIN_R
+
+# How many roles carry graphs. The report itself holds a variable number of
+# roles (5-10); roles past this cut-off get a full role page with a full-width
+# header and no graph. This constant and the slice in main() are the only two
+# places the boundary lives — Part 2 raises it to cover every role.
+# NOTE: unrelated to the client's Top 5 *functions* and Top 5 *values*, which
+# are fixed at 5 by the report design and must not be driven from here.
+GRAPH_ROLE_COUNT = 5
+
+# Supported role count for the report as a whole. Verified at 5, 7 and 10.
+MIN_ROLES = 5
+MAX_ROLES = 10
 
 # ─── STYLES ──────────────────────────────────────────────────────────────────
 styles = getSampleStyleSheet()
@@ -331,7 +344,7 @@ def build_toc_page(story, roles, job_page_map):
     story.append(PageBreak())
 
 
-def build_intro_page(story, client_name):
+def build_intro_page(story, client_name, role_count):
     """Build the intro/how-to page — fits on one page."""
     story.append(Spacer(1, 0.2 * inch))
     story.append(Paragraph("HOW TO READ THIS REPORT", s_intro_title))
@@ -343,7 +356,7 @@ def build_intro_page(story, client_name):
     s_intro_bullet = ParagraphStyle("IntroBullet", parent=s_intro_tight, leftIndent=16, firstLineIndent=-12, spaceAfter=4)
 
     story.append(Paragraph(
-        f"This Career Compass report identifies 5 marketplace job types that align with {client_name}\u2019s unique combination of values, job functions, and work preferences. The Client Profile on the following page summarizes the inputs that drive every recommendation. Each role has been individually researched and evaluated for fit.",
+        f"This Career Compass report identifies {role_count} marketplace job types that align with {client_name}\u2019s unique combination of values, job functions, and work preferences. The Client Profile on the following page summarizes the inputs that drive every recommendation. Each role has been individually researched and evaluated for fit.",
         s_intro_tight
     ))
 
@@ -607,7 +620,7 @@ def _scaled_image(path, target_w):
 
 
 def build_graph_page(story, overview_png):
-    """Full-page overview graph: all 5 roles on the fixed 9x3 grid.
+    """Full-page overview graph: the top GRAPH_ROLE_COUNT roles on the 9x3 grid.
 
     Placed after the client profile and before the first role entry, per the
     build spec — its own page, not folded into the profile.
@@ -617,8 +630,9 @@ def build_graph_page(story, overview_png):
     story.append(AccentLine(width=60, height=3))
     story.append(Spacer(1, 0.15 * inch))
     story.append(Paragraph(
-        "Each of the five roles below is plotted by the business function it sits in "
-        "and the level of seniority it operates at. Roles higher on the grid carry more "
+        f"Your top {GRAPH_ROLE_COUNT} roles are plotted below by the business function "
+        "they sit in and the level of seniority they operate at. Roles higher on the "
+        "grid carry more "
         "strategic scope; roles further along it sit in different parts of an "
         "organization. The numbers match the rankings used throughout this report.",
         s_intro_body
@@ -630,6 +644,9 @@ def build_graph_page(story, overview_png):
 
 def build_job_page(story, role, values, functions, compact_png):
     """v15: Build a single job role as 3 pages.
+
+    `compact_png` is None for roles past GRAPH_ROLE_COUNT; those render a
+    full-width header instead of the two-column header-plus-graph row.
 
     Page 1: Header + Salary + Function Alignment (Top 5 table + Additional table + coverage line)
     Page 2: Value Alignment
@@ -658,20 +675,35 @@ def build_job_page(story, role, values, functions, compact_png):
         Paragraph(title, s_page_title),
         Paragraph(f'Also known as: {alt_str}', s_page_subtitle),
     ]
-    graph_w = 2.8 * inch
-    header_tbl = Table(
-        [[header_left, _scaled_image(compact_png, graph_w)]],
-        colWidths=[CONTENT_W - 3.0 * inch, 3.0 * inch],
-    )
-    header_tbl.setStyle(TableStyle([
-        ("VALIGN", (0, 0), (0, 0), "TOP"),
-        ("VALIGN", (1, 0), (1, 0), "TOP"),
-        ("ALIGN", (1, 0), (1, 0), "RIGHT"),
-        ("LEFTPADDING", (0, 0), (-1, -1), 0),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-        ("TOPPADDING", (0, 0), (-1, -1), 0),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
-    ]))
+    if compact_png:
+        graph_w = 2.8 * inch
+        header_tbl = Table(
+            [[header_left, _scaled_image(compact_png, graph_w)]],
+            colWidths=[CONTENT_W - 3.0 * inch, 3.0 * inch],
+        )
+        header_tbl.setStyle(TableStyle([
+            ("VALIGN", (0, 0), (0, 0), "TOP"),
+            ("VALIGN", (1, 0), (1, 0), "TOP"),
+            ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+            ("LEFTPADDING", (0, 0), (-1, -1), 0),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+            ("TOPPADDING", (0, 0), (-1, -1), 0),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+        ]))
+    else:
+        # No graph for this role: collapse the header to full width rather than
+        # leaving an empty cell where the graph would sit, which reads as a
+        # rendering fault. Deliberately a separate branch — when Part 2 gives
+        # every role a graph the condition above is always true and the
+        # two-column path runs unchanged, with nothing to unwind here.
+        header_tbl = Table([[header_left]], colWidths=[CONTENT_W])
+        header_tbl.setStyle(TableStyle([
+            ("VALIGN", (0, 0), (0, 0), "TOP"),
+            ("LEFTPADDING", (0, 0), (-1, -1), 0),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+            ("TOPPADDING", (0, 0), (-1, -1), 0),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+        ]))
     story.append(header_tbl)
     story.append(Spacer(1, 6))
 
@@ -732,7 +764,7 @@ def build_job_page(story, role, values, functions, compact_png):
             "A function showing “—” above means it did not surface as a meaningful "
             "part of this specific role in the research reviewed — not that it is "
             "unimportant to you generally. Your top functions are weighted consistently "
-            "across all five roles; some naturally show up more in certain roles than others.",
+            "across every role in this report; some naturally show up more in certain roles than others.",
             note_style
         ))
     story.append(Spacer(1, 12))
@@ -963,6 +995,21 @@ def main():
 
     client = data["client"]
     roles = data["roles"]
+
+    # The report supports a variable role count, but only within a range it has
+    # actually been built and verified against. Outside it, fail before spending
+    # two build passes on a PDF that is wrong in a way nobody will notice —
+    # a short report reads as truncated, an over-long one as a data error.
+    # This bounds the number of ROLES only; it has nothing to do with the
+    # client's Top 5 functions/values, which are fixed by the report design.
+    if not MIN_ROLES <= len(roles) <= MAX_ROLES:
+        raise SystemExit(
+            f"Role count out of range: {len(roles)} role(s) in {json_path}.\n"
+            f"The report supports {MIN_ROLES}-{MAX_ROLES}. Fix the source data "
+            f"rather than widening this bound — pagination, the TOC page map and "
+            f"the graph cut-off have only been verified across that range."
+        )
+
     client_name = client["name"]
     first_name = client.get("first_name", client_name.split()[0])
     report_date = client["report_date"]
@@ -997,15 +1044,20 @@ def main():
 
     graph_dir = Path(tempfile.mkdtemp(prefix="cc_graphs_"))
     gg.ensure_fonts()
-    graph_roles = gg.load_graph(json_path)
+    # Graphs cover the top GRAPH_ROLE_COUNT roles only. Slicing here rather than
+    # inside graph_generator keeps the generator count-agnostic, so Part 2 is a
+    # change to this one list comprehension.
+    graph_roles = [r for r in gg.load_graph(json_path)
+                   if r["rank"] <= GRAPH_ROLE_COUNT]
     overview_png = str(graph_dir / "overview.png")
     gg.render(graph_roles, "overview", None, overview_png)
     compact_png = {}
-    for r in roles:
+    for r in graph_roles:
         p = str(graph_dir / f"compact_{r['rank']}.png")
         gg.render(graph_roles, "compact", r["rank"], p)
         compact_png[r["rank"]] = p
-    print(f"Graphs: overview + {len(compact_png)} compact -> {graph_dir}")
+    print(f"Graphs: overview + {len(compact_png)} compact "
+          f"(top {GRAPH_ROLE_COUNT} of {len(roles)} roles) -> {graph_dir}")
 
     # Two-pass build: first pass calculates page numbers, second pass writes final PDF
 
@@ -1016,12 +1068,15 @@ def main():
         story = []
         build_cover_page(story, client_name, report_date)
         build_toc_page(story, roles, job_page_map)
-        build_intro_page(story, client_name)
+        build_intro_page(story, client_name, len(roles))
         build_action_page(story)
         build_profile_page(story, client_name, values, functions, work_preferences)
         build_graph_page(story, overview_png)
         for role in roles:
-            build_job_page(story, role, values, functions, compact_png[role["rank"]])
+            # .get(), not [] — roles past GRAPH_ROLE_COUNT have no graph and
+            # build_job_page renders them with a full-width header.
+            build_job_page(story, role, values, functions,
+                           compact_png.get(role["rank"]))
         return story
 
     # Pass 1: build with placeholder page numbers to measure actual pages

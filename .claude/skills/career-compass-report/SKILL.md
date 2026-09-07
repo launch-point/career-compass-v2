@@ -141,6 +141,20 @@ Three modes:
 you only run these directly to preview placements before building. Regression
 fixture: `$SKILL/fixtures/regression_graph.json` (see its README for coverage).
 
+**Role count and the graph cut-off.** The report holds a variable number of
+roles, 5 to 10 (enforced by `MIN_ROLES`/`MAX_ROLES` in `report_template.py`,
+which exits rather than building outside that range). Graphs cover only the top
+`GRAPH_ROLE_COUNT` (currently 5): those roles get the two-column header with a
+compact graph, and they are the only roles plotted on the overview. Roles past
+the cut-off get a full role page — Function Alignment, Value Alignment,
+Day-to-Day, everything — with a full-width header and no graph.
+`graph_generator.py` is itself count-agnostic; the boundary is the slice in
+`main()`.
+
+Do not confuse this with the client's **Top 5 functions** and **Top 5 values**,
+which are fixed at 5 by the report design and have nothing to do with how many
+roles the report contains.
+
 ### 5. Build
 
 ```bash
