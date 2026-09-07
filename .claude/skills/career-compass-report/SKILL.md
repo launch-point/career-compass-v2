@@ -109,10 +109,12 @@ heading exactly as it appears in the markdown:
 }
 ```
 
-- `function` — one of the 9 fixed business functions (Product, Marketing, Sales,
-  Customer Experience, Operations, Human Resources, Finance and Accounting,
-  Legal, Communications). **Your judgment call.** Walk Todd through the reasoning
-  per role before generating.
+- `function` — one of the 10 fixed business functions (Executive Leadership,
+  Product, Marketing, Sales, Customer Experience, Operations, Human Resources,
+  Finance and Accounting, Legal, Communications). **Your judgment call.** Walk
+  Todd through the reasoning per role before generating. Executive Leadership is
+  the leftmost column and covers general-management roles — an Executive
+  Director or GM belongs there, not under Communications or Operations.
 - `seniority` — Specialist / Integrator / Strategist. See the mapping rule below.
 - `low` / `avg` / `high` — integers. The source states prose ranges.
 - `seniority_note` — visible page text; empty string when the role needs none.

@@ -2,7 +2,7 @@
 """
 Career Compass v2 — Function/Seniority Graph Generator (standalone).
 
-Renders the fixed 9x3 grid (9 business functions x 3 seniority bands) with the
+Renders the fixed 10x3 grid (10 business functions x 3 seniority bands) with the
 client's 5 roles plotted as numbered dots. Two modes:
 
   overview : all 5 dots, colored by rank, + a legend (number -> full title).
@@ -34,19 +34,21 @@ from matplotlib.patches import Rectangle
 
 # ─── Fixed axes (never dynamic) ──────────────────────────────────────────────
 FUNCTIONS = [
-    "Product", "Marketing", "Sales", "Customer Experience", "Operations",
-    "Human Resources", "Finance and Accounting", "Legal", "Communications",
+    "Executive Leadership", "Product", "Marketing", "Sales",
+    "Customer Experience", "Operations", "Human Resources",
+    "Finance and Accounting", "Legal", "Communications",
 ]
 SENIORITY = ["Specialist", "Integrator", "Strategist"]  # y=0 bottom -> y=2 top
 
 # Labels for the compact (in-PDF, top-right of a role page) variant. Full words
-# everywhere they fit; the two longest wrap to two lines. "Ops" and "HR" stay
-# abbreviated because they are already short and unambiguous. Horizontal text
-# cannot work here — "Communications" needs ~2.5pt to sit inside an 18pt column —
-# so these are rotated 40°, which trades vertical space for horizontal room.
+# everywhere they fit; the two longest wrap to two lines. "Exec Leader", "Ops",
+# "HR" and "Comms" are abbreviated because they are short and unambiguous.
+# Horizontal text cannot work here — "Communications" needs ~2.5pt to sit inside
+# a ~16pt column — so these are rotated 40°, which trades vertical space for
+# horizontal room.
 FUNCTIONS_COMPACT = [
-    "Product", "Marketing", "Sales", "Customer\nExperience", "Ops", "HR",
-    "Finance and\nAccounting", "Legal", "Comms",
+    "Exec Leader", "Product", "Marketing", "Sales", "Customer\nExperience",
+    "Ops", "HR", "Finance and\nAccounting", "Legal", "Comms",
 ]
 
 # Display labels for the full-size (overview / role) graphs. Horizontal and
@@ -55,8 +57,9 @@ FUNCTIONS_COMPACT = [
 # validated against and must stay verbatim — only the rendered label is
 # shortened here ("Finance and Accounting" -> "Finance").
 FUNCTIONS_DISPLAY = [
-    "Product", "Marketing", "Sales", "Customer\nExperience", "Operations",
-    "Human\nResources", "Finance", "Legal", "Communications",
+    "Executive\nLeadership", "Product", "Marketing", "Sales",
+    "Customer\nExperience", "Operations", "Human\nResources", "Finance",
+    "Legal", "Communications",
 ]
 
 # ─── Brand ───────────────────────────────────────────────────────────────────
@@ -165,7 +168,7 @@ def load_graph(path):
     errors = []
     for r in data:
         if r.get("function") not in FUNCTIONS:
-            errors.append(f"  rank {r.get('rank')}: function {r.get('function')!r} is not one of the 9 fixed functions")
+            errors.append(f"  rank {r.get('rank')}: function {r.get('function')!r} is not one of the 10 fixed functions")
         if r.get("seniority_level") not in SENIORITY:
             errors.append(f"  rank {r.get('rank')}: seniority_level {r.get('seniority_level')!r} is not Specialist/Integrator/Strategist")
     if errors:

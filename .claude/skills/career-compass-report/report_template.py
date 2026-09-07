@@ -621,7 +621,7 @@ def _scaled_image(path, target_w):
 
 
 def build_graph_page(story, overview_png):
-    """Full-page overview graph: every plotted role on the fixed 9x3 grid.
+    """Full-page overview graph: every plotted role on the fixed 10x3 grid.
 
     Placed after the client profile and before the first role entry, per the
     build spec — its own page, not folded into the profile.

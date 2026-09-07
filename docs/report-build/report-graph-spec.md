@@ -13,9 +13,18 @@
 > only** — roles past that cut-off get a full role page with a full-width header
 > and no graph. The graph specification itself is unchanged.
 >
+> **Also superseded — the x-axis.** Sections 5 and 6 specify **9 fixed business
+> functions** and a **9x3 grid**. A tenth, **Executive Leadership**, was added as
+> the leftmost column on 2026-09-07, so the grid is now **10x3**. It exists
+> because general-management roles — Executive Director, General Manager, Chief
+> of Staff — had no honest home and were landing under Communications or
+> Operations. The order is otherwise unchanged and the axis remains fixed, not
+> per-client.
+>
 > Current behaviour is documented in the `career-compass-report` `SKILL.md`
-> ("Role count and the graph cut-off") and enforced by `GRAPH_ROLE_COUNT`,
-> `MIN_ROLES` and `MAX_ROLES` in `report_template.py`. Read those, not this
+> ("Role count and graphs", and the `function` field notes) and enforced by
+> `GRAPH_ROLE_COUNT`, `MIN_ROLES` and `MAX_ROLES` in `report_template.py`, with
+> the axis itself in `graph_generator.py`'s `FUNCTIONS`. Read those, not this
 > document, for how the build works today.
 
 ---

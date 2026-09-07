@@ -4,7 +4,7 @@
 `graph_generator.py` that have actually broken:
 
 - **All three seniority bands** used (Specialist / Integrator / Strategist).
-- **Four of the nine functions** used, spread across the x-axis including the
+- **Four of the ten functions** used, spread across the x-axis including the
   last column (Communications), which catches right-edge clipping.
 - **A collision cell**: ranks 1 and 4 both sit at Human Resources / Strategist,
   exercising the horizontal-offset logic in `_positions()`.

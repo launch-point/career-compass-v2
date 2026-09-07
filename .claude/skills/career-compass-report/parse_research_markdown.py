@@ -8,7 +8,7 @@ Why This Fits You value narratives, and the three Day-to-Day sections.
 Two things the markdown does NOT state have to be supplied in a judgment file,
 because they are decisions rather than findings:
 
-  * `function`        which of the 9 fixed business functions the role sits in
+  * `function`        which of the 10 fixed business functions the role sits in
   * `seniority_level` Specialist / Integrator / Strategist (the graph's y-axis;
                       a different scale from the source's Director/Manager/IC
                       eligibility tiers, so the mapping is a judgment call)
