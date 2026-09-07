@@ -37,14 +37,14 @@ Keep this file short. If it's getting long, that usually means something belongs
 - **No upskilling-tolerance question in intake.** Replaced by a flat downstream rule: any role requiring more than 3 months of upskilling is excluded at the validation stage. (Sept 2026)
 - **No job-history screen.** The four Career Highlight Stories capture last-15-years signal narratively. Current job title is a single text field. (Sept 2026)
 - **Google Drive upload + Mission Control linking deferred to Phase 4.** Do not design or build it during phases 1–3. Interim requirement: every phase writes output tied to the stable client ID in a predictable, loggable way so phase 4 wires existing IDs together rather than retrofitting. (Sept 2026)
-
----
 - **Compact-mode axis-label crowding: left as-is, not reworked.** It is real and
   geometric (see Technical Notes), but at the size the graph is actually placed in the
   PDF every label reads cleanly. The available fixes — shorter abbreviations or less
   label rotation — both change the compact slot's geometry, which the PDF layout depends
   on through the pinned `COMPACT_W`. Not worth destabilising a proven layout for a
   cosmetic gain. (Sept 7 2026)
+
+---
 
 ## Open Questions
 
@@ -61,8 +61,6 @@ Keep this file short. If it's getting long, that usually means something belongs
 
 - **A fresh clone has no venv and no `reports/` — both gitignored by design.** `.claude/skills/career-compass-report/.venv/` and `reports/` are both in `.gitignore`, so any new clone gets the report skill's scripts (`SKILL.md`, the three `.py` files, `assets/`, `fixtures/`) but no Python interpreter and no client artifacts — no research markdown, judgment file, generated JSON, or PDF. Verified directly on a fresh remote clone, Sept 5 2026. **Practical rule: use a remote/cloud session to inspect or structurally verify the pipeline; run the real client build locally — never treat a remote-session PDF as client-deliverable.** The venv gap is only setup friction (build it per SKILL.md's pins and it's gone) — confirmed today. Remote output is non-deliverable because the environment's egress policy blocks the brand-font host (`github.com/google/fonts` → 403 → silent DejaVu fallback; SKILL.md Known Gaps). This has now been independently confirmed in two separate remote sessions (Sept 4 and Sept 5, 2026), both hitting the identical block — treat this as settled, reliable behavior of running this pipeline remotely, not a fragile one-off. If a future environment's policy changes, that would need to be re-verified before this guidance is revised — until then, local build is required for anything client-facing. (Sept 5 2026)
 - **matplotlib: `scatter(..., transform=ax.transAxes)` still autoscales the axes' *data* limits from the raw offset values.** It does not "opt out" of data space the way it looks like it should. Consequence: on an `axis("off")` legend axes, those scatter calls silently collapsed the data limits to `(-0.055, 0.055)`, and a sibling `text()` left in data coords at `y=1.0` was flung to figure-fraction y=3.07 — three figure-heights above the canvas. `bbox_inches="tight"` then grew the saved PNG to ~20in tall to contain it. **Rule: on any axes used purely for layout, pin `set_xlim(0,1)`/`set_ylim(0,1)` and give *every* artist an explicit `transform=`. Mixing coordinate systems on one axes is the trap.** Cost a full diagnostic cycle in the Phase 2 graph generator; regression fixture at `.claude/skills/career-compass-report/fixtures/`. (Sept 4 2026)
-
----
 - **Graph dimensions drift for layout reasons, not font reasons — don't blame the font
   fallback.** Measured on Todd's Mac with real DM Sans/Inter present: role mode renders
   2541×1095, DejaVu fallback 2554×1097. Fonts account for ~13px of width and 2px of
@@ -83,6 +81,8 @@ Keep this file short. If it's getting long, that usually means something belongs
   rendering page 7 of Austin's delivered PDF at 300dpi shows every label reading cleanly.
   If this is ever re-measured, check the rendered artifact, not just the bboxes.
   (Sept 7 2026)
+
+---
 
 ## Corrections Log
 
