@@ -259,6 +259,161 @@ not drafted before the session ended.
 
 ---
 
+## Session 3 — 2026-09-05 — Environment check only (no build work)
+
+**Raw observations. Not authoritative — for the next 5-session review.**
+
+Short session. No code written, no pipeline run. Todd asked what branch the
+session was on, whether the report skill was present, and what state the
+pipeline was in on a fresh remote clone.
+
+**Findings (all verified directly this session):**
+
+- Branch: `phase-2-report`, as designated.
+- `.claude/skills/career-compass-report/SKILL.md` present (13,298 bytes),
+  alongside `assets/`, `fixtures/`, and the three `.py` files. Recognized as an
+  available skill in the session's skill list.
+- **No `.venv`** at `.claude/skills/career-compass-report/.venv` — gitignored,
+  so absent from a fresh clone. Every pipeline command would fail until built.
+- **No `reports/` directory at all** — also gitignored. A repo-wide search for
+  `*research*`, `*Scheiwe*`, `*judgment*`, `*report_data*`, `*.pdf` returned
+  exactly one hit: `parse_research_markdown.py`, matched on its own filename.
+  No client artifacts of any kind travel with the clone.
+
+**Decisions made:**
+
+- Do not set up the pipeline in this remote session. Todd's call: since remote
+  graphs fall back to DejaVu and aren't client-deliverable, there is no benefit
+  to building the venv here. Real run happens locally on his Mac when an actual
+  research file exists.
+- The fresh-clone fact was promoted to `MEMORY.md` (Technical Notes & Gotchas)
+  at Todd's explicit direction — the "log that" path, not the review cycle.
+
+**Worth watching:**
+
+- Todd's framing when directing the entry was that non-deliverability from
+  remote is "a property of the repo's design ... regardless of which specific
+  remote environment it is." The MEMORY.md entry as written splits that: the
+  gitignore design causes the missing venv/artifacts (setup friction only),
+  while non-deliverability traces to the environment's font egress policy per
+  SKILL.md's Known Gaps. Flagged to Todd rather than logged as dictated. If he
+  reaffirms the stronger, environment-independent reading, the entry should be
+  strengthened to match.
+
+---
+
+## Session 3 (continued) — 2026-09-05 — Pipeline smoke-test on a fresh remote clone
+
+*Same session, later. The entry above closed with "do not set up the pipeline
+in this remote session." Todd then redirected: set up the venv and run the
+regression fixture, explicitly scoped as a structural check rather than a real
+build. That supersedes the earlier decision — it does not contradict its
+reasoning, since nothing client-deliverable was attempted. Earlier entry left
+as-written (append-only).*
+
+**Raw observations. Not authoritative — for the next 5-session review.**
+
+Scope was deliberately narrow: confirm the report pipeline is structurally
+intact on `phase-2-report`. No real client build attempted — the remote-session
+font block makes anything rendered here non-deliverable.
+
+### Refined observation — `role` mode dimensions (narrows an existing Known Gap)
+
+SKILL.md's Known Gaps currently attributes the `role`-mode size discrepancy to
+"most likely DejaVu's metrics shifting the `bbox_inches='tight'` crop." This
+session's measurements make that hypothesis look incomplete.
+
+Rendered from `fixtures/regression_graph.json`, under the DejaVu fallback:
+
+| Mode | Documented | Actual | Delta |
+|---|---|---|---|
+| overview | 2541x1856 | 2554x1856 | width +13, **height exact** |
+| role | 2541x1280 | 2554x1097 | width +13, **height −183** |
+
+The point: **width drifted uniformly (+13px) across both modes, but height
+drifted in `role` mode only** — overview's height matched the documented figure
+exactly. If wider DejaVu glyph metrics were expanding the tight-crop, the
+distortion would be expected in both modes, not just one. A uniform width shift
+with a mode-specific height collapse looks more like something in `role` mode's
+own layout than like a global font-metric effect.
+
+Also worth noting: the drift is *negative* in height. Wider fallback labels
+would plausibly make a tight-crop taller, not 183px shorter.
+
+**Not a confirmed defect.** `role` mode is preview-only and never embedded in
+the PDF, so nothing client-facing depends on it. But when the pipeline is next
+run locally with real DM Sans/Inter, check this specifically: if width snaps
+back to 2541 and `role` height stays at 1097, the cause is not fonts and the
+documented 1280 figure is wrong or `role` mode's layout regressed. If both
+dimensions land on 2541x1280, the font hypothesis is confirmed and this entry
+can be struck.
+
+### `compact` mode label crowding — check locally
+
+At 5.8pt under the DejaVu fallback, the wrapped x-axis labels in `compact` mode
+("Customer Experience", "Finance and Accounting") crowd their neighbours — the
+second line of a wrapped label sits close enough to the adjacent label to read
+as collision on screen. `compact` **is** the mode embedded in the PDF, so unlike
+the `role` dimension question this one could affect a client-facing page.
+
+Unresolvable here: DejaVu is wider than Inter, so this may vanish entirely with
+real fonts. Flagging for a local look rather than proposing a fix — changing
+label layout to solve a problem that only exists under the fallback would be
+fixing the wrong thing.
+
+### Session-2 "pending edits" are stale — both landed
+
+Session 2's entry records two approved SKILL.md edits that "never reached disk"
+after repeated permission-prompt rejections. Both are present in the file now,
+verified by grep: `## Setup (first run on a machine)` with the pinned install at
+line 23, and `role`-mode documentation at line 134. They were committed in
+`e8abc7a` and `e56710b`, both *after* `b2367bf` (the session-2 log capture) —
+so they were applied later in that same session and the log entry was simply
+never updated. Left as-written above per append-only.
+
+Consequence: the fresh-clone problem that entry describes is resolved. Setup ran
+cleanly today straight from SKILL.md.
+
+### What ran clean
+
+- Venv created; all four pins resolved and installed (`reportlab 5.0.1`,
+  `pdfplumber 0.11.8`, `matplotlib 3.9.4`, `pillow 11.3.0`, plus `fonttools
+  4.64.0` as a matplotlib dependency). The reportlab-5.0.1 drift risk flagged in
+  SKILL.md did not materialise.
+- All three graph modes rendered, exit 0.
+- All five fixture placements matched the JSON exactly; legend numbering and
+  titles correct.
+- The Sept-2026 overview layout bug did **not** recur — "ROLES" heading sits
+  correctly beneath the grid, overview is 6.19in tall, not ~20in.
+- Collision cell works (ranks 1 and 4 offset side-by-side at HR/Strategist);
+  right-edge column (Communications) renders without clipping.
+
+### Environment deviation worth watching
+
+The pipeline ran on **Python 3.11.15**, not the 3.9 the pins are documented as
+verified against. Everything installed and executed, but the documented baseline
+and the actual runtime no longer match. If a future run produces odd
+`reportlab`/`matplotlib` behaviour, interpreter version is a candidate cause
+before anything in the code.
+
+### Not verified this session
+
+The entire PDF half: `report_template.py` and `parse_research_markdown.py` never
+ran. Two-pass pagination, TOC page-number accuracy, `[cite:N]` stripping, and
+the conditional elements (methodology note, `seniority_note`) all remain
+unverified. Requires a research markdown plus a judgment file, neither of which
+exists in this repo.
+
+### Note on capture path
+
+The session-capture skill's Mechanism B routes "log that" straight to
+`MEMORY.md`. Todd explicitly directed these to `SESSION_LOG.md` instead, which
+matches the content: these are unconfirmed observations, and MEMORY.md's own
+rule is that nothing lands there on Claude Code's inference alone. Followed
+Todd's instruction over the skill default.
+
+---
+
 ## Correction note — 2026-09-07 (re: Session 2, above)
 
 *Appended, not a rewrite. The Session 2 entry stands as written; this points at
