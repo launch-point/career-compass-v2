@@ -1,6 +1,6 @@
 # Career Compass v2 — MEMORY.md
 
-*Last updated: [date of first session]*
+*Last updated: Sept 7, 2026*
 
 This file holds **confirmed** facts, decisions, and gotchas. It is authoritative — read at the start of every session and treated as settled.
 
@@ -16,12 +16,14 @@ Keep this file short. If it's getting long, that usually means something belongs
 
 ## Current Status
 
-**Phase:** 2 — Report PDF template (in progress)
+**Phase:** 2 — Report PDF template (**complete and proven**)
 **State:**
 - **Phase 1 (intake form + minimal admin view): built and deployed.** Live in production at `career.ministrytomarketplace.co`. Supabase-verified (writes and RLS confirmed against the live project).
-- **Phase 2 (report build): in progress** on branch `phase-2-report`. Report skill scaffolding and the standalone graph generator are committed but not yet verified.
+- **Phase 2 (report build): built, verified, and reviewed.** The full pipeline — Stage-2 research markdown → `parse_research_markdown.py` → `graph_generator.py` → `report_template.py` → branded PDF — has produced a real client report end to end: **Austin Scheiwe, 26 pages.** Independently verified against actual page content, and personally reviewed by Todd. The `career-compass-report` skill has additionally been cold-session verified multiple times across different environments. Phase 2 is not "unverified work" — treat it as proven.
 
-*(Status confirmed by Todd, Sept 4 2026.)*
+**Do not mistake gitignore for absence.** The Austin Scheiwe report and all generated client artifacts live in `reports/scheiwe/`, and `reports/` is gitignored. They are absent from git and from any fresh clone, but they are real and present on Todd's Mac. A future session that cannot see them in git must not conclude the work was never done — check the filesystem.
+
+*(Phase 1 status confirmed by Todd Sept 4 2026. Phase 2 completion confirmed by Todd Sept 7 2026; 26-page count and embedded DM Sans/Inter independently re-confirmed from the PDF that same day.)*
 
 ---
 
@@ -37,6 +39,12 @@ Keep this file short. If it's getting long, that usually means something belongs
 - **Google Drive upload + Mission Control linking deferred to Phase 4.** Do not design or build it during phases 1–3. Interim requirement: every phase writes output tied to the stable client ID in a predictable, loggable way so phase 4 wires existing IDs together rather than retrofitting. (Sept 2026)
 
 ---
+- **Compact-mode axis-label crowding: left as-is, not reworked.** It is real and
+  geometric (see Technical Notes), but at the size the graph is actually placed in the
+  PDF every label reads cleanly. The available fixes — shorter abbreviations or less
+  label rotation — both change the compact slot's geometry, which the PDF layout depends
+  on through the pinned `COMPACT_W`. Not worth destabilising a proven layout for a
+  cosmetic gain. (Sept 7 2026)
 
 ## Open Questions
 
@@ -54,12 +62,47 @@ Keep this file short. If it's getting long, that usually means something belongs
 - **matplotlib: `scatter(..., transform=ax.transAxes)` still autoscales the axes' *data* limits from the raw offset values.** It does not "opt out" of data space the way it looks like it should. Consequence: on an `axis("off")` legend axes, those scatter calls silently collapsed the data limits to `(-0.055, 0.055)`, and a sibling `text()` left in data coords at `y=1.0` was flung to figure-fraction y=3.07 — three figure-heights above the canvas. `bbox_inches="tight"` then grew the saved PNG to ~20in tall to contain it. **Rule: on any axes used purely for layout, pin `set_xlim(0,1)`/`set_ylim(0,1)` and give *every* artist an explicit `transform=`. Mixing coordinate systems on one axes is the trap.** Cost a full diagnostic cycle in the Phase 2 graph generator; regression fixture at `.claude/skills/career-compass-report/fixtures/`. (Sept 4 2026)
 
 ---
+- **Graph dimensions drift for layout reasons, not font reasons — don't blame the font
+  fallback.** Measured on Todd's Mac with real DM Sans/Inter present: role mode renders
+  2541×1095, DejaVu fallback 2554×1097. Fonts account for ~13px of width and 2px of
+  height — nothing. SKILL.md's long-standing `2541x1280` came from rendering the
+  generator as it stood *before* commit `93e00f3`, which switched axis labels from
+  rotated to horizontal-wrapped and shortened the `bbox_inches="tight"` crop;
+  `figsize` has never changed in any commit. Role and overview modes are tight-cropped,
+  so their pixel dimensions are a *consequence* of label layout and will drift again.
+  Document them as approximate. Compact mode is the exception — pinned figsize, no tight
+  bbox, reliably 840×570. (Sept 7 2026)
+- **Compact-mode label crowding is geometric, not font-related.** Identical four
+  overlapping tick-label pairs under both real fonts and DejaVu (Product/Marketing,
+  Sales/Customer-Experience, HR/Finance-and-Accounting, Legal/Comms); magnitudes differ
+  only slightly. Mechanism: at `rotation=40` a wrapped label's second line offsets
+  down-and-left and tucks under the previous column's label, so only the two two-line
+  labels are affected. **Caveat on the measurement:** those overlap figures are
+  axis-aligned boxes around rotated text, so they badly overstate real glyph collision —
+  rendering page 7 of Austin's delivered PDF at 300dpi shows every label reading cleanly.
+  If this is ever re-measured, check the rendered artifact, not just the bboxes.
+  (Sept 7 2026)
 
 ## Corrections Log
 
 *When Todd corrects something, capture it here so the same mistake doesn't repeat. Include what was wrong and what the right behavior is.*
 
-- (empty — add as they occur)
+- **Never conclude "absent" from a truncated command.** Ran `ls -R reports | head -40`;
+  the pipe cut the output at exactly the `reports/scheiwe:` line, so the directory read as
+  empty and Austin's finished 26-page report was reported to Todd as missing/unbuilt. All
+  17 files were there the whole time. Before reporting anything missing, confirm with a
+  targeted check — `ls` the specific directory, or `find` with a name filter — never a
+  head/tail-truncated listing. A truncated command manufactures false negatives.
+  (Sept 7 2026)
+- **Gitignored does not mean unreadable.** `reports/` is gitignored, which hides it from
+  git and from a fresh clone — but not from the filesystem tools. Generated client
+  artifacts can and should be verified directly on disk. (Sept 7 2026)
+- **SESSION_LOG's session-2 "two approved SKILL.md edits never applied" entry is stale —
+  both edits did land.** SKILL.md's mtime was Sept 4 17:34, after the 17:04 log entry;
+  `## Setup`, `python3 -m venv`, `reportlab==`, `DejaVu Sans` and the role-mode docs are
+  all present in the file. Do not re-apply them. General lesson: SESSION_LOG entries
+  capture a moment mid-session and can be overtaken by later work in that same session —
+  check the file before acting on a logged "verified absent". (Sept 7 2026)
 
 ---
 

@@ -131,7 +131,8 @@ Three modes:
   page in the report, after the client profile and before the first role.
 - **`compact`** — one role highlighted, the rest greyed, sized for the slot
   beside a role page's header. This is the mode the PDF embeds per role.
-- **`role`** — the same content as `compact` but rendered large (2541x1280) with
+- **`role`** — the same content as `compact` but rendered large
+  (≈2541×1095 — tight-cropped; height varies with axis-label layout) with
   full-length axis labels. **Not used in the PDF.** Use it to preview or
   sanity-check a single role's placement at readable size, where compact's
   5.8pt labels are hard to judge on screen.
