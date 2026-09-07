@@ -43,6 +43,14 @@ Keep this file short. If it's getting long, that usually means something belongs
   label rotation — both change the compact slot's geometry, which the PDF layout depends
   on through the pinned `COMPACT_W`. Not worth destabilising a proven layout for a
   cosmetic gain. (Sept 7 2026)
+- **Rating UI for functions Phase 2: paginated, not one long scroll.** Chunks of 8 per
+  screen with a section-level progress rail. Shipped in Phase 1 as `PAGE_SIZE = 8` in
+  `FunctionScreens.tsx` — the log recorded the intent as "~8–10", the build settled on 8.
+  (Decided Sept 1 2026; confirmed and promoted Sept 7 2026)
+- **Salary is a structured integer, not open text.** `salaryMin: number | null`, with
+  `salaryPeriod` fixed to `'annual'` (USD) as the only period offered. Stored as an
+  integer and formatted for display only. Shipped in Phase 1.
+  (Decided Sept 1 2026; confirmed and promoted Sept 7 2026)
 
 ---
 
@@ -50,8 +58,7 @@ Keep this file short. If it's getting long, that usually means something belongs
 
 *Things that need Todd's input before they can be resolved. Remove once answered — move the answer to Decisions.*
 
-- Rating UI pattern for functions Phase 2 (one long scroll vs. paginated) — propose to Todd, don't decide unilaterally
-- Salary field: keep as open text or convert to structured number input?
+- (none open)
 
 ---
 
