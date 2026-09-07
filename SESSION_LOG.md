@@ -256,3 +256,35 @@ not drafted before the session ended.
   session (merged/split Day-to-Day sections, `[cite:N]` markers appearing,
   "Confirmed" → "Proposed" seniority). Diffing revisions caught changes the
   document's own revision note did not mention.
+
+---
+
+## Correction note — 2026-09-07 (re: Session 2, above)
+
+*Appended, not a rewrite. The Session 2 entry stands as written; this points at
+what was later found to be stale in it.*
+
+Two claims in the Session 2 block are now known to be wrong. Both are resolved
+in `MEMORY.md` — read it, not the block above, on these points:
+
+1. **"Two approved edits were never applied … Verified absent."** Stale. Both
+   edits *did* land. `SKILL.md` was written at 17:34, after that 17:04
+   observation, and `## Setup`, `python3 -m venv`, `reportlab==`, `DejaVu Sans`
+   and the role-mode documentation are all present in the file. **Do not
+   re-apply them.** The general lesson — a SESSION_LOG entry captures a moment
+   mid-session and can be overtaken by later work in that same session, so check
+   the file before acting on a logged "verified absent" — is in MEMORY.md's
+   Corrections Log.
+
+2. **Role mode documented as `2541x1280`.** Wrong number, and not a font-fallback
+   artifact as was suspected. It was a measurement taken before commit `93e00f3`
+   switched axis labels from rotated to horizontal-wrapped. Real value with
+   DM Sans/Inter is 2541×1095; the DejaVu fallback gives 2554×1097, so fonts
+   account for ~13px. Corrected in `SKILL.md` on 2026-09-07 to an approximate
+   figure, since these modes are tight-cropped and will drift again. Detail in
+   MEMORY.md's Technical Notes & Gotchas.
+
+Also settled 2026-09-07: the compact-mode label crowding flagged around the
+graph work is real and geometric, not font-related — but cosmetically negligible
+at the size the graph is actually placed in the PDF. Todd's call: leave as-is.
+See MEMORY.md's Decisions Made.
