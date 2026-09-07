@@ -93,13 +93,14 @@ MARGIN_B = 0.85 * inch
 
 CONTENT_W = PAGE_W - MARGIN_L - MARGIN_R
 
-# How many roles carry graphs. The report itself holds a variable number of
-# roles (5-10); roles past this cut-off get a full role page with a full-width
-# header and no graph. This constant and the slice in main() are the only two
-# places the boundary lives — Part 2 raises it to cover every role.
+# How many roles carry graphs. Now equal to MAX_ROLES, so every role in the
+# report gets a compact graph and appears on the overview. The full-width header
+# branch in build_job_page is therefore no longer exercised — it is kept
+# deliberately, so lowering this constant again is a value change rather than a
+# restructure.
 # NOTE: unrelated to the client's Top 5 *functions* and Top 5 *values*, which
 # are fixed at 5 by the report design and must not be driven from here.
-GRAPH_ROLE_COUNT = 5
+GRAPH_ROLE_COUNT = 10
 
 # Supported role count for the report as a whole. Verified at 5, 7 and 10.
 MIN_ROLES = 5
@@ -620,7 +621,7 @@ def _scaled_image(path, target_w):
 
 
 def build_graph_page(story, overview_png):
-    """Full-page overview graph: the top GRAPH_ROLE_COUNT roles on the 9x3 grid.
+    """Full-page overview graph: every plotted role on the fixed 9x3 grid.
 
     Placed after the client profile and before the first role entry, per the
     build spec — its own page, not folded into the profile.
@@ -630,7 +631,7 @@ def build_graph_page(story, overview_png):
     story.append(AccentLine(width=60, height=3))
     story.append(Spacer(1, 0.15 * inch))
     story.append(Paragraph(
-        f"Your top {GRAPH_ROLE_COUNT} roles are plotted below by the business function "
+        "Your roles are plotted below by the business function "
         "they sit in and the level of seniority they operate at. Roles higher on the "
         "grid carry more "
         "strategic scope; roles further along it sit in different parts of an "

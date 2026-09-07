@@ -141,15 +141,23 @@ Three modes:
 you only run these directly to preview placements before building. Regression
 fixture: `$SKILL/fixtures/regression_graph.json` (see its README for coverage).
 
-**Role count and the graph cut-off.** The report holds a variable number of
-roles, 5 to 10 (enforced by `MIN_ROLES`/`MAX_ROLES` in `report_template.py`,
-which exits rather than building outside that range). Graphs cover only the top
-`GRAPH_ROLE_COUNT` (currently 5): those roles get the two-column header with a
-compact graph, and they are the only roles plotted on the overview. Roles past
-the cut-off get a full role page — Function Alignment, Value Alignment,
-Day-to-Day, everything — with a full-width header and no graph.
-`graph_generator.py` is itself count-agnostic; the boundary is the slice in
-`main()`.
+**Role count and graphs.** The report holds a variable number of roles, 5 to 10
+(enforced by `MIN_ROLES`/`MAX_ROLES` in `report_template.py`, which exits rather
+than building outside that range). **Every role gets a graph:** a compact graph
+in its two-column page header, and a dot plus legend row on the overview.
+`GRAPH_ROLE_COUNT` is now 10 — equal to `MAX_ROLES` — so the slice in `main()`
+never actually drops a role.
+
+The constant and the full-width header branch in `build_job_page` are both kept
+on purpose. Lowering `GRAPH_ROLE_COUNT` again limits graphs to the top N and
+gives roles past the cut-off a full-width, graph-less header, with no other
+change needed. `graph_generator.py` is itself count-agnostic; the boundary lives
+only in that slice.
+
+At 10 roles the overview legend grows the image (504x456pt placed, against
+504x368 at 5) and still fits the graph page with room to spare. Up to four dots
+can share one grid cell; they overlap but stay in-cell and the numbers remain
+legible — a known, accepted cosmetic limit, not a defect to fix.
 
 Do not confuse this with the client's **Top 5 functions** and **Top 5 values**,
 which are fixed at 5 by the report design and have nothing to do with how many
