@@ -90,6 +90,46 @@ requirements. Coverage totals are summed, not transcribed.
 
 **Never derived** — see the judgment file below.
 
+#### Template v2.3 and the parser contract
+
+The parser targets the **v2.3** research template and tolerates v1 documents'
+heading names. What v2.3 changed, all of which broke the previous parser:
+
+| v1 | v2.3 |
+|---|---|
+| heading, then `Alternate titles:` | `Rank: N` sits between them |
+| profile lists bulleted (`- item`) | numbered (`1. item`) |
+| `STANDARD INTAKE:` | `WORK PREFERENCES:`, keys renamed |
+| `### Technical Requirements & Upskilling` | `### Technical Requirements` |
+| `### Travel, Schedule & Office Findings` | `### Travel` |
+| `- Function: ~20% — description` | `- Function: ~20%` (no description) |
+| `**Bias self-check:**` present | removed |
+
+Both list styles and both heading-name styles parse. Role **rank comes from the
+`Rank:` field**, never from position — enumeration renumbers silently when a
+role is dropped, which hides the very defect worth catching.
+
+The parser **parses permissively, validates strictly, reports loudly**. Sections
+are classified as roles by content (>=3 role markers), never by heading name, so
+renaming "Mapping Revision Notes" to "Appendix" changes nothing. Any FAIL
+refuses to write JSON and exits 1 — an empty role list is never a valid parse.
+Run `$SKILL/fixtures/drift_suite.py <research.md> <judgment.json>` after any
+parser change; it covers dropped/duplicate ranks, dropped and reordered values,
+an omitted top function, heading-case and field-order drift, and a v1 document.
+
+**`TEMPLATE_GAP_NO_DESCRIPTION` is a template gap, not a parser bug.** v2.3
+dropped the `— description` tail from Functional Mix bullets, so the report's
+"How It Shows Up in This Role" column renders **blank**. That is deliberate: the
+descriptions were real content in the delivered v1 report and need restoring in
+the research format, not synthesizing at parse time. Do not "fix" this in the
+parser — the previous version turned an empty tail into the string `"."` and
+rendered a bare period in every row. Raise it as a template change.
+
+One validation limit worth knowing: a dropped **last** role is undetectable from
+rank alone, because ranks 1..N-1 in an (N-1)-role document is exactly what a
+legitimate shorter document looks like. Catching that needs an expected count
+from outside the document.
+
 ### 3. Judgment file
 
 Per-client, supplied by you and Todd together, **gitignored** (keep it beside the
