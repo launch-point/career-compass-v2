@@ -88,6 +88,18 @@ Keep this file short. If it's getting long, that usually means something belongs
   rendering page 7 of Austin's delivered PDF at 300dpi shows every label reading cleanly.
   If this is ever re-measured, check the rendered artifact, not just the bboxes.
   (Sept 7 2026)
+- **In a line-anchored regex, `\s` crosses newlines and lets one match swallow the
+  next line.** `\s` includes `\n`, so under `re.M` a pattern like
+  `^[-*]\s*(.+?):\s*(\d+)%\s*(?:—\s*(.*))?$` does not stop at its own line end:
+  the `\s*` before the optional group eats the newline, `—`/`-` matches the *next*
+  bullet's marker, and that whole line is captured as this line's description.
+  Consequence in the v2.3 parser: every second Functional Mix bullet was consumed,
+  five listed top functions parsed as three, and the validator reported
+  TOP_FUNCTION_ABSENT against a document that was correct. **Rule: use `[ \t]` for
+  intra-line whitespace and `[^\n]` for intra-line content in any `re.M` pattern;
+  reserve `\s` for where a newline is genuinely wanted.** Same family as the
+  matplotlib `transAxes` entry above — invisible, plausible-looking, and easy to
+  reintroduce. (Sept 7 2026)
 
 ---
 
@@ -105,6 +117,15 @@ Keep this file short. If it's getting long, that usually means something belongs
 - **Gitignored does not mean unreadable.** `reports/` is gitignored, which hides it from
   git and from a fresh clone — but not from the filesystem tools. Generated client
   artifacts can and should be verified directly on disk. (Sept 7 2026)
+- **When a verification run fails, suspect the test before the build.** Three times
+  in one session a reported failure was the check, not the code: `ls -R | head -40`
+  truncated a listing into a false "directory empty"; a legend check searched PDF
+  *text* for titles that live inside a PNG; and a drift scenario asserted a rank gap
+  after dropping the LAST role, which is genuinely undetectable — ranks 1..N-1 in an
+  (N-1)-role document is exactly what a legitimate shorter document looks like.
+  SESSION_LOG records two more in session 2, making this the most repeated failure
+  mode on this project. **Before reporting a failure, re-derive the expectation and
+  confirm the check can actually observe what it claims to.** (Sept 7 2026)
 - **SESSION_LOG's session-2 "two approved SKILL.md edits never applied" entry is stale —
   both edits did land.** SKILL.md's mtime was Sept 4 17:34, after the 17:04 log entry;
   `## Setup`, `python3 -m venv`, `reportlab==`, `DejaVu Sans` and the role-mode docs are
