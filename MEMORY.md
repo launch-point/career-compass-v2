@@ -1,6 +1,6 @@
 # Career Compass v2 — MEMORY.md
 
-*Last updated: Sept 7, 2026*
+*Last updated: Sept 8, 2026*
 
 This file holds **confirmed** facts, decisions, and gotchas. It is authoritative — read at the start of every session and treated as settled.
 
@@ -67,7 +67,13 @@ Keep this file short. If it's getting long, that usually means something belongs
 
 *Things that need Todd's input before they can be resolved. Remove once answered — move the answer to Decisions.*
 
-- (none open)
+- **Should the parser check that TOP 5 and NEXT 5 FUNCTIONS are disjoint — and at what level?** No such check exists. The parser reads `TOP 5 FUNCTIONS` and `TOP 5 VALUES` and **never reads `NEXT 5 FUNCTIONS` at all**, so an overlap between the two lists passes silently; the only duplicate check in the file is `RANK_DUPLICATE`, which covers `Rank:` values.
+
+  It distorts the report because `additional_functions` is the *complement* of `top_functions` over the Functional Mix bullets, and the template renders that list under the heading **"Functions 6-10"**. Overlapping entries route to the Top 5 table and can never reach the additional table, so "Functions 6-10" quietly renders fewer rows than the document declares.
+
+  Henry Johnson's document has two such overlaps — "Presenting to people via TV, films, seminars, speeches" (top #5 / next #6) and "Performing, acting" (top #1 / next #10) — so only three distinct functions 6-10 are actually declared. Across all seven roles the Functional Mix bullets add exactly one non-top name, so that table would have rendered a single row.
+
+  Needs deciding: FAIL or WARN, and whether an overlap is a research-document fix (the `FUNCTION_DESC_MISSING` precedent says yes) or something the parser reconciles. Also whether Henry's document gets corrected upstream before his build. Detail in SKILL.md Known Gaps. (Logged Sept 8 2026 — verified by reading the parser, not inferred)
 
 ---
 
@@ -75,7 +81,11 @@ Keep this file short. If it's getting long, that usually means something belongs
 
 *Things that cost time to figure out once and shouldn't cost time again.*
 
-- **A fresh clone has no venv and no `reports/` — both gitignored by design.** `.claude/skills/career-compass-report/.venv/` and `reports/` are both in `.gitignore`, so any new clone gets the report skill's scripts (`SKILL.md`, the three `.py` files, `assets/`, `fixtures/`) but no Python interpreter and no client artifacts — no research markdown, judgment file, generated JSON, or PDF. Verified directly on a fresh remote clone, Sept 5 2026. **Practical rule: use a remote/cloud session to inspect or structurally verify the pipeline; run the real client build locally — never treat a remote-session PDF as client-deliverable.** The venv gap is only setup friction (build it per SKILL.md's pins and it's gone) — confirmed today. Remote output is non-deliverable because the environment's egress policy blocks the brand-font host (`github.com/google/fonts` → 403 → silent DejaVu fallback; SKILL.md Known Gaps). This has now been independently confirmed in two separate remote sessions (Sept 4 and Sept 5, 2026), both hitting the identical block — treat this as settled, reliable behavior of running this pipeline remotely, not a fragile one-off. If a future environment's policy changes, that would need to be re-verified before this guidance is revised — until then, local build is required for anything client-facing. (Sept 5 2026)
+- **A fresh clone has no venv and no `reports/` — both gitignored by design.** `.claude/skills/career-compass-report/.venv/` and `reports/` are both in `.gitignore`, so any new clone gets the report skill's scripts (`SKILL.md`, the three `.py` files, `assets/`, `fixtures/`) but no Python interpreter and no client artifacts — no research markdown, judgment file, generated JSON, or PDF. Verified directly on a fresh remote clone, Sept 5 2026. **Practical rule: use a remote/cloud session to inspect the pipeline's source and the research document; run every actual pipeline command locally.** The venv gap is only setup friction (build it per SKILL.md's pins and it's gone) — confirmed today, and the four pins resolve fine on Python 3.11 as well as the 3.9 they were verified on. The egress policy blocks the brand-font host (`github.com/google/fonts` → 403).
+
+**Corrected Sept 8 2026 — the earlier description of that block was too mild.** It said remote output was merely off-brand ("silent DejaVu fallback"), implying a remote session still produces artifacts that are structurally sound but not client-deliverable. That is true of `graph_generator.py` alone, which does fall back to DejaVu. It is **not** true of the pipeline: `report_template.py` calls `ensure_fonts()` at *import* time and registers DM Sans/Inter immediately after, with no fallback — so it cannot be imported at all. `parse_research_markdown.py` imports `MIN_ROLES`/`MAX_ROLES` from it, so the failure propagates to the very first command. **`--propose` dies too. A remote session yields no draft judgment file, no report JSON and no PDF — nothing to inspect or discard.** Confirmed by running it: `Cannot import MIN_ROLES/MAX_ROLES from report_template.py: HTTPError: HTTP Error 403: Forbidden`.
+
+Three independent remote sessions have now hit this host block (Sept 4, Sept 5, Sept 8 2026) — settled behavior, not a fragile one-off. **Never satisfy the import by placing a substitute TTF at `/tmp/fonts/DMSans.ttf`:** the registration is by filename and prints no warning, so the resulting PDF would look and claim to be branded while silently not being — destroying the only signal that catches it. If a future environment's policy changes, re-verify before revising this. Until then, local is required for the build, not just for the final artifact. (Sept 5 2026; severity corrected Sept 8 2026)
 - **matplotlib: `scatter(..., transform=ax.transAxes)` still autoscales the axes' *data* limits from the raw offset values.** It does not "opt out" of data space the way it looks like it should. Consequence: on an `axis("off")` legend axes, those scatter calls silently collapsed the data limits to `(-0.055, 0.055)`, and a sibling `text()` left in data coords at `y=1.0` was flung to figure-fraction y=3.07 — three figure-heights above the canvas. `bbox_inches="tight"` then grew the saved PNG to ~20in tall to contain it. **Rule: on any axes used purely for layout, pin `set_xlim(0,1)`/`set_ylim(0,1)` and give *every* artist an explicit `transform=`. Mixing coordinate systems on one axes is the trap.** Cost a full diagnostic cycle in the Phase 2 graph generator; regression fixture at `.claude/skills/career-compass-report/fixtures/`. (Sept 4 2026)
 - **Graph dimensions drift for layout reasons, not font reasons — don't blame the font
   fallback.** Measured on Todd's Mac with real DM Sans/Inter present: role mode renders

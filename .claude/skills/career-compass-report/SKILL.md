@@ -472,11 +472,65 @@ Run before telling Todd anything is done. Show real output, never a description.
 - **`actions_taken` grouping** is inferred: the source gives flat bullets, and the
   parser makes each bullet its own group with its lead sentence as the label.
 
-- **Brand fonts are blocked in Claude Code remote sessions.**
-  `graph_generator.py` fetches DM Sans and Inter from
+- **No profile-level check that TOP 5 and NEXT 5 FUNCTIONS are disjoint.** The
+  parser reads `TOP 5 FUNCTIONS` and `TOP 5 VALUES` (`profile_list`, ~line 598)
+  and never reads `NEXT 5 FUNCTIONS` at all. Nothing compares the two lists, so
+  a function named in both passes silently. The existing `RANK_DUPLICATE` check
+  covers duplicate `Rank:` values only — there is no analogous profile check.
+
+  Why it matters: `additional_functions` is built as the *complement* of
+  `top_functions` over the Functional Mix bullets (`if name in top_functions …
+  else additional`), and `report_template.py` renders that list under the
+  heading **"Functions 6-10"**. When the document's declared next-five overlaps
+  the top five, the overlapping entries route to the Top 5 table and can never
+  reach the additional table, so the table titled "Functions 6-10" silently
+  carries fewer rows than the document claims to supply — with no finding
+  emitted.
+
+  Seen live in Henry Johnson's document (Sept 8 2026), where two of five NEXT 5
+  entries duplicate TOP 5 entries — "Presenting to people via TV, films,
+  seminars, speeches" (top #5 / next #6) and "Performing, acting" (top #1 /
+  next #10) — leaving three genuinely distinct functions 6-10 declared. Across
+  all seven roles the Functional Mix bullets contribute exactly one non-top
+  name ("Persuading, motivating, convincing, or selling to a group"), so the
+  "Functions 6-10" table would have rendered a single row.
+
+  Open: whether the check belongs at FAIL or WARN, and whether an overlap is a
+  research-document fix (the likely answer, matching the `FUNCTION_DESC_MISSING`
+  precedent) or something the parser should reconcile. **Todd's call — not yet
+  decided, and no check has been written.**
+
+- **Brand fonts are blocked in Claude Code remote sessions, and this kills the
+  whole pipeline — not just graph styling.** DM Sans and Inter are fetched from
   `github.com/google/fonts/raw/...`; the remote session's egress policy denies
-  that host with a 403, and it is not routable around. Graphs still render —
-  structurally correct, but in DejaVu Sans, announced only by a single `NOTE:`
-  line that is easy to scroll past. **Treat any graph built in a remote session
-  as not client-deliverable.** Local runs are unaffected. Verified Sept 2026;
-  fixing it means allowlisting the font host, not changing the code.
+  that host with a 403, and it is not routable around (the agent proxy's own
+  README classes a 403 as an organization policy denial: report it, do not
+  retry).
+
+  The severity depends on which module needs the font, and only one of the two
+  has a fallback:
+
+  | Module | On a 403 | Effect |
+  |---|---|---|
+  | `graph_generator.py` | falls back to DejaVu Sans, prints one `NOTE:` line | graphs render, off-brand |
+  | `report_template.py` | **no fallback** — `ensure_fonts()` runs at *import* time and `pdfmetrics.registerFont(TTFont("DMSans", "/tmp/fonts/DMSans.ttf"))` follows immediately | the module cannot even be imported |
+
+  Because `parse_research_markdown.py` imports `MIN_ROLES`/`MAX_ROLES` from
+  `report_template.py`, that import failure propagates: **`--propose` dies too.**
+  So a remote session produces no draft judgment file, no report JSON and no
+  PDF — it fails at the very first command with
+  `Cannot import MIN_ROLES/MAX_ROLES from report_template.py: HTTPError: HTTP
+  Error 403: Forbidden`, before any parsing happens.
+
+  The earlier wording here ("graphs still render… treat any graph as not
+  client-deliverable") understated this. It is not a cosmetic degradation to
+  inspect and discard — **nothing runs at all**, so there is no remote output to
+  judge. Local runs are unaffected. Verified Sept 4, Sept 5 and Sept 8 2026;
+  fixing it means allowlisting the font host or pre-populating `/tmp/fonts` with
+  the genuine faces, not changing the code.
+
+  **Do not satisfy the import by dropping any available TTF at those paths.**
+  `report_template.py` registers whatever file it finds under the names
+  `DMSans`/`Inter` and prints no warning, so a substituted face yields a PDF
+  that looks branded, claims to be branded, and is not — removing the only
+  signal that would have caught it.
