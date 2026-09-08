@@ -471,3 +471,103 @@ Practical consequence, if the 5-session review wants one: numbers that are
 going into a permanent artifact — a commit message, MEMORY.md, SKILL.md — should
 be re-derived from full output at the moment of writing, not carried forward
 from something read earlier in the session.
+
+---
+
+## Session 4 — 2026-09-07 — Variable role count, tenth column, parser rebuild, judgment gate, first full client run
+
+**Raw observations. Not authoritative — for the 5-session review, which the next
+session triggers.**
+
+### The milestone
+
+**The pipeline ran end to end on real client work for the first time.** Research
+markdown → `--propose` → Todd's judgment → build → PDF, with Todd approving at
+Gate 4. Austin Scheiwe, 30 pages, **8 roles shipped and 2 dropped** (Partnerships
+Manager at research rank 7, Relationship Manager at research rank 10), with
+renumbering applied: research `[1,2,3,4,5,6,8,9]` → report `[1..8]`.
+
+**Executive Director placed in Executive Leadership** — the first real use of the
+tenth function column added earlier the same session, and the exact
+miscategorisation that motivated adding it.
+
+Artifacts, all under the gitignored `reports/scheiwe/`:
+`scheiwe_judgment_v24.json`, `scheiwe_austin_v24_report_data.json`,
+`Austin_Scheiwe_Career_Compass_Report_v24.pdf`.
+
+### What shipped (roughly thirteen commits on `phase-2-report`)
+
+- **Part 1** — report supports a variable 5–10 roles, graphs limited to top 5
+- **Part 2** — graphs for every role (`GRAPH_ROLE_COUNT` 5 → 10)
+- **Tenth function column** — Executive Leadership, leftmost
+- **`fixtures/make_role_count_fixture.py`** — synthesises N-role JSON from real
+  client data to a temp path, so no client content is ever committed
+- **Parser rebuilt for template v2.3**, then v2.4's restored description tails
+- **`fixtures/drift_suite.py`** — 14 scenarios, all passing
+- **The judgment gate** — `--propose` writes a draft with evidence; the build
+  refuses without `"_confirmed": true`; `include: false` drops roles
+- **Propose-step generalisations** — Seniority Notes read for direction,
+  `SALARY_NO_FIGURES` flagged at propose time
+
+### Open items Todd asked to log
+
+**1. Salary basis is not distinguished on the page.** Customer Success Manager's
+figures (105/125/145k) are on-target earnings including variable comp; the other
+seven roles quote base salary. Nothing in the report says which is which.
+`salary_context` holds the caveat verbatim, but `report_template.py` does not
+render that field — verified by grep, not assumed. Austin's report was approved
+at Gate 4 with the figures undistinguished, so the decision needed is
+forward-looking. Options raised, none chosen: ship as-is; carry a line in
+`seniority_note`, which does render; or add `salary_context` rendering.
+
+**2. The Gate reasoning has no backup.** Austin's confirmed judgment and report
+data exist only in gitignored `reports/scheiwe/` on Todd's Mac. That is correct
+for client content — it is what the gitignore is for — but the judgment file is
+where the function placements, seniority calls, salary picks and Todd's own
+overrides (recorded in `_note`) live. CLAUDE.md says that reasoning is what
+accumulates to teach the system to reason like Todd. Its only copy sitting on one
+machine is worth a decision.
+
+### Todd's corrections and decisions
+
+- **The salary floor is aspirational at build time, not disqualifying.** It
+  filters upstream during research and validation; a role that survived into the
+  handoff has already been judged worth showing. Raised after I built the
+  opposite framing into a role walkthrough, grouping roles by whether they
+  cleared the floor. Already promoted to MEMORY.md and SKILL.md.
+- **General Manager stays Operations**, overriding the Executive Leadership
+  proposal — continuity with the delivered report.
+- **Recruiter "$72k+"** read as flooring at the BLS median (72,910), not the
+  source's 45,000 low.
+- **Development Director at the wider band** (96/112/128k), not the mid-size end.
+- **Sector-context generalisation dropped after audit.** Only 1 of 10 roles is
+  genuinely sector-forked; Executive Director and Development Director fork on
+  org size and market tier, which stay Todd's calls. His words: he had been
+  "reasoning from my own lens rather than the document."
+- **Seniority note inversion confirmed.** A `Seniority Note` usually *corrects*
+  the title rule rather than obscuring it — 3 of 4 are altitude notes and the
+  title rule gets all three wrong. Todd invited disagreement on his original
+  spec and accepted the inversion.
+
+### Patterns worth watching
+
+**Suspect the harness before reporting a failure — now the dominant failure mode
+of this project.** Six instances this session: a `head`-truncated listing read as
+an empty directory; a legend check searching PDF text for titles that live inside
+a PNG; a drift scenario asserting a rank gap after dropping the last role
+(genuinely undetectable); an unanchored `[—–-]` that deleted a whole line; an
+em-dash escape raising `bad escape \u`; and a `SALARY_NO_FIGURES` check that
+failed to fire on the one role it was written for.
+
+**Two of those happened AFTER the rule was written into MEMORY.md that same
+session**, and the wrong count in commit `2934e48`'s message is the same pattern
+reaching a permanent artifact rather than a transient claim (see the correction
+note above). Tentative hypothesis for the review: a MEMORY.md entry alone does
+not move this behaviour, and it may belong in CLAUDE.md as a behavioural rule —
+a step taken before reporting, not a fact to be recalled.
+
+**Repeated permission-prompt rejections recurred**, as first noted in session 2 —
+several on content Todd had explicitly approved, including four in a row at one
+point. Working around it by writing to the scratchpad and showing `diff -u`
+before touching the repo proved reliable, and Todd adopted that as the review
+gate for the parser rewrite.
