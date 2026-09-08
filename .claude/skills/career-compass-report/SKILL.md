@@ -117,13 +117,28 @@ Run `$SKILL/fixtures/drift_suite.py <research.md> <judgment.json>` after any
 parser change; it covers dropped/duplicate ranks, dropped and reordered values,
 an omitted top function, heading-case and field-order drift, and a v1 document.
 
-**`TEMPLATE_GAP_NO_DESCRIPTION` is a template gap, not a parser bug.** v2.3
-dropped the `— description` tail from Functional Mix bullets, so the report's
-"How It Shows Up in This Role" column renders **blank**. That is deliberate: the
-descriptions were real content in the delivered v1 report and need restoring in
-the research format, not synthesizing at parse time. Do not "fix" this in the
-parser — the previous version turned an empty tail into the string `"."` and
-rendered a bare period in every row. Raise it as a template change.
+#### Description tails (v2.4)
+
+v2.3 dropped the `— description` tail from Functional Mix bullets, which left
+the report's "How It Shows Up In This Role" column blank on every function of
+every role. **v2.4 restored it**, and the parser now enforces the template's
+three rules about it:
+
+| code | level | condition |
+|---|---|---|
+| `FUNCTION_DESC_MISSING` | FAIL | a function scoring above 0% carries no tail — that cell would render blank |
+| `FUNCTION_DESC_ON_ZERO` | WARN | a 0% function carries a tail, contradicting its own percentage; the tail is ignored and the "Not a core function of this role" sentinel stands |
+| `FUNCTION_DESC_RESTATES_NAME` | WARN | the tail, normalised, is exactly the function name |
+
+Restatement detection is **exact-match only**. Near-restatement and generic
+filler are equally real problems, but detecting them takes judgment the parser
+cannot supply, and a check that cries wolf gets ignored — those stay a human
+read. A v2.3-era document now fails on `FUNCTION_DESC_MISSING`, which is
+intended: it would otherwise ship blank cells.
+
+Never synthesize a tail to satisfy the check. The pre-v2.4 code turned an empty
+tail into the string `"."` and printed a bare period in every row; a missing
+tail is a research-document fix, not a parser one.
 
 One validation limit worth knowing: a dropped **last** role is undetectable from
 rank alone, because ranks 1..N-1 in an (N-1)-role document is exactly what a

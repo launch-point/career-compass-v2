@@ -129,6 +129,11 @@ LIST_ITEM    = re.compile(r"^[ \t]*(?:[-*+]|\d+\.)[ \t]+(\S[^\n]*?)[ \t]*$", re.
 CITE = re.compile(r"\s*\[cite:\d+\]")
 strip = lambda s: CITE.sub("", s or "").strip()
 
+def _norm(s):
+    """Lowercase, punctuation- and whitespace-insensitive form, for comparing a
+    description tail against its own function name."""
+    return re.sub(r"[^a-z0-9]+", " ", (s or "").lower()).strip()
+
 FINDINGS = []
 def fail(where, code, msg): FINDINGS.append(("FAIL", where, code, msg))
 def warn(where, code, msg): FINDINGS.append(("WARN", where, code, msg))
@@ -239,17 +244,37 @@ def parse_role(sec, judgment, top_functions, top_values):
         name, pct, desc = strip(name), int(pct), strip(desc)
         coverage += pct
         seen.append(name)
+
+        # A tail is required above 0% and forbidden at 0%. Never synthesise one:
+        # the pre-v2.4 code turned an empty tail into the string "." and printed
+        # a bare period in every row.
+        if pct > 0 and not desc:
+            fail(where, "FUNCTION_DESC_MISSING",
+                 f"{name!r} scores {pct}% but carries no description tail; "
+                 f"the report's 'How It Shows Up In This Role' cell renders blank")
+        if pct == 0 and desc:
+            warn(where, "FUNCTION_DESC_ON_ZERO",
+                 f"{name!r} scores 0% but carries a description tail, which "
+                 f"contradicts its own percentage; tail ignored")
+        # Exact restatement only. Near-restatement and generic filler are real
+        # problems too, but detecting them reliably needs judgment this cannot
+        # supply, and a noisy check gets ignored.
+        if desc and _norm(desc) == _norm(name):
+            warn(where, "FUNCTION_DESC_RESTATES_NAME",
+                 f"{name!r} tail restates the function name verbatim instead of "
+                 f"how it shows up in this role")
+
         if name in top_functions:
             i = top_functions.index(name)
             pcts[i] = pct
-            # Do NOT synthesise a description. v2.3 dropped the inline
-            # "- description" tail; that is a template gap to restore in the
-            # research format, not something to paper over here. The old code
-            # turned an empty tail into the string "." and rendered it.
-            descs[i] = (desc[:1].upper() + desc[1:] +
-                        ("" if desc.endswith(".") else ".")) if desc else ""
+            # At 0% the sentinel stands: the template says the report renders
+            # "Not a core function of this role" automatically there.
+            if pct > 0:
+                descs[i] = (desc[:1].upper() + desc[1:] +
+                            ("" if desc.endswith(".") else ".")) if desc else ""
         else:
-            additional.append({"name": name, "pct": pct, "description": desc})
+            additional.append({"name": name, "pct": pct,
+                               "description": "" if pct == 0 else desc})
 
     # Presence by NAME, independent of bullet count: if a top function is
     # omitted, a Next-5 function slides into its slot, the count still reads 5,
@@ -258,10 +283,6 @@ def parse_role(sec, judgment, top_functions, top_values):
     if absent:
         fail(where, "TOP_FUNCTION_ABSENT",
              f"{len(absent)} of {len(top_functions)} top functions not listed: {absent}")
-    undesc = [f for i, f in enumerate(top_functions) if descs[i] == "" and f in seen]
-    if undesc:
-        warn(where, "TEMPLATE_GAP_NO_DESCRIPTION",
-             f"{len(undesc)} top function(s) carry no description tail: {undesc}")
 
     # --- Why This Fits You ---
     vals = [""] * len(top_values)

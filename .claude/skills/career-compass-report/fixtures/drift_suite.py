@@ -91,6 +91,19 @@ def reverse_bullets(block, subsection):
     return block[:head_end] + "\n".join(lines) + block[body_end:]
 
 
+def edit_first_fm_bullet(block, fn):
+    """Rewrite the first Functional Mix bullet via fn(line) -> line."""
+    m = re.search(r"^###[ \t]+Functional\s+Mix[^\n]*$", block, re.M | re.I)
+    head_end = m.end()
+    nxt = re.search(r"^#{2,3}[ \t]+", block[head_end:], re.M)
+    body_end = head_end + (nxt.start() if nxt else len(block) - head_end)
+    body = block[head_end:body_end]
+    for line in body.split("\n"):
+        if re.match(r"^[ \t]*[-*+][ \t]+\S", line):
+            return block[:head_end] + body.replace(line, fn(line), 1) + block[body_end:]
+    raise SystemExit("drift suite: no Functional Mix bullet found")
+
+
 def to_v1_format(md):
     """v1 shape: no `Rank:` lines, bulleted client profile, v1 heading names."""
     md = re.sub(r"^Rank:[ \t]*\d+[ \t]*\n\n?", "", md, flags=re.M)
@@ -160,6 +173,24 @@ def main():
          re.sub(r"^Rank:[ \t]*(\d+)[ \t]*\n\n(Alternate titles:[^\n]*)\n",
                 r"\2\nRank: \1\n", base, flags=re.M),
          0, [], ["FAIL"]),
+
+        # v2.4 restored the description tail. It is required above 0%,
+        # forbidden at 0%, and must not simply restate the function name.
+        ("missing description tail above 0% is a hard failure",
+         in_role(base, first, lambda b: edit_first_fm_bullet(
+             b, lambda l: re.sub(r"(%[ \t]*)[—–-][ \t]*.*$", r"\1", l))),
+         1, ["FUNCTION_DESC_MISSING"], []),
+
+        ("a tail on a 0% function contradicts its percentage",
+         in_role(base, first, lambda b: edit_first_fm_bullet(
+             b, lambda l: re.sub(r"~[ \t]*\d{1,3}[ \t]*%", "~0%", l))),
+         0, ["FUNCTION_DESC_ON_ZERO"], ["FUNCTION_DESC_MISSING"]),
+
+        ("a tail that only restates the function name is flagged",
+         in_role(base, first, lambda b: edit_first_fm_bullet(
+             b, lambda l: re.sub(r"(%[ \t]*)[—–-][ \t]*.*$",
+                                 "\\1\u2014 " + l.split(":")[0].lstrip("- ").strip(), l))),
+         0, ["FUNCTION_DESC_RESTATES_NAME"], []),
 
         ("a v1-format document is rejected, not silently mis-parsed",
          to_v1_format(base), 1, ["FIELD_MISSING"], []),
