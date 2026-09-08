@@ -481,11 +481,14 @@ Run before telling Todd anything is done. Show real output, never a description.
   Why it matters: `additional_functions` is built as the *complement* of
   `top_functions` over the Functional Mix bullets (`if name in top_functions …
   else additional`), and `report_template.py` renders that list under the
-  heading **"Functions 6-10"**. When the document's declared next-five overlaps
-  the top five, the overlapping entries route to the Top 5 table and can never
-  reach the additional table, so the table titled "Functions 6-10" silently
-  carries fewer rows than the document claims to supply — with no finding
-  emitted.
+  heading **"ADDITIONAL FUNCTIONS ALIGNMENT"** (line 777). **"Functions 6-10" is
+  internal-only wording** from the docstring at line 569 and never reaches the
+  page. When the document's declared next-five overlaps the top five, the
+  overlapping entries route to the Top 5 table and can never reach the
+  additional table, so that table silently carries fewer rows than the document
+  claims to supply — with no finding emitted. The rendered heading makes no
+  row-count promise to the client, so the report understates rather than
+  visibly contradicting itself.
 
   Seen live in Henry Johnson's document (Sept 8 2026), where two of five NEXT 5
   entries duplicate TOP 5 entries — "Presenting to people via TV, films,
@@ -493,7 +496,16 @@ Run before telling Todd anything is done. Show real output, never a description.
   next #10) — leaving three genuinely distinct functions 6-10 declared. Across
   all seven roles the Functional Mix bullets contribute exactly one non-top
   name ("Persuading, motivating, convincing, or selling to a group"), so the
-  "Functions 6-10" table would have rendered a single row.
+  Additional Functions table would have rendered a single row.
+
+  Confirmed in the build (Sept 8 2026). The corrected document — the two
+  duplicate NEXT 5 entries removed upstream, leaving three declared — was
+  built to PDF, and the Additional Functions table renders exactly one row
+  ("Persuading, motivating, convincing, or selling to a group") on every one
+  of the six role pages. So removing the overlap did not change the outcome:
+  the shortfall comes from the Functional Mix bullets never naming the other
+  declared next-functions, which is a separate gap from the overlap itself
+  and is not addressed by fixing the overlap.
 
   Open: whether the check belongs at FAIL or WARN, and whether an overlap is a
   research-document fix (the likely answer, matching the `FUNCTION_DESC_MISSING`

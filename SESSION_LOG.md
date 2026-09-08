@@ -571,3 +571,117 @@ several on content Todd had explicitly approved, including four in a row at one
 point. Working around it by writing to the scratchpad and showing `diff -u`
 before touching the repo proved reliable, and Todd adopted that as the review
 gate for the parser rewrite.
+
+---
+
+## Session 5 — 2026-09-08 — Henry Johnson propose + build, docs correction
+
+**Raw observations. Not authoritative — this session triggers the 5-session
+review.**
+
+### What ran
+
+**Second full client run of the pipeline, start to finish.** Corrected research
+document (`Johnson_Henry_CareerCompass_Roles (2).md`) → `--propose` → Todd's
+judgment across six exchanges → build → **24-page PDF, 6 roles**. Both parse
+phases reported `FINDINGS: none`. Artifacts under gitignored `reports/johnson/`:
+`draft_judgment.json`, `johnson_judgment.json`,
+`johnson_henry_client_report_data.json`,
+`Henry_Johnson_Career_Compass_Report.pdf`, four page PNGs.
+
+**The upstream-fix rule paid off visibly.** Session 4's "Why This Fits You"
+defect (five keyed entries collapsed to one paragraph) was sent back to the
+research thread rather than patched in the parser. The corrected document
+diffs as exactly 7 paragraphs → 35 keyed bullets, nothing else changed, and
+`vals 5/5` on every role. The fix arrived correct from upstream.
+
+**The TOP5/NEXT5 overlap was also corrected upstream** — the two duplicate NEXT 5
+entries are gone, leaving three declared. Notable: this did **not** change the
+outcome. The Additional Functions table still renders exactly one row on all six
+role pages, because the Functional Mix bullets never name the other declared
+next-functions. The overlap and the one-row shortfall are separate gaps; fixing
+the first does not fix the second.
+
+### Todd's gate decisions (his, not defaults)
+
+- HR Generalist and Corporate Trainer both **Specialist** — declining the
+  senior/HRBP-adjacent and T&D Manager readings the document raised.
+- Church Engagement, Adjunct, and In-School Career Coach all **Customer
+  Experience**. Todd overrode a proposed Communications placement for Adjunct.
+- **"Use the higher cluster of salaries" for all** — then, when shown that the
+  higher cluster on two roles *was* the seniority reading he had just declined,
+  he kept Specialist and took the standard bands. The directive was general;
+  he did not apply it where it would contradict the dot.
+- **Adjunct Professor dropped** rather than modify proven Phase 2 code or ship
+  a TOC line reading "Adjunct Professor $20,000" for per-course income.
+- Alternate-title change abandoned once it turned out to require either an
+  upstream research fix or a schema change.
+
+### Notable findings
+
+**`salary_context` is parsed and never rendered.** The parser writes it into the
+report JSON, but `report_template.py` never reads it. Confirmed against Austin's
+delivered PDF: his `salary_context` prose appears nowhere in the PDF text while
+his Low/Avg/High band renders. Consequence: there is no field that carries a
+salary caveat onto the page. `seniority_note` is the only nearby free text that
+renders ("A NOTE ON LEVEL").
+
+**MEMORY.md and SKILL.md both misstated a client-visible heading.** Both said the
+additional-functions list renders under "Functions 6-10". It renders under
+"ADDITIONAL FUNCTIONS ALIGNMENT"; "Functions 6-10" exists only in a docstring at
+`report_template.py:569`. Corrected in both files this session with Todd's
+approval. This is the first instance of an *authoritative* file being wrong about
+rendered output rather than a transient claim being wrong.
+
+### Patterns worth watching
+
+**"Suspect the harness before reporting a failure" — three instances, all caught
+before reaching Todd.** (1) A percentage diff reported six mismatches because the
+check guessed name-keyed dicts when `function_pcts_top5` is a positional array
+aligned to the client's declared top-5 order. (2) A TOC check returned False on
+all six because it searched pages 3–4; the TOC is page 2. (3) An
+additional-functions row check returned False on all six because flat
+`extract_text()` interleaves that table's columns — the documented trap, hit
+again, and the second attempt using `extract_tables()` *also* failed before
+dumping the raw cells resolved it.
+
+**This is the contrast worth reviewing.** Session 4 logged six instances, two of
+which reached Todd as reported failures after the rule was already in MEMORY.md.
+This session hit three and reported none of them as defects — each was caught by
+re-deriving the expectation first. The difference between the sessions may be
+that the rule now lives in CLAUDE.md as a behavioural step rather than only in
+MEMORY.md as a fact to recall. Tentative — two sessions is not a trend.
+
+**A verification claim was written into an authoritative file before it was fully
+verified.** The added SKILL.md line said the one-row table renders "on every one
+of the six role pages" when only two had been inspected visually and the other
+four were inferred from JSON. Caught and verified across all six before the
+session ended, but the claim was written first. Worth watching whether
+doc-writing gets the same verification discipline as completion claims.
+
+**Permission-prompt friction did not recur this session.** No rejections observed.
+
+
+— reviewed 2026-09-08, sessions 1–5 —
+
+Promoted to MEMORY.md with Todd's confirmation: `salary_context` parsed but never
+rendered (Technical Notes) plus a paired Open Question that it needs a real fix,
+since a role priced on a different basis than its neighbours has nowhere to say so
+(Austin's CSM was OTE among seven base-salary roles; Henry's Adjunct was
+per-course); the rendered-artifact standard for claims about client-visible output,
+extended to cover writing into authoritative files — kept as ONE entry, not two, so
+the scopes cannot drift apart; the three classes of verification; the upstream-fix
+decision amended with the session 4→5 evidence; and the TOP5/NEXT5 open question
+amended to record that the overlap and the one-row table are separate gaps.
+
+Not promoted, still watching: the hypothesis that the harness-first rule improved
+because it moved to CLAUDE.md — Todd agreed two sessions is noise and that an
+improvement which cannot be attributed should not be claimed. Permission-prompt
+friction (sessions 2 and 4, absent in 5) stays on the watch list.
+
+Dropped: session 3's open item about the environment-independent reading of remote
+non-deliverability. The font finding materially changed since (the URL is blocked,
+not the fonts) and MEMORY has been rewritten twice. Moot — Todd's call.
+
+Gate 4 confirmed for Henry Johnson this session; the run is recorded complete in
+MEMORY.md's Current Status.

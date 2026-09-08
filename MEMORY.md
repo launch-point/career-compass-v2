@@ -23,7 +23,14 @@ Keep this file short. If it's getting long, that usually means something belongs
 
 **Do not mistake gitignore for absence.** The Austin Scheiwe report and all generated client artifacts live in `reports/scheiwe/`, and `reports/` is gitignored. They are absent from git and from any fresh clone, but they are real and present on Todd's Mac. A future session that cannot see them in git must not conclude the work was never done — check the filesystem.
 
-*(Phase 1 status confirmed by Todd Sept 4 2026. Phase 2 completion confirmed by Todd Sept 7 2026; 26-page count and embedded DM Sans/Inter independently re-confirmed from the PDF that same day.)*
+**Two client reports delivered through all four gates.** Austin Scheiwe (26 pages) and
+**Henry Johnson (24 pages, 6 roles, Gate 4 approved by Todd Sept 8 2026)**. Henry's run
+selected 6 of 7 researched roles — Adjunct Professor dropped at the judgment gate — and
+both parse phases reported `FINDINGS: none`. Artifacts in the gitignored `reports/johnson/`.
+The pipeline is now proven across two clients with different role counts, function spreads
+and salary structures.
+
+*(Phase 1 status confirmed by Todd Sept 4 2026. Phase 2 completion confirmed by Todd Sept 7 2026; 26-page count and embedded DM Sans/Inter independently re-confirmed from the PDF that same day. Henry Johnson run confirmed complete by Todd Sept 8 2026.)*
 
 ---
 
@@ -74,6 +81,14 @@ Keep this file short. If it's getting long, that usually means something belongs
   that fills gaps hides the very signal the upstream thread needs to correct itself.
   (Sept 8 2026 — directed by Todd)
 
+  **The rule has now paid off once, measurably.** Henry Johnson's collapsed "Why This
+  Fits You" went back to the research thread in session 4 rather than being reconciled
+  in the parser. The corrected document returned in session 5 diffing as exactly 7
+  prose paragraphs → 35 keyed bullets with nothing else changed, and parsed clean on
+  the first attempt (`vals 5/5` on every role). The upstream thread produced the fix
+  correctly, which is the outcome the rule exists to buy. One confirmed instance, not
+  yet a pattern. (Sept 8 2026)
+
 ---
 
 ## Open Questions
@@ -82,9 +97,30 @@ Keep this file short. If it's getting long, that usually means something belongs
 
 - **Should the parser check that TOP 5 and NEXT 5 FUNCTIONS are disjoint — and at what level?** No such check exists. The parser reads `TOP 5 FUNCTIONS` and `TOP 5 VALUES` and **never reads `NEXT 5 FUNCTIONS` at all**, so an overlap between the two lists passes silently; the only duplicate check in the file is `RANK_DUPLICATE`, which covers `Rank:` values.
 
-  It would distort a report because `additional_functions` is the *complement* of `top_functions` over the Functional Mix bullets, and the template renders that list under the heading **"Functions 6-10"**. Overlapping entries route to the Top 5 table and can never reach the additional table, so "Functions 6-10" would quietly render fewer rows than the document declares.
+  It would distort a report because `additional_functions` is the *complement* of `top_functions` over the Functional Mix bullets, and the template renders that list under the heading **"ADDITIONAL FUNCTIONS ALIGNMENT"** (`report_template.py:777`). **"Functions 6-10" is internal-only** — it lives in a docstring at `report_template.py:569` and never reaches the page. Overlapping entries route to the Top 5 table and can never reach the additional table, so that table quietly renders fewer rows than the document declares. Because the rendered heading makes no row-count promise, the client-visible defect is milder than a table titled "Functions 6-10" would be: the report understates rather than contradicting itself. (Heading corrected Sept 8 2026, read off Henry Johnson’s rendered PDF.)
+
+  **The overlap and the short table are separate gaps, and fixing the first does not
+  fix the second.** Henry's document had its two duplicate NEXT 5 entries removed
+  upstream, leaving three declared. The built report still renders **exactly one** row
+  in the Additional Functions table on all six role pages — verified by cell-level
+  extraction across every page, not inferred. The shortfall's real cause is that the
+  Functional Mix bullets never name the other declared next-functions, which no
+  disjointness check would catch. Solve them separately. (Sept 8 2026)
 
   Needs deciding: FAIL or WARN, and whether the check belongs parser-side or template-side. **Parked for the 5-session review — not to be added mid-build.** Detail in SKILL.md Known Gaps, where the originating example is recorded. (Logged Sept 8 2026 — verified by reading the parser, not inferred. Narrowed to the general question Sept 8 2026: the document that surfaced it was corrected upstream, so no client document is currently affected.)
+
+- **A role priced on a different basis than its neighbours has nowhere to say so — this
+  needs a real fix.** `salary_context` is parsed but never rendered (see Technical Notes),
+  so the report can only ever show a `Low / Avg / High` dollar band plus the average in the
+  TOC. When one role is priced on a different basis than the rest, the band silently
+  misrepresents it. This is not hypothetical and not one-off: Austin's CSM was **OTE** among
+  seven base-salary roles, and Henry's Adjunct Professor was **per-course**, which is why it
+  was dropped rather than shipped at a misleading $20,000. Two clients, two occurrences.
+
+  Needs deciding: render `salary_context` beneath the band, add a unit/basis label to the
+  band itself, or something else. Dropping the role is the current workaround and it
+  discards research Todd may want shown. **Todd's call — a template change to proven
+  Phase 2 code, so it wants a presented diff and a pagination re-verify.** (Sept 8 2026)
 
 ---
 
@@ -101,6 +137,25 @@ Keep this file short. If it's getting long, that usually means something belongs
   **The URLs are deliberately not changed, and `/tmp/fonts` is left unpopulated.** Whether pulling the identical asset from a permitted host is acceptable, or is the "routing around" the agent-proxy README forbids, is an organization egress-policy question — Todd's, not a technical one, and not to be settled as a side effect of wanting a build to work tonight. Three routes would each fix it (allowlist `github.com`, change the URLs in both modules, or pre-populate `/tmp/fonts` from the permitted host); **none is taken pending his decision.** (Todd, Sept 8 2026)
 
   Three independent remote sessions have now hit this host block (Sept 4, Sept 5, Sept 8 2026) — settled behavior, not a fragile one-off. **Never satisfy the import by placing a substitute TTF at `/tmp/fonts/DMSans.ttf`:** registration is by filename and prints no warning, so the resulting PDF would look and claim to be branded while silently not being — destroying the only signal that catches it. This is why correction 2 matters in practice: a 200 from any host is not evidence of a genuine face, and the name-table check above is the bar. If a future environment's policy changes, re-verify before revising this. Until the policy question is answered, run the build locally. (Sept 5 2026; corrected Sept 8 2026)
+- **`salary_context` is parsed into the report JSON and never rendered.** The parser
+  writes it (`parse_research_markdown.py:517`, parsed Salary prose winning over any
+  judgment value), but `report_template.py` never reads the key — the only salary output
+  is the `Low / Avg / High` band (lines 730-732, via `fmt_salary`, always `$N,NNN`) plus
+  the average printed beside the title in the TOC (line 331). **Consequence: there is no
+  field that carries a salary caveat onto the page.** `seniority_note` is the only nearby
+  free text that renders, as "A NOTE ON LEVEL", and it is a note about level, not pay.
+  Verified against Austin's delivered PDF: his `salary_context` ("Nonprofit-context
+  analytical band…") appears nowhere in the extracted text while his band renders fine.
+  Do not assume a caveat written into the judgment file will reach the client — it will
+  not. See the Open Question above; this wants a real fix. (Sept 8 2026)
+- **Verification here spans three classes, and they are not interchangeable.**
+  (1) *Automatable data/pipeline* — parse, diff, re-parse; fully machine-checkable.
+  (2) *Interactive UI* — Todd walks the real flow in a browser; catches per-screen
+  interaction gates that backend checks structurally cannot. (3) *Visual artifact* —
+  the graph PNG and the PDF must be opened and looked at, because extraction alone
+  misses truncation, collisions and empty states. A completion claim that only covers
+  class 1 is not verified. Recurred across sessions 1-2 and held since. (Promoted from
+  SESSION_LOG at the sessions 1-5 review, Sept 8 2026)
 - **matplotlib: `scatter(..., transform=ax.transAxes)` still autoscales the axes' *data* limits from the raw offset values.** It does not "opt out" of data space the way it looks like it should. Consequence: on an `axis("off")` legend axes, those scatter calls silently collapsed the data limits to `(-0.055, 0.055)`, and a sibling `text()` left in data coords at `y=1.0` was flung to figure-fraction y=3.07 — three figure-heights above the canvas. `bbox_inches="tight"` then grew the saved PNG to ~20in tall to contain it. **Rule: on any axes used purely for layout, pin `set_xlim(0,1)`/`set_ylim(0,1)` and give *every* artist an explicit `transform=`. Mixing coordinate systems on one axes is the trap.** Cost a full diagnostic cycle in the Phase 2 graph generator; regression fixture at `.claude/skills/career-compass-report/fixtures/`. (Sept 4 2026)
 - **Graph dimensions drift for layout reasons, not font reasons — don't blame the font
   fallback.** Measured on Todd's Mac with real DM Sans/Inter present: role mode renders
@@ -191,6 +246,27 @@ Keep this file short. If it's getting long, that usually means something belongs
   all present in the file. Do not re-apply them. General lesson: SESSION_LOG entries
   capture a moment mid-session and can be overtaken by later work in that same session —
   check the file before acting on a logged "verified absent". (Sept 7 2026)
+- **A claim about client-visible output is only true once it has been read off a rendered
+  artifact — and that standard governs what gets written into authoritative files, not
+  just what gets said to Todd.** Both MEMORY.md and SKILL.md stated that the additional-
+  functions list renders under the heading **"Functions 6-10"**. It does not, and never
+  did: the rendered heading is "ADDITIONAL FUNCTIONS ALIGNMENT", and "Functions 6-10"
+  exists only in a docstring at `report_template.py:569`. The wrong heading survived in
+  two authoritative files, was reasoned from twice, and shaped how an open question was
+  framed. Every prior instance of this failure was a transient claim; this one was
+  load-bearing documentation.
+
+  **The same standard applies when writing the correction.** In the same session a line
+  was added to SKILL.md asserting the one-row table renders "on every one of the six role
+  pages" when only two had been looked at and four were inferred from JSON. It happened to
+  be true — confirmed afterwards by cell-level extraction on all six — but it was written
+  before it was known. Writing into MEMORY.md or SKILL.md is a completion claim; verify it
+  the same way, before it lands, not after.
+
+  Deliberately **one entry, not two**: these are the same rule at different scopes, and
+  splitting them would let the scopes drift apart — the same reasoning that collapsed
+  `TEMPLATE_GAP_NO_DESCRIPTION` into `FUNCTION_DESC_MISSING` rather than keeping both.
+  (Sept 8 2026 — confirmed by Todd at the sessions 1-5 review)
 
 ---
 
