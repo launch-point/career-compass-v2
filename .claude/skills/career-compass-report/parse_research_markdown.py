@@ -159,6 +159,23 @@ SENIORITY_RULE = {
     "individual contributor": "Specialist",
 }
 
+# A Seniority Note is not noise obscuring the altitude reading — it is usually
+# the signal that CORRECTS the title rule. SENIORITY_RULE maps titles; the note
+# says when the title misdescribes the work. Measured on Austin's ten roles: of
+# four notes, three describe altitude and the title rule gets all three wrong
+# (Manager by title / Director-equivalent by scope; Manager by title /
+# individual contributor by function, twice). So the note is READ for direction
+# and the reading is offered ALONGSIDE the flag — never auto-filled. A wrong
+# placement ships a dot in the wrong band with nothing to catch it; an
+# unnecessary flag costs five seconds.
+NOTE_DIRECTION = [
+    ("Strategist", [r"director[- ]equivalent", r"chief executive", r"c-suite",
+                    r"executive[- ]equivalent", r"full p&l"]),
+    ("Specialist", [r"individual contributor", r"rather than direct reports",
+                    r"personal client book", r"account book"]),
+    ("Integrator", [r"manager[- ]equivalent"]),
+]
+
 # Intra-line whitespace is [ \t], never \s. `\s` matches newlines, so a `\s*`
 # before the optional description group lets a bullet swallow the NEXT bullet
 # as its own description — silently dropping every second function. Caught in
@@ -265,7 +282,47 @@ def salary_scenarios(prose_text):
     return [t.strip() for t in SENTENCE.split(prose_text or "") if "$" in t]
 
 
-def build_evidence(sec, top_functions):
+def note_direction(note):
+    """What altitude does a Seniority Note point at, and on what phrase?
+
+    Returns (band, matched phrase) or (None, reason). Deliberately literal: it
+    reports the phrase it matched so the reading is auditable rather than
+    magic, and refuses to choose when a note points both ways.
+    """
+    if not note:
+        return None, "no note"
+    hits = []
+    for band, pats in NOTE_DIRECTION:
+        for p in pats:
+            m = re.search(p, note, re.I)
+            if m:
+                hits.append((band, m.group(0)))
+                break
+    if not hits:
+        return None, "note matches no known altitude phrasing"
+    bands = {b for b, _ in hits}
+    if len(bands) > 1:
+        return None, f"note points at more than one band: {sorted(bands)}"
+    return hits[0][0], hits[0][1]
+
+
+MONEY = re.compile(r"\$[\d,]+")
+
+
+def usable_salary_figures(prose_text, floor_text=""):
+    """Salary amounts in the prose that are not just the client's own floor.
+
+    The research routinely restates the client's minimum ("clears the $120,000
+    floor cleanly") in a role whose prose gives no figures of its own. Counting
+    any `$` as a figure therefore misses exactly the case this is for — caught
+    in testing on Austin's Relationship Manager, whose only amount IS the floor.
+    """
+    floor = {m.replace(",", "") for m in MONEY.findall(floor_text or "")}
+    return [m for m in MONEY.findall(prose_text or "")
+            if m.replace(",", "") not in floor]
+
+
+def build_evidence(sec, top_functions, floor_text=""):
     """Everything a judgment call needs, extracted deterministically."""
     body = sec["body"]
     rm = SCALARS["rank"].search(body)
@@ -284,6 +341,16 @@ def build_evidence(sec, top_functions):
 
     sal = prose(subsection(body, SUBSECTIONS["salary"]))
     scenarios = salary_scenarios(sal)
+    if not usable_salary_figures(sal, floor_text):
+        # The report has no blank-salary presentation: fmt_salary(None) raises,
+        # and salary is printed in the TOC beside every role title, so a gap
+        # there reads as broken. Surface it at PROPOSE time so figures can be
+        # sourced during review, rather than at build time. The build already
+        # refuses via JUDGMENT_FIELD when low/avg/high stay null.
+        warn(sec["heading"], "SALARY_NO_FIGURES",
+             "Salary prose names no figure; low/avg/high must come from another "
+             "source before this role can build")
+    note_band, note_basis = note_direction(note)
     # A note means the reading is contested; SKILL.md says flag it rather than
     # pick. Only propose a band where the tier maps cleanly AND nothing disputes
     # it — otherwise leave it null and say why.
@@ -294,11 +361,16 @@ def build_evidence(sec, top_functions):
         "stated_seniority_tier": tier,
         "seniority_note_in_document": note,
         "seniority_suggested_by_rule": suggested,
+        # Read from the note, offered alongside the flag. Never auto-filled:
+        # `seniority` in the draft stays null whenever the role is ambiguous.
+        "seniority_suggested_by_note": note_band,
+        "seniority_note_basis": note_basis,
         "seniority_ambiguous": bool(note) or suggested is None,
         "functional_mix_by_weight": mix,
         "salary_prose_verbatim": sal,
         "salary_scenarios_verbatim": scenarios,
         "salary_scenario_count": len(scenarios),
+        "salary_figures_beyond_the_floor": len(usable_salary_figures(sal, floor_text)),
     }
 
 
@@ -572,12 +644,13 @@ def main():
 
     # --- phase 1: propose ---------------------------------------------------
     if proposing:
+        floor_text = pmap.get("minimum salary", pmap.get("minimum salary requirement", ""))
         draft = {"_confirmed": False,
                  "_instructions": "Fill function / seniority / low / avg / high per "
                                   "role, set include:false to drop a role, then set "
                                   "_confirmed:true. _evidence is informational."}
         for r in roles:
-            ev = build_evidence(r["_section"], top_functions)
+            ev = build_evidence(r["_section"], top_functions, floor_text)
             draft[r["_section"]["heading"]] = {
                 "include": True,
                 "function": None,
@@ -597,7 +670,16 @@ def main():
             print(f"\n   [{ev['research_rank']}] {r['_section']['heading']}")
             print(f"       tier={ev['stated_seniority_tier']!r} -> "
                   f"rule suggests {ev['seniority_suggested_by_rule']!r}"
-                  + ("   AMBIGUOUS - see Seniority Note" if ev["seniority_ambiguous"] else ""))
+                  + ("   AMBIGUOUS" if ev["seniority_ambiguous"] else ""))
+            if ev["seniority_ambiguous"]:
+                if ev["seniority_suggested_by_note"]:
+                    print(f"         note points at {ev['seniority_suggested_by_note']}"
+                          f" (on {ev['seniority_note_basis']!r}) - review, not auto-filled")
+                else:
+                    print(f"         note gives no clear direction: {ev['seniority_note_basis']}")
+            if not ev["salary_figures_beyond_the_floor"]:
+                print(f"       NO SALARY FIGURES of its own - prose only restates "
+                      f"the client's floor; figures must come from elsewhere")
             print(f"       heaviest functions: {top}")
             print(f"       salary scenarios named: {ev['salary_scenario_count']}")
         _print_findings()

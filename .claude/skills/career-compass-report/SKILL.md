@@ -304,6 +304,31 @@ altitude**. They are different scales. Map:
 Director-equivalent (function)" — flag the conflict and ask Todd which reading to
 use. Never silently pick one.**
 
+#### A Seniority Note usually CORRECTS the title rule, it does not obscure it
+
+The intuitive read is that a `Seniority Note` is about whether the client
+*qualifies* (years, tier equivalence) while the axis is about where the work
+*sits* — and that the note can therefore be discounted. **On the evidence that is
+backwards.** Measured across Austin's ten roles, four carried notes:
+
+| Note | About | Title rule | Correct band |
+|---|---|---|---|
+| "expecting 25+ years rather than 15+" | eligibility | Strategist | Strategist ✓ |
+| "Manager by title, **Director-equivalent by functional scope**, full P&L; both readings clear the years threshold" | altitude | Integrator | **Strategist ✗** |
+| "Manager by title, **individual contributor by function** — account book rather than direct reports" | altitude | Integrator | **Specialist ✗** |
+| "Manager by title, **individual contributor by function**" | altitude | Integrator | **Specialist ✗** |
+
+Three of four are altitude notes, and the title rule gets all three wrong. The
+second explicitly rules eligibility out ("both readings clear the years
+threshold"), leaving a pure altitude question.
+
+So the note is the signal that says *the title misdescribes the work*.
+`--propose` therefore reads the note for direction and prints that reading
+**alongside** the AMBIGUOUS flag — it never auto-fills `seniority`, which stays
+null for review. Do not "improve" this by suppressing the flag when the note
+looks like an eligibility note: a wrong auto-fill ships a dot in the wrong band
+with nothing to catch it, while an unnecessary flag costs five seconds.
+
 ### A role that genuinely straddles two levels
 
 Place the dot at the **confirmed / title-level** reading, and put the nuance in
@@ -343,6 +368,34 @@ When a source gives multiple bands, a bimodal range, or says "median/typical"
 without naming one — **stop and ask Todd for a real answer.** Never average
 competing bands or silently pick the flattering one. Midpoints are only computed
 once he's named the band.
+
+### The client's salary floor is aspirational at build time, not disqualifying
+
+The research handoff document already reflects the floor: it filters upstream,
+during research and validation. **A role that survived into the handoff has
+already been judged worth showing.** Do not re-apply the floor at build time as
+a reason to drop a role, and do not present "clears / does not clear the floor"
+as a selection criterion when walking Todd through role selection.
+
+Salary prose routinely says a role "sits below the $120,000 floor" — that is the
+research recording where the role lands, not a verdict on whether it belongs in
+the report. Report the figures the scenario gives and leave selection to Todd on
+his own grounds.
+
+### A role whose research names no salary figures
+
+Some roles' salary prose gives no numbers of their own — Austin's Relationship
+Manager says only that banking/wealth scope "clears the $120,000 floor cleanly."
+`--propose` flags these with **`SALARY_NO_FIGURES`** so the figures can be
+sourced during review rather than discovered at build time. Note the detection
+excludes the client's own stated minimum: the prose restates the floor, so
+counting any `$` as a figure misses exactly this case.
+
+The build behaviour is unchanged and already correct — null `low`/`avg`/`high`
+trips `JUDGMENT_FIELD` and refuses. **Do not add a "graceful" blank-salary
+rendering.** `fmt_salary(None)` raises, salary is printed in the TOC beside
+every role title as well as on the role page, and one blank row among nine
+populated ones reads as a defect rather than as an absence.
 
 ### Citation artifacts
 
