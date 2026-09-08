@@ -500,12 +500,35 @@ Run before telling Todd anything is done. Show real output, never a description.
   precedent) or something the parser should reconcile. **Todd's call — not yet
   decided, and no check has been written.**
 
-- **Brand fonts are blocked in Claude Code remote sessions, and this kills the
-  whole pipeline — not just graph styling.** DM Sans and Inter are fetched from
-  `github.com/google/fonts/raw/...`; the remote session's egress policy denies
-  that host with a 403, and it is not routable around (the agent proxy's own
-  README classes a 403 as an organization policy denial: report it, do not
-  retry).
+- **The font URL the code uses is blocked in Claude Code remote sessions, and
+  that kills the whole pipeline — not just graph styling.** Both modules fetch
+  DM Sans and Inter from `github.com/google/fonts/raw/...`, and the remote
+  session's egress policy denies that host with a 403. The agent proxy's own
+  README classes a 403 as an organization policy denial: report the blocked
+  host, do not retry.
+
+  **The blocked thing is that URL, not the fonts.** Measured Sept 8 2026 from a
+  remote session:
+
+  | URL | Result |
+  |---|---|
+  | `github.com/google/fonts/raw/main/ofl/dmsans/DMSans[opsz,wght].ttf` — what the code calls | **403** |
+  | `github.com/google/fonts` — the host generally | 403 |
+  | `raw.githubusercontent.com/google/fonts/main/ofl/dmsans/DMSans[opsz,wght].ttf` | **200** |
+  | `pypi.org` — control | 200 |
+
+  `raw.githubusercontent.com` is the host `github.com/.../raw/...` redirects to,
+  and it is permitted. Both faces download intact from it: verified by reading
+  the `name` tables with fontTools — `DM Sans 9pt` Regular v4.004 (240,164 B)
+  and `Inter` Regular v4.001 (876,576 B). Genuine variable fonts, confirmed by
+  inspection rather than assumed from a 200 and a plausible file size.
+
+  **The URLs are deliberately NOT changed.** Whether fetching the identical
+  asset from a permitted host is acceptable, or is the "routing around" the
+  proxy README forbids, is an organization egress-policy question for Todd and
+  not a technical one — and it is not decided as a side effect of wanting a
+  build to succeed. Pending that decision the code stands as written, and
+  `/tmp/fonts` is left unpopulated. (Todd, Sept 8 2026.)
 
   The severity depends on which module needs the font, and only one of the two
   has a fallback:
@@ -524,10 +547,17 @@ Run before telling Todd anything is done. Show real output, never a description.
 
   The earlier wording here ("graphs still render… treat any graph as not
   client-deliverable") understated this. It is not a cosmetic degradation to
-  inspect and discard — **nothing runs at all**, so there is no remote output to
-  judge. Local runs are unaffected. Verified Sept 4, Sept 5 and Sept 8 2026;
-  fixing it means allowlisting the font host or pre-populating `/tmp/fonts` with
-  the genuine faces, not changing the code.
+  inspect and discard — **as the code stands, nothing runs at all**, so there is
+  no remote output to judge. Local runs are unaffected. Verified Sept 4, Sept 5
+  and Sept 8 2026.
+
+  Note what that does and does not mean now. It is accurate that a remote
+  session cannot currently run the pipeline. It would **not** be accurate to say
+  the brand fonts are unreachable from a remote session — they are reachable,
+  from `raw.githubusercontent.com`, and the only reason the pipeline fails is
+  the URL the code happens to use. Three routes would each fix it: allowlisting
+  `github.com`, changing the URLs, or pre-populating `/tmp/fonts` from the
+  permitted host. All three await Todd's policy decision; none is taken.
 
   **Do not satisfy the import by dropping any available TTF at those paths.**
   `report_template.py` registers whatever file it finds under the names
