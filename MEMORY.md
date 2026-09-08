@@ -51,6 +51,15 @@ Keep this file short. If it's getting long, that usually means something belongs
   `salaryPeriod` fixed to `'annual'` (USD) as the only period offered. Stored as an
   integer and formatted for display only. Shipped in Phase 1.
   (Decided Sept 1 2026; confirmed and promoted Sept 7 2026)
+- **The client's salary floor is aspirational at build time, not disqualifying.** The
+  floor does its filtering upstream, during research and validation. A role that
+  survived into the research handoff document has already been judged worth showing,
+  so the floor is not re-applied at build time as a reason to drop a role — and
+  "clears / does not clear the floor" is not offered as a selection criterion when
+  walking Todd through which roles ship. Salary prose routinely records that a role
+  "sits below the $120,000 floor"; that is the research stating where the role lands,
+  not a verdict on whether it belongs in the report. This is a pipeline rule, not a
+  per-client judgment. (Sept 7 2026)
 
 ---
 
