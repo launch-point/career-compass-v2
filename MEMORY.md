@@ -100,6 +100,22 @@ Keep this file short. If it's getting long, that usually means something belongs
   reserve `\s` for where a newline is genuinely wanted.** Same family as the
   matplotlib `transAxes` entry above — invisible, plausible-looking, and easy to
   reintroduce. (Sept 7 2026)
+  *Earned its place within hours:* an externally-supplied patch for template v2.4
+  proposed replacing that pattern with a `\s*`-based one around the optional tail
+  group, which would have reintroduced this exact bug. Todd caught it before it
+  reached the repo. Treat any `\s` in a line-anchored pattern as suspect.
+- **Functional Mix description tails: required above 0%, forbidden at 0% (template
+  v2.4).** v2.3 dropped the `— description` tail, blanking the report's "How It Shows
+  Up In This Role" column on every function of every role; v2.4 restored it. The
+  parser enforces the template's three rules: `FUNCTION_DESC_MISSING` (**FAIL** —
+  above 0% with no tail), `FUNCTION_DESC_ON_ZERO` (WARN — a 0% function with a tail
+  contradicts its own percentage; the tail is discarded so the "Not a core function of
+  this role" sentinel still renders), and `FUNCTION_DESC_RESTATES_NAME` (WARN,
+  exact-match only). The old `TEMPLATE_GAP_NO_DESCRIPTION` warning is renamed and
+  promoted to FAIL — **a v2.3-era document now hard-fails by design**, because it
+  would otherwise ship blank cells to a client. Never synthesize a tail to satisfy the
+  check: the pre-v2.4 code turned an empty tail into `"."` and printed a bare period in
+  every row. A missing tail is a research-document fix. (Sept 7 2026)
 
 ---
 
@@ -117,15 +133,24 @@ Keep this file short. If it's getting long, that usually means something belongs
 - **Gitignored does not mean unreadable.** `reports/` is gitignored, which hides it from
   git and from a fresh clone — but not from the filesystem tools. Generated client
   artifacts can and should be verified directly on disk. (Sept 7 2026)
-- **When a verification run fails, suspect the test before the build.** Three times
-  in one session a reported failure was the check, not the code: `ls -R | head -40`
-  truncated a listing into a false "directory empty"; a legend check searched PDF
-  *text* for titles that live inside a PNG; and a drift scenario asserted a rank gap
-  after dropping the LAST role, which is genuinely undetectable — ranks 1..N-1 in an
-  (N-1)-role document is exactly what a legitimate shorter document looks like.
-  SESSION_LOG records two more in session 2, making this the most repeated failure
-  mode on this project. **Before reporting a failure, re-derive the expectation and
-  confirm the check can actually observe what it claims to.** (Sept 7 2026)
+- **When a verification run fails, check the harness before reporting the failure —
+  and treat this as a step, not a reminder.** Five times in one session a reported
+  failure was the check, not the code: `ls -R | head -40` truncated a listing into a
+  false "directory empty"; a legend check searched PDF *text* for titles that live
+  inside a PNG; a drift scenario asserted a rank gap after dropping the LAST role,
+  which is genuinely undetectable (ranks 1..N-1 in an (N-1)-role document is exactly
+  what a legitimate shorter document looks like); a drift mutation used an unanchored
+  `[—–-]` that matched the leading `- ` bullet marker and deleted the whole line, so
+  the *function* vanished instead of its description tail; and an em-dash written as
+  `\u2014` inside a raw replacement string raised `re.error: bad escape \u`.
+  SESSION_LOG records two more in session 2.
+  **The part worth acting on is not the count.** This entry already existed, in this
+  file, roughly an hour before the last two happened — and it did not change behaviour
+  in the moment. Recording a lesson here is demonstrably not the same as applying it
+  under momentum, so the countermeasure has to be procedural: before reporting any
+  verification failure, re-derive the expectation and confirm the check can actually
+  observe what it claims to — as an explicit step, not as something a note is trusted
+  to trigger. (Sept 7 2026)
 - **SESSION_LOG's session-2 "two approved SKILL.md edits never applied" entry is stale —
   both edits did land.** SKILL.md's mtime was Sept 4 17:34, after the 17:04 log entry;
   `## Setup`, `python3 -m venv`, `reportlab==`, `DejaVu Sans` and the role-mode docs are
