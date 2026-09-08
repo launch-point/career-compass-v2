@@ -82,11 +82,9 @@ Keep this file short. If it's getting long, that usually means something belongs
 
 - **Should the parser check that TOP 5 and NEXT 5 FUNCTIONS are disjoint — and at what level?** No such check exists. The parser reads `TOP 5 FUNCTIONS` and `TOP 5 VALUES` and **never reads `NEXT 5 FUNCTIONS` at all**, so an overlap between the two lists passes silently; the only duplicate check in the file is `RANK_DUPLICATE`, which covers `Rank:` values.
 
-  It distorts the report because `additional_functions` is the *complement* of `top_functions` over the Functional Mix bullets, and the template renders that list under the heading **"Functions 6-10"**. Overlapping entries route to the Top 5 table and can never reach the additional table, so "Functions 6-10" quietly renders fewer rows than the document declares.
+  It would distort a report because `additional_functions` is the *complement* of `top_functions` over the Functional Mix bullets, and the template renders that list under the heading **"Functions 6-10"**. Overlapping entries route to the Top 5 table and can never reach the additional table, so "Functions 6-10" would quietly render fewer rows than the document declares.
 
-  Henry Johnson's document has two such overlaps — "Presenting to people via TV, films, seminars, speeches" (top #5 / next #6) and "Performing, acting" (top #1 / next #10) — so only three distinct functions 6-10 are actually declared. Across all seven roles the Functional Mix bullets add exactly one non-top name, so that table would have rendered a single row.
-
-  Needs deciding: FAIL or WARN, and whether an overlap is a research-document fix (the `FUNCTION_DESC_MISSING` precedent says yes) or something the parser reconciles. Also whether Henry's document gets corrected upstream before his build. Detail in SKILL.md Known Gaps. (Logged Sept 8 2026 — verified by reading the parser, not inferred)
+  Needs deciding: FAIL or WARN, and whether the check belongs parser-side or template-side. **Parked for the 5-session review — not to be added mid-build.** Detail in SKILL.md Known Gaps, where the originating example is recorded. (Logged Sept 8 2026 — verified by reading the parser, not inferred. Narrowed to the general question Sept 8 2026: the document that surfaced it was corrected upstream, so no client document is currently affected.)
 
 ---
 
