@@ -443,3 +443,31 @@ Also settled 2026-09-07: the compact-mode label crowding flagged around the
 graph work is real and geometric, not font-related — but cosmetically negligible
 at the size the graph is actually placed in the PDF. Todd's call: leave as-is.
 See MEMORY.md's Decisions Made.
+
+---
+
+## Correction note — 2026-09-07 (re: commit 2934e48's message)
+
+**Commit `2934e48` states a wrong count in its message.** It says the propose
+step leaves "eight pre-filled and two flagged AMBIGUOUS" on Austin's v2.4
+document. The real split is **six pre-filled and four flagged** — research ranks
+2, 5, 9 and 10 all carry a `Seniority Note`, and all four are flagged.
+
+**The code was and is correct.** Only the commit message is wrong. Todd's call
+was to leave it rather than rewrite pushed history for a count, so this note is
+the correction of record — anyone reading `2934e48` later should read the count
+as 6/4.
+
+**It is the same failure pattern as the `ls -R | head -40` incident** recorded in
+MEMORY.md's Corrections Log: a number read off a truncated tail of command
+output and then asserted without re-checking. The earlier instance produced a
+transient wrong claim in conversation that was corrected minutes later. This one
+went into a commit message, so it is **permanent** — which is the part worth
+noticing. The cost of the pattern scales with the durability of what the claim
+gets written into, and a commit message is about as durable as this project
+gets.
+
+Practical consequence, if the 5-session review wants one: numbers that are
+going into a permanent artifact — a commit message, MEMORY.md, SKILL.md — should
+be re-derived from full output at the moment of writing, not carried forward
+from something read earlier in the session.
