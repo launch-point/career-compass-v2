@@ -119,8 +119,19 @@ def main():
     if len(sys.argv) < 3:
         raise SystemExit(__doc__)
     base = Path(sys.argv[1]).read_text()
-    judgment = Path(sys.argv[2]).resolve()
-    jkeys = list(json.loads(judgment.read_text()))
+    supplied = json.loads(Path(sys.argv[2]).read_text())
+    jkeys = [k for k in supplied if not k.startswith("_")]
+
+    # The drift scenarios exercise PARSING, so they get a confirmed copy of the
+    # judgment; the gate gets its own scenario below. Written beside the real
+    # file, never over it.
+    tmpdir = Path(tempfile.mkdtemp(prefix="drift_judgment_"))
+    confirmed = dict(supplied); confirmed["_confirmed"] = True
+    judgment = tmpdir / "confirmed.json"
+    judgment.write_text(json.dumps(confirmed, indent=2))
+    unconfirmed = tmpdir / "unconfirmed.json"
+    u = dict(supplied); u.pop("_confirmed", None)
+    unconfirmed.write_text(json.dumps(u, indent=2))
 
     heads = [m.group(1).strip() for m in sections(base)]
     roles = [h for h in heads if h in jkeys]
@@ -196,6 +207,11 @@ def main():
          to_v1_format(base), 1, ["FIELD_MISSING"], []),
     ]
 
+    # The human gate: an unconfirmed judgment must refuse to build, whatever
+    # else is correct about the document.
+    gate_code, gate_out, _ = run(base, unconfirmed)
+    gate_ok = gate_code == 1 and "JUDGMENT_UNCONFIRMED" in gate_out
+
     width = max(len(c[0]) for c in cases)
     failures = 0
     for name, text, want_exit, want, forbid in cases:
@@ -225,7 +241,14 @@ def main():
         for p in problems:
             print(f"          -> {p}")
 
-    print(f"\n{len(cases) - failures}/{len(cases)} scenarios passed")
+    gate_codes = (["JUDGMENT_UNCONFIRMED"] if gate_ok
+                  else sorted(set(re.findall(r"\[([A-Z_]+)\]", gate_out))))
+    gate_status = "PASS" if gate_ok else "FAIL"
+    gate_name = "an unconfirmed judgment refuses to build"
+    print(f"  {gate_status}  {gate_name:<{width}}  exit={gate_code} codes={gate_codes}")
+    failures += (not gate_ok)
+    total = len(cases) + 1
+    print(f"\n{total - failures}/{total} scenarios passed")
     sys.exit(1 if failures else 0)
 
 

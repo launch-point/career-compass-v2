@@ -19,6 +19,20 @@ Sections are classified as roles by CONTENT, never by heading name: a hardcoded
 skip for "Mapping Revision Notes" breaks the first time a section is called
 "Appendix".
 
+TWO PHASES, with a human gate between them. Judgment is not an input Todd has
+to produce cold before seeing anything:
+
+  1. `--propose <draft.json>` parses the research, validates the document in
+     full, and writes a DRAFT judgment carrying the evidence for each role —
+     stated seniority tier, functional mix by weight, and the salary prose
+     VERBATIM including its caveats. Proposed values are left `null`; they get
+     filled in review, so an unmade decision looks unmade rather than defaulted.
+  2. Todd corrects the draft, sets `include` per role, and sets
+     `"_confirmed": true`. Only then does the build run.
+
+The build REFUSES a judgment file without `"_confirmed": true`
+(JUDGMENT_UNCONFIRMED). The gate is structural, not a convention.
+
 Two things the markdown does NOT state come from a judgment file, because they
 are decisions rather than findings:
 
@@ -34,17 +48,38 @@ Judgment file — a JSON object keyed by the role heading exactly as it appears
 in the markdown:
 
   {
+    "_confirmed": true,
     "Program Director": {
+      "include": true,
       "function": "Operations",
       "seniority": "Strategist",
       "low": 101000, "avg": 113000, "high": 125000,
       "salary_context": "optional; parsed Salary prose wins when present",
       "seniority_note": "optional; the markdown's Seniority Note wins",
-      "title": "optional shorter title for the report"
+      "title": "optional shorter title for the report",
+      "_reasoning": "why this placement — kept for gate training",
+      "_note": "Todd's correction rationale, if he changed it",
+      "_evidence": { ... written by --propose, ignored on build ... }
     }
   }
 
+`include: false` drops a role from the report. It is an EXPLICIT flag, never an
+absence: a missing entry still means "not reviewed" and still fails NO_JUDGMENT.
+Dropped roles keep their entry, reasoning and evidence, so the decision stays
+auditable.
+
+Selected roles are RENUMBERED 1..N for the report; the document's own numbering
+is preserved as `research_rank`. Rank drives only display and internal wiring
+(the TOC numeral, page header, graph dot and legend), so a report numbered
+01-06, 08, 09, 10 would read as a printing error. RANK_GAP is unchanged and
+still validates the research document, which always holds the full set.
+
 Usage:
+    # phase 1 — propose
+    python parse_research_markdown.py <research.md> --propose <draft.json> \
+        --client "Full Name"
+
+    # phase 2 — build, after review
     python parse_research_markdown.py <research.md> <judgment.json> <out.json> \
         --client "Full Name" [--report-date "September 4, 2026"] [--strict]
 
@@ -113,6 +148,16 @@ REQUIRED_FOR_ROLE = ["rank", "alt_titles", "seniority", "functional_mix",
                      "values", "problems", "actions", "metrics", "travel"]
 
 NO_DESC = "Not a core function of this role."
+
+# SKILL.md's documented mapping from the source's eligibility tier to the
+# graph's work-altitude axis. Used only to PROPOSE a value, and only where the
+# document gives no Seniority Note — a note means the reading is contested, and
+# SKILL.md says flag it rather than silently pick.
+SENIORITY_RULE = {
+    "director": "Strategist",
+    "manager": "Integrator",
+    "individual contributor": "Specialist",
+}
 
 # Intra-line whitespace is [ \t], never \s. `\s` matches newlines, so a `\s*`
 # before the optional description group lets a bullet swallow the NEXT bullet
@@ -206,7 +251,58 @@ def pref(pmap, *aliases, default=""):
     return default
 
 
-def parse_role(sec, judgment, top_functions, top_values):
+SENTENCE = re.compile(r"(?<=[.!?])\s+")
+
+
+def salary_scenarios(prose_text):
+    """Sentences of the Salary prose that name a figure, VERBATIM.
+
+    Not summarised and not normalised: choosing between "$115,000-$203,000 in
+    corporate contexts" and "$69,000-$125,000 in nonprofit contexts" depends on
+    the caveats the research attached about org size and market tier, and a
+    paraphrase drops exactly those.
+    """
+    return [t.strip() for t in SENTENCE.split(prose_text or "") if "$" in t]
+
+
+def build_evidence(sec, top_functions):
+    """Everything a judgment call needs, extracted deterministically."""
+    body = sec["body"]
+    rm = SCALARS["rank"].search(body)
+    am = SCALARS["alt_titles"].search(body)
+    sm = SCALARS["seniority"].search(body)
+    sn = SCALARS["seniority_note"].search(body)
+    tier = strip(sm.group(1)) if sm else ""
+    note = strip(sn.group(1)) if sn else ""
+
+    mix = []
+    for name, pct, desc in PCT_BULLET.findall(
+            subsection(body, SUBSECTIONS["functional_mix"]) or ""):
+        mix.append({"name": strip(name), "pct": int(pct),
+                    "in_client_top5": strip(name) in top_functions})
+    mix.sort(key=lambda m: -m["pct"])
+
+    sal = prose(subsection(body, SUBSECTIONS["salary"]))
+    scenarios = salary_scenarios(sal)
+    # A note means the reading is contested; SKILL.md says flag it rather than
+    # pick. Only propose a band where the tier maps cleanly AND nothing disputes
+    # it — otherwise leave it null and say why.
+    suggested = SENIORITY_RULE.get(tier.lower()) if not note else None
+    return {
+        "research_rank": int(strip(rm.group(1))) if rm and strip(rm.group(1)).isdigit() else None,
+        "alt_titles": [a.strip() for a in strip(am.group(1)).split(",")] if am else [],
+        "stated_seniority_tier": tier,
+        "seniority_note_in_document": note,
+        "seniority_suggested_by_rule": suggested,
+        "seniority_ambiguous": bool(note) or suggested is None,
+        "functional_mix_by_weight": mix,
+        "salary_prose_verbatim": sal,
+        "salary_scenarios_verbatim": scenarios,
+        "salary_scenario_count": len(scenarios),
+    }
+
+
+def parse_role(sec, judgment, top_functions, top_values, check_judgment=True):
     """Parse one classified section into a role dict. Records findings."""
     head, body, where = sec["heading"], sec["body"], sec["heading"]
 
@@ -228,13 +324,24 @@ def parse_role(sec, judgment, top_functions, top_values):
     if am and strip(am.group(1)).lower() != "none":
         alts = [a.strip() for a in strip(am.group(1)).split(",") if a.strip()]
 
-    j = judgment.get(head)
+    j = (judgment or {}).get(head)
     if j is None:
-        fail(where, "NO_JUDGMENT", f"no judgment entry; known: {list(judgment)}")
         j = {}
-    for k in ("function", "seniority", "low", "avg", "high"):
-        if k not in j:
-            fail(where, "JUDGMENT_FIELD", f"judgment entry missing {k!r}")
+        if check_judgment:
+            # Absence is never "deliberately dropped" — that is `include: false`,
+            # an explicit flag. A missing entry means the role has not been
+            # reviewed, and the two must stay distinguishable.
+            fail(where, "NO_JUDGMENT", "no judgment entry; known: "
+                 f"{[k for k in (judgment or {}) if not k.startswith('_')]}")
+    include = bool(j.get("include", True))
+    if check_judgment and include:
+        # `is None` as well as absent: the draft pre-fills nulls, and a null
+        # that passed validation would ship an empty field. An EXCLUDED role
+        # needs none of these, so it is not asked for them.
+        for k in ("function", "seniority", "low", "avg", "high"):
+            if j.get(k) in (None, ""):
+                fail(where, "JUDGMENT_FIELD",
+                     f"judgment entry missing {k!r} (still null in the draft?)")
 
     # --- Functional Mix ---
     pcts = [0] * len(top_functions)
@@ -354,23 +461,66 @@ def parse_role(sec, judgment, top_functions, top_values):
         # v2.3 dropped the "**Bias self-check:**" marker. Kept for schema
         # compatibility; report_template.py does not reference this field.
         "bias_prevention_note": "",
-        "_section": sec,   # reporting only; stripped before serialising
+        # The document's own numbering, kept for traceability once the selected
+        # roles are renumbered 1..N for the report.
+        "research_rank": rank,
+        "_section": sec,     # reporting only; stripped before serialising
+        "_include": include, # selection flag; stripped before serialising
     }
+
+
+def _report_document(sections, skipped, parsed_n, selected_n,
+                     top_functions, top_values, pmap, known, gaps, dupes):
+    print(f"SECTIONS FOUND  : {len(sections)}")
+    print(f"ROLES PARSED    : {parsed_n}"
+          + ("" if selected_n is None or selected_n == parsed_n
+             else f"   SELECTED: {selected_n}"))
+    print(f"SECTIONS SKIPPED: {len(skipped)}")
+    for s in skipped:
+        miss = [m for m in ROLE_MARKERS if m not in s["markers"]]
+        print(f"   - {s['heading']!r} (line {s['line']}): "
+              f"{len(s['markers'])}/{len(ROLE_MARKERS)} role markers "
+              f"(need >={ROLE_MARKER_MIN}); missing {', '.join(miss[:6])}"
+              + ("..." if len(miss) > 6 else ""))
+    print(f"\nCLIENT PROFILE  : {len(top_functions)} top functions, "
+          f"{len(top_values)} values, {len(pmap)} work preferences")
+    print(f"RANK SEQUENCE   : declared {sorted(known)}  "
+          f"gaps={gaps or 'none'}  duplicates={dupes or 'none'}")
+
+
+def _print_findings():
+    fails = [f for f in FINDINGS if f[0] == "FAIL"]
+    warns = [f for f in FINDINGS if f[0] == "WARN"]
+    if FINDINGS:
+        print(f"\nFINDINGS ({len(fails)} FAIL, {len(warns)} WARN)")
+        for level, where, code, msg in FINDINGS:
+            print(f"   {level:4} [{code}] {where}: {msg}")
+    else:
+        print("\nFINDINGS: none")
+    return fails, warns
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("markdown"); ap.add_argument("judgment"); ap.add_argument("out")
+    ap.add_argument("markdown")
+    ap.add_argument("judgment", nargs="?", help="confirmed judgment JSON (build phase)")
+    ap.add_argument("out", nargs="?", help="client report JSON to write (build phase)")
+    ap.add_argument("--propose", metavar="DRAFT.json",
+                    help="phase 1: write a draft judgment with evidence, then stop")
     ap.add_argument("--client", required=True, help="Client full name")
     ap.add_argument("--report-date", default=None,
                     help='Defaults to today, e.g. "September 4, 2026"')
     ap.add_argument("--strict", action="store_true",
                     help="Treat WARN findings as fatal too")
     args = ap.parse_args()
+    proposing = bool(args.propose)
+    if not proposing and not (args.judgment and args.out):
+        ap.error("build phase needs <judgment.json> and <out.json>; "
+                 "or use --propose DRAFT.json for phase 1")
 
     md = Path(args.markdown).read_text()
-    judgment = json.loads(Path(args.judgment).read_text())
+    judgment = {} if proposing else json.loads(Path(args.judgment).read_text())
     report_date = args.report_date or date.today().strftime("%B %-d, %Y")
 
     top_functions = profile_list(md, r"TOP 5 FUNCTIONS")
@@ -390,16 +540,23 @@ def main():
     role_secs = [s for s in sections if s["is_role"]]
     skipped = [s for s in sections if not s["is_role"]]
 
-    roles = [parse_role(s, judgment, top_functions, top_values) for s in role_secs]
+    roles = [parse_role(s, judgment, top_functions, top_values,
+                        check_judgment=not proposing) for s in role_secs]
 
     # --- document-level validation ------------------------------------------
+    # These run over EVERY parsed role, before any selection. RANK_GAP and
+    # RANK_DUPLICATE validate the research document, which always holds the full
+    # set; selection happens afterwards and never reaches them.
     if not roles:
         fail("document", "NO_ROLES",
              f"no section carried >={ROLE_MARKER_MIN} role markers. "
              f"An empty role list is never a valid parse.")
-    elif not MIN_ROLES <= len(roles) <= MAX_ROLES:
-        fail("document", "ROLE_COUNT",
-             f"{len(roles)} roles; report_template.py supports {MIN_ROLES}-{MAX_ROLES}")
+    elif len(roles) > MAX_ROLES:
+        # Research over-producing is expected — narrowing is what the gate is
+        # for — so the parsed count warns while the SELECTED count is bounded.
+        warn("document", "PARSED_ABOVE_MAX",
+             f"{len(roles)} roles parsed, above the report maximum of {MAX_ROLES}; "
+             f"select at most {MAX_ROLES} with `include`")
 
     known = [r["rank"] for r in roles if r["rank"] is not None]
     dupes = sorted({r for r in known if known.count(r) > 1})
@@ -413,43 +570,91 @@ def main():
 
     roles.sort(key=lambda r: (r["rank"] is None, r["rank"]))
 
+    # --- phase 1: propose ---------------------------------------------------
+    if proposing:
+        draft = {"_confirmed": False,
+                 "_instructions": "Fill function / seniority / low / avg / high per "
+                                  "role, set include:false to drop a role, then set "
+                                  "_confirmed:true. _evidence is informational."}
+        for r in roles:
+            ev = build_evidence(r["_section"], top_functions)
+            draft[r["_section"]["heading"]] = {
+                "include": True,
+                "function": None,
+                "seniority": ev["seniority_suggested_by_rule"],
+                "low": None, "avg": None, "high": None,
+                "salary_context": "", "seniority_note": "",
+                "_reasoning": "", "_note": "", "_evidence": ev,
+            }
+        fails = [f for f in FINDINGS if f[0] == "FAIL"]
+        _report_document(sections, skipped, len(roles), None,
+                         top_functions, top_values, pmap, known, gaps, dupes)
+        print("\nPROPOSAL EVIDENCE")
+        for r in roles:
+            ev = draft[r["_section"]["heading"]]["_evidence"]
+            top = ", ".join(f"{m['name'][:34]} {m['pct']}%"
+                            for m in ev["functional_mix_by_weight"][:3])
+            print(f"\n   [{ev['research_rank']}] {r['_section']['heading']}")
+            print(f"       tier={ev['stated_seniority_tier']!r} -> "
+                  f"rule suggests {ev['seniority_suggested_by_rule']!r}"
+                  + ("   AMBIGUOUS - see Seniority Note" if ev["seniority_ambiguous"] else ""))
+            print(f"       heaviest functions: {top}")
+            print(f"       salary scenarios named: {ev['salary_scenario_count']}")
+        _print_findings()
+        if fails:
+            print(f"\nREFUSED: {len(fails)} FAIL. No draft written — fix the "
+                  f"research document before proposing judgment for it.")
+            sys.exit(1)
+        Path(args.propose).write_text(json.dumps(draft, indent=2, ensure_ascii=False))
+        print(f"\nWrote draft judgment: {args.propose}")
+        print(f"   {len(roles)} roles, all include:true, _confirmed:false.")
+        print(f"   Review, correct, set _confirmed:true, then run the build phase.")
+        return
+
+    # --- phase 2: the gate --------------------------------------------------
+    if judgment.get("_confirmed") is not True:
+        fail("document", "JUDGMENT_UNCONFIRMED",
+             'judgment file is not confirmed — set "_confirmed": true after review')
+
+    # --- selection and renumbering ------------------------------------------
+    dropped = [r for r in roles if not r["_include"]]
+    roles = [r for r in roles if r["_include"]]
+    if not MIN_ROLES <= len(roles) <= MAX_ROLES:
+        fail("document", "ROLE_COUNT",
+             f"{len(roles)} roles selected; report_template.py supports "
+             f"{MIN_ROLES}-{MAX_ROLES}")
+    research_ranks = [r["rank"] for r in roles]
+    for n, r in enumerate(roles, start=1):
+        r["rank"] = n
+    if research_ranks != list(range(1, len(roles) + 1)):
+        print(f"RENUMBERED      : research {research_ranks} -> report "
+              f"{list(range(1, len(roles) + 1))}")
+    assert [r["rank"] for r in roles] == list(range(1, len(roles) + 1)), \
+        "report ranks must be contiguous 1..N after renumbering"
+
     # --- report -------------------------------------------------------------
-    print(f"SECTIONS FOUND  : {len(sections)}")
-    print(f"ROLES PARSED    : {len(roles)}")
-    print(f"SECTIONS SKIPPED: {len(skipped)}")
-    for s in skipped:
-        miss = [m for m in ROLE_MARKERS if m not in s["markers"]]
-        print(f"   - {s['heading']!r} (line {s['line']}): "
-              f"{len(s['markers'])}/{len(ROLE_MARKERS)} role markers "
-              f"(need >={ROLE_MARKER_MIN}); missing {', '.join(miss[:6])}"
-              + ("..." if len(miss) > 6 else ""))
-    print(f"\nCLIENT PROFILE  : {len(top_functions)} top functions, "
-          f"{len(top_values)} values, {len(pmap)} work preferences")
-    print(f"RANK SEQUENCE   : declared {sorted(known)}  "
-          f"gaps={gaps or 'none'}  duplicates={dupes or 'none'}")
+    if dropped:
+        print(f"DROPPED         : {len(dropped)} role(s) with include:false — "
+              + ", ".join(f"{d['_section']['heading']} (research rank "
+                          f"{d['research_rank']})" for d in dropped))
+    _report_document(sections, skipped, len(roles) + len(dropped), len(roles),
+                     top_functions, top_values, pmap, known, gaps, dupes)
 
     print("\nPER-ROLE FIELD COMPLETENESS")
-    print(f"   {'rank':>4}  {'role':28} {'mark':>4} {'fn':>3} {'top5':>5} {'vals':>5} "
-          f"{'P/A/S':>8}  missing")
+    print(f"   {'rank':>4} {'res':>4}  {'role':28} {'mark':>4} {'fn':>3} {'top5':>5} "
+          f"{'vals':>5} {'P/A/S':>8}  missing")
     for r in roles:
         s = r["_section"]
         miss = [m for m in REQUIRED_FOR_ROLE if m not in s["markers"]]
         d = r["day_to_day"]
         present = sum(1 for x in r["function_descriptions_top5"] if x != NO_DESC)
-        print(f"   {r['rank']!s:>4}  {r['title'][:28]:28} "
+        print(f"   {r['rank']!s:>4} {r['research_rank']!s:>4}  {r['title'][:28]:28} "
               f"{len(s['markers']):>4} {present + len(r['additional_functions']):>3} "
               f"{present:>3}/5 {sum(1 for v in r['value_alignments'] if v):>3}/5 "
               f"{len(d['problems_solved'])}/{len(d['actions_taken'])}/{len(d['success_metrics']):<4}"
               f"  {','.join(miss) or '-'}")
 
-    fails = [f for f in FINDINGS if f[0] == "FAIL"]
-    warns = [f for f in FINDINGS if f[0] == "WARN"]
-    if FINDINGS:
-        print(f"\nFINDINGS ({len(fails)} FAIL, {len(warns)} WARN)")
-        for level, where, code, msg in FINDINGS:
-            print(f"   {level:4} [{code}] {where}: {msg}")
-    else:
-        print("\nFINDINGS: none")
+    fails, warns = _print_findings()
 
     if fails or (args.strict and warns):
         print(f"\nREFUSED: {len(fails)} FAIL"
@@ -459,6 +664,7 @@ def main():
 
     for r in roles:
         del r["_section"]
+        del r["_include"]
     data = {
         "client": {
             "name": args.client, "first_name": args.client.split()[0],

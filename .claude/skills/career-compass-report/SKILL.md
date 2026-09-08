@@ -43,13 +43,19 @@ renders but is off-brand, so check for that line if the type looks wrong.
 
 ## The Pipeline
 
-Four stages. Run them in order; each has a checkpoint with Todd.
+Run them in order. Judgment is produced through a gate, not supplied cold.
 
 ```
-research.md  ──parse──▶  {client}_client_report_data.json  ──▶  graphs (PNG)  ──▶  report.pdf
-                 ▲
-          judgment.json   (the decisions the markdown cannot answer)
+research.md ──propose──▶ draft_judgment.json ──▶ TODD REVIEWS ──▶ judgment.json
+                          (evidence, values null)   corrects,        (_confirmed:true)
+                                                    sets include            │
+                                                                            ▼
+research.md ──build──▶ {client}_client_report_data.json ──▶ graphs ──▶ report.pdf
 ```
+
+**The build refuses a judgment file without `"_confirmed": true`.** Todd does not
+produce function placements, seniority bands and salary picks before seeing
+anything — phase 1 shows him the evidence, he decides, phase 2 builds.
 
 All commands use the skill's own venv:
 
@@ -145,24 +151,70 @@ rank alone, because ranks 1..N-1 in an (N-1)-role document is exactly what a
 legitimate shorter document looks like. Catching that needs an expected count
 from outside the document.
 
-### 3. Judgment file
+### 3. Judgment — proposed, reviewed, then confirmed
 
-Per-client, supplied by you and Todd together, **gitignored** (keep it beside the
-client's other artifacts under `reports/<client>/`). JSON keyed by the role
-heading exactly as it appears in the markdown:
+Per-client, **gitignored** (keep it beside the client's other artifacts under
+`reports/<client>/`). Two phases.
+
+**Phase 1 — propose.** Validates the research document in full, then writes a
+draft carrying the evidence for each decision:
+
+```bash
+$PY $SKILL/parse_research_markdown.py <research.md> --propose <draft.json> \
+    --client "Full Name"
+```
+
+Each entry ships with `function`, `low`, `avg`, `high` as `null`, and
+`_evidence` holding the stated seniority tier, any Seniority Note, the
+functional mix by weight, and **the salary prose verbatim** — including its
+caveats about org size and market tier, because those are what the scenario
+choice turns on. Values stay null so an unmade decision looks unmade rather than
+defaulted. `seniority` is pre-filled from the mapping rule **only** where the
+tier maps cleanly and the document raises no Seniority Note; otherwise it is
+null and flagged AMBIGUOUS.
+
+Walk Todd through your proposals and reasoning in conversation. Do not fill the
+draft silently.
+
+**Phase 2 — build.** After Todd corrects the draft and sets `"_confirmed": true`:
+
+```bash
+$PY $SKILL/parse_research_markdown.py <research.md> <judgment.json> <out.json> \
+    --client "Full Name" --report-date "September 4, 2026"
+```
 
 ```json
 {
+  "_confirmed": true,
   "Program Director": {
+    "include": true,
     "function": "Operations",
     "seniority": "Strategist",
     "low": 101000, "avg": 113000, "high": 125000,
     "salary_context": "Nonprofit-context analytical band. …",
     "seniority_note": "",
-    "title": "optional shorter title for the report"
+    "title": "optional shorter title for the report",
+    "_reasoning": "why — kept for gate training",
+    "_note": "Todd's correction rationale, if he changed it"
   }
 }
 ```
+
+**Role selection.** `include: false` drops a role. It is an explicit flag, never
+an absence — a missing entry still means "not reviewed" and still fails
+`NO_JUDGMENT`. Dropped roles keep their entry and reasoning, so the decision
+stays auditable. An excluded role is not asked for `function`/`seniority`/salary.
+
+**Renumbering.** Selected roles are renumbered 1..N for the report; the
+document's numbering is preserved as `research_rank`, and the mapping prints as
+a `RENUMBERED` line. Rank drives only display and wiring (TOC numeral, page
+header, graph dot and legend), so a report numbered 01-06, 08, 09, 10 would read
+as a printing error. `RANK_GAP` is unchanged and still validates the research
+document, which always holds the full set — selection happens after it.
+
+**Counts.** `MIN_ROLES`/`MAX_ROLES` bound the **selected** set. A research
+document above `MAX_ROLES` warns (`PARSED_ABOVE_MAX`) rather than failing:
+over-producing is expected, and narrowing is what the gate is for.
 
 - `function` — one of the 10 fixed business functions (Executive Leadership,
   Product, Marketing, Sales, Customer Experience, Operations, Human Resources,
