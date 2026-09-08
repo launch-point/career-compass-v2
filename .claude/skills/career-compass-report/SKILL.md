@@ -83,7 +83,16 @@ the document's own revision note.
 
 ### 2. Parse
 
+Two phases — propose first, build only after Todd has confirmed. Running the
+build form without a confirmed judgment file is an error, not a shortcut; see
+**3. Judgment** below.
+
 ```bash
+# phase 1 — propose (no judgment file exists yet)
+$PY $SKILL/parse_research_markdown.py <research.md> --propose <draft.json> \
+    --client "Full Name"
+
+# phase 2 — build, after review
 $PY $SKILL/parse_research_markdown.py <research.md> <judgment.json> <out.json> \
     --client "Full Name" [--report-date "September 4, 2026"]
 ```
