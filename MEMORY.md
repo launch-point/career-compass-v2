@@ -60,6 +60,19 @@ Keep this file short. If it's getting long, that usually means something belongs
   "sits below the $120,000 floor"; that is the research stating where the role lands,
   not a verdict on whether it belongs in the report. This is a pipeline rule, not a
   per-client judgment. (Sept 7 2026)
+- **A format defect in a research document goes back to the research thread — it is
+  never patched at the build step.** This holds even when the fix is lossless and
+  cheap to do locally. The reason is not purity: the research thread does not learn
+  from a silent downstream fix, so it produces the same defect on the next client.
+  Applied twice now with the same reasoning — the Functional Mix description tails
+  (v2.3, which blanked "How It Shows Up In This Role" on every row) and Henry
+  Johnson's prose "Why This Fits You" (v2.4, five keyed entries collapsed into one
+  summary paragraph). Both were mechanically trivial to reconcile in the parser;
+  both went upstream instead.
+
+  **Corollary: this is why the parser refuses rather than synthesizes.** A parser
+  that fills gaps hides the very signal the upstream thread needs to correct itself.
+  (Sept 8 2026 — directed by Todd)
 
 ---
 
