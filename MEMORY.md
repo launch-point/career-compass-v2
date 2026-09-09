@@ -18,7 +18,7 @@ Keep this file short. If it's getting long, that usually means something belongs
 
 **Phase:** 2 — Report PDF template (**complete and proven**)
 **State:**
-- **Phase 1 (intake form + minimal admin view): built and deployed.** Live in production at `career.ministrytomarketplace.co`. Supabase-verified **on writes and RLS only** — both confirmed against the live project. **The prod magic-link sign-in path was not part of that verification and may never have had a successful end-to-end run.** `LoginPanel.tsx` routes to a dev-cookie path whenever `NEXT_PUBLIC_SUPABASE_URL` is unset, so local testing bypasses Supabase auth entirely. Sign-in is failing in prod as of Sept 9 2026 (`otp_expired` on a fresh link) and is under diagnosis. Do not read "Supabase-verified" as covering auth. This is the same class of problem as a stale entry: a note that reads broader than what was actually tested end to end. (Narrowed Sept 9 2026 — directed by Todd.)
+- **Phase 1 (intake form + minimal admin view): built and deployed.** Live in production at `career.ministrytomarketplace.co`. Supabase-verified **on writes and RLS only** — both confirmed against the live project. **The prod magic-link sign-in path was not part of that verification and may never have had a successful end-to-end run.** `LoginPanel.tsx` routes to a dev-cookie path whenever `NEXT_PUBLIC_SUPABASE_URL` is unset, so local testing bypasses Supabase auth entirely. **Sign-in is now confirmed working end to end in production (Sept 9 2026):** a magic link signed Todd in and resumed his in-progress intake. Do not read the original "Supabase-verified" note as having covered auth — it did not. That was the same class of problem as a stale entry: a note reading broader than what was actually tested end to end. (Narrowed Sept 9 2026; auth confirmed working Sept 9 2026 — both directed by Todd.)
 - **Phase 2 (report build): built, verified, and reviewed.** The full pipeline — Stage-2 research markdown → `parse_research_markdown.py` → `graph_generator.py` → `report_template.py` → branded PDF — has produced a real client report end to end: **Austin Scheiwe, 26 pages.** Independently verified against actual page content, and personally reviewed by Todd. The `career-compass-report` skill has additionally been cold-session verified multiple times across different environments. Phase 2 is not "unverified work" — treat it as proven.
 
 **Do not mistake gitignore for absence.** The Austin Scheiwe report and all generated client artifacts live in `reports/scheiwe/`, and `reports/` is gitignored. They are absent from git and from any fresh clone, but they are real and present on Todd's Mac. A future session that cannot see them in git must not conclude the work was never done — check the filesystem.
@@ -127,6 +127,30 @@ and salary structures.
 ## Technical Notes & Gotchas
 
 *Things that cost time to figure out once and shouldn't cost time again.*
+
+- **Magic-link auth: custom SMTP is configured and working, and the real fix for the
+  `otp_expired` failures was Supabase's Site URL — not anything in this codebase.**
+
+  *SMTP (cleared, no longer a constraint on real client use):* Resend, configured in the
+  Supabase dashboard — `smtp.resend.com:465`, username `resend`, the Resend API key as the
+  password, sending domain verified on `ministrytomarketplace.co`. Nothing about it lives
+  in this repo, so grepping the tree for `smtp` finds nothing; it is dashboard state.
+  Confirmed past Supabase's default built-in ceiling (~2/hour): 8 sends in 10 hours and 3
+  within 2 minutes, all registering in Resend rather than silently falling back to
+  Supabase's own sender.
+
+  *The actual root cause of the sign-in failures:* Supabase's **Site URL** was still
+  `http://localhost:3000`. Every emailed link was baked with the wrong base, and the
+  `otp_expired` / "Email link is invalid or has expired" errors were downstream of that.
+  Correcting Site URL to the production domain fixed sign-in.
+
+  **The callback diagnostics did not fix this.** Commit `4af9ac8` (deployed to `main` as
+  `64d727c`) only changed `auth/callback` from swallowing every failure to reporting a
+  named `?auth_error=` — `missing_code`, `exchange_failed`, `no_session`, or a
+  query-string `error_code` passthrough — with a matching `console.error` in the Vercel
+  function logs. That is worth keeping because the next failure will be legible, but it
+  repaired nothing. **When auth breaks, check Supabase's Site URL and Redirect URLs
+  before reading application code.** (Sept 9 2026)
 
 - **A fresh clone has no venv and no `reports/` — both gitignored by design.** `.claude/skills/career-compass-report/.venv/` and `reports/` are both in `.gitignore`, so any new clone gets the report skill's scripts (`SKILL.md`, the three `.py` files, `assets/`, `fixtures/`) but no Python interpreter and no client artifacts — no research markdown, judgment file, generated JSON, or PDF. Verified directly on a fresh remote clone, Sept 5 2026. **Practical rule: use a remote/cloud session to inspect the pipeline's source and the research document; run every actual pipeline command locally.** The venv gap is only setup friction (build it per SKILL.md's pins and it's gone) — confirmed today, and the four pins resolve fine on Python 3.11 as well as the 3.9 they were verified on. The egress policy blocks `github.com` (→ 403), which is the host both modules fetch DM Sans and Inter from.
 
