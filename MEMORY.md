@@ -32,6 +32,14 @@ and salary structures.
 
 *(Phase 1 status confirmed by Todd Sept 4 2026. Phase 2 completion confirmed by Todd Sept 7 2026; 26-page count and embedded DM Sans/Inter independently re-confirmed from the PDF that same day. Henry Johnson run confirmed complete by Todd Sept 8 2026.)*
 
+**Submit → Make.com → Slack notification pipeline is live and verified end to end
+(Sept 9 2026).** A real submission through the production intake form produced a correct
+Slack header and thread: requirements, all 16 story fields, and all four arrays render.
+Story 4 was correctly empty (only three stories filled). This also independently confirms
+the webhook payload refactor `0a7bc4f` is live and correct in production — `functions.next5`
+contains genuinely different items from `functions.top5`, so the computed filter is doing
+real work rather than being a rename. Verified by Todd against the actual Slack message.
+
 ---
 
 ## Decisions Made
@@ -127,6 +135,28 @@ and salary structures.
 ## Technical Notes & Gotchas
 
 *Things that cost time to figure out once and shouldn't cost time again.*
+
+- **Make.com: a scenario built by hand and never run against real traffic silently
+  renders every field empty — and unprefixed `{{field}}` references are inert text.**
+  Two compounding causes, both of which produced blank Slack fields:
+
+  1. **The webhook had never determined its data structure** ("No data detected"). The
+     scenario was built in session 1 but no real submission ever reached it — the 2/hour
+     Supabase email ceiling prevented completing one. Until a live payload arrives and the
+     structure is detected, downstream modules have nothing to bind to.
+  2. **The Slack module's field mappings were hand-typed** as `{{email}}`,
+     `{{requirements.currentJobTitle}}` and so on. **Make.com references need the
+     module-ID prefix — `{{2.email}}` — to bind to the webhook's output.** Without it they
+     are inert literal text and render empty.
+
+  Fix: detect the data structure from a live submission, then rewrite every reference in
+  both Slack messages with the `2.` prefix.
+
+  **The diagnostic tell is the key part.** Fields *unrelated to any recent change* were
+  also blank. If only the recently-changed fields were empty you would suspect the change;
+  when everything is empty, including untouched fields, suspect the scenario's binding —
+  not the payload. That distinction is what separates this from the payload-shape problem
+  it was initially confused with. (Sept 9 2026)
 
 - **Magic-link auth: custom SMTP is configured and working, and the real fix for the
   `otp_expired` failures was Supabase's Site URL — not anything in this codebase.**
@@ -333,3 +363,6 @@ and salary structures.
 - Full admin dashboard: client table, top-5 column, PDF download (Phase 4)
 - Agent training loop: pattern surfacing every ~5 sessions to turn Todd's intuitive gate decisions into explicit rules (after phases 1–4)
 - Fixed master role list of 50–100 real roles (Todd building in parallel, manually)
+- Slack message cosmetics (not blocking; pipeline works): the four arrays render
+  comma-separated on one line rather than one item per line, and `submittedAt` renders as
+  raw ISO (`2026-09-09T14:31:59.899+00:00`) rather than a readable date. (Noted Sept 9 2026)
