@@ -116,6 +116,32 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
 
 *Things that need Todd's input before they can be resolved. Remove once answered — move the answer to Decisions.*
 
+- **Are `seniority_note` and `salary_context` one problem — per-role prose the pipeline
+  cannot route by audience?** Two symptoms, opposite directions, same shape:
+
+  | Field | Behaviour |
+  |---|---|
+  | `salary_context` | parsed into the report JSON and **never rendered** |
+  | `seniority_note` | **rendered verbatim and cannot be suppressed** — `parse_research_markdown.py:513` treats the document's `Seniority Note:` as authoritative and the judgment value as a fallback only |
+
+  The `seniority_note` half is the serious one. On Jensen Harper's build, three notes
+  written **to Todd** — one asserting prior client direction, one referencing "an earlier
+  draft" — were replaced with client-facing text Todd approved, written into the judgment
+  file, and then silently discarded by the build, which printed `FINDINGS: none`. **A note
+  written to Todd shipping to a client, with no finding raised, is a silent override of his
+  judgment in the worst direction.** Caught only by rendering the page and reading it.
+  Detail in SESSION_LOG session 6 — raw observation, not yet confirmed.
+
+  Neither field distinguishes internal prose from client-facing prose; the pipeline has no
+  concept of audience for per-role text. **Worth testing at the next review whether one fix
+  covers both** rather than solving them separately.
+
+  **The fix itself stays open.** Three options were put to Todd for `seniority_note` — ask
+  the research thread for client-facing notes, split the template into a client-facing
+  `Seniority Note:` plus an internal field the parser ignores, or flip the parser
+  precedence. The template split was recommended. Todd has deliberately not decided; this
+  is a real choice and not one to make at the end of a long session. (Logged Sept 9 2026)
+
 - **Do research-only clients need a `clients` row — or is that simply not how they work?**
   The research path and the intake path have never met. Henry Johnson has no row in `clients`
   because his report was built from a research markdown Todd supplied directly, not from an intake
