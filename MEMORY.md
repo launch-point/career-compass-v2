@@ -212,6 +212,27 @@ and salary structures.
 
 *When Todd corrects something, capture it here so the same mistake doesn't repeat. Include what was wrong and what the right behavior is.*
 
+- **Work landing on `phase-2-report` is NOT deployed. Production tracks `main`.**
+  `career.ministrytomarketplace.co` builds from `main`, and as of Sept 9 2026 `main`
+  is **49 commits behind** `phase-2-report`. Todd had been reasoning as though branch
+  work was live; it is not, and neither is anything else merged only to the branch.
+  Verified two ways, not assumed: the old callback route is still the file content at
+  `origin/main`, and a live `GET /auth/callback` returned `location: .../` rather than
+  the new `?auth_error=missing_code`.
+
+  **What this means is already concrete, not hypothetical.** Commit `e69a1dc` — the
+  webhook payload refactor that flattened `functions`/`values` from
+  `top5`/`top10` object arrays to `top5`/`next5` label-string arrays, plus the
+  `admin/[id]/page.tsx` change that adapts the consumer to it — has never been live.
+  **Production still emits the OLD payload shape.** Any downstream consumer built
+  against the new shape is reading a contract that prod does not serve.
+
+  Only three app files differ between `main` and the branch; everything else in those
+  49 commits is docs, MEMORY/SESSION_LOG, and the report skill, none of which ships in
+  the web app. **Before assuming any intake-app behaviour is live, check it against
+  `origin/main` — not against the working tree or the branch.** (Sept 9 2026 —
+  directed by Todd)
+
 - **Never conclude "absent" from a truncated command.** Ran `ls -R reports | head -40`;
   the pipe cut the output at exactly the `reports/scheiwe:` line, so the directory read as
   empty and Austin's finished 26-page report was reported to Todd as missing/unbuilt. All
