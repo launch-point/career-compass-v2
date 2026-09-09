@@ -16,10 +16,23 @@ Keep this file short. If it's getting long, that usually means something belongs
 
 ## Current Status
 
-**Phase:** 2 — Report PDF template (**complete and proven**)
+**Phase:** 4 step 1 — Drive upload (**complete and verified**); steps 2–3 not started
 **State:**
 - **Phase 1 (intake form + minimal admin view): built and deployed.** Live in production at `career.ministrytomarketplace.co`. Supabase-verified **on writes and RLS only** — both confirmed against the live project. **The prod magic-link sign-in path was not part of that verification and may never have had a successful end-to-end run.** `LoginPanel.tsx` routes to a dev-cookie path whenever `NEXT_PUBLIC_SUPABASE_URL` is unset, so local testing bypasses Supabase auth entirely. **Sign-in is now confirmed working end to end in production (Sept 9 2026):** a magic link signed Todd in and resumed his in-progress intake. Do not read the original "Supabase-verified" note as having covered auth — it did not. That was the same class of problem as a stale entry: a note reading broader than what was actually tested end to end. (Narrowed Sept 9 2026; auth confirmed working Sept 9 2026 — both directed by Todd.)
 - **Phase 2 (report build): built, verified, and reviewed.** The full pipeline — Stage-2 research markdown → `parse_research_markdown.py` → `graph_generator.py` → `report_template.py` → branded PDF — has produced a real client report end to end: **Austin Scheiwe, 26 pages.** Independently verified against actual page content, and personally reviewed by Todd. The `career-compass-report` skill has additionally been cold-session verified multiple times across different environments. Phase 2 is not "unverified work" — treat it as proven.
+- **Phase 4 step 1 (Drive upload after Gate 4): built and verified end to end, Sept 9 2026.**
+  `upload_report.py` uploads an approved PDF to Drive, sets link sharing to anyone-with-the-link,
+  and records the link on `clients`. Proven with a real run: Henry Johnson's 822KB PDF uploaded to
+  the folder `Career Compass Reports` (`1dRdVO-LSrk9diSkQQ2ysuZwYIDtfkZGo`), permissions read back
+  as `type=anyone role=reader`, the link fetched with **no Google session** returning the PDF
+  byte-identical to the local file, and all four `report_*` columns written and read back through
+  PostgREST. Auth is OAuth (Internal consent screen, `drive.file` scope, refresh token) — **not** a
+  service account: `iam.disableServiceAccountKeyCreation` is enforced org-wide. Credentials live
+  **outside the repo** at `~/.config/career-compass/credentials.json`, mode 0600, and the scripts
+  refuse to run if that file is readable beyond its owner. Supabase creds are *not* duplicated
+  there — the uploader reads them from `intake-app/.env.local`. Migration `0002` is applied to
+  production. Verified against the test row `todd+careertest1@launchpoint.co`, whose columns were
+  nulled afterwards so it does not look like a real delivery.
 
 **Do not mistake gitignore for absence.** The Austin Scheiwe report and all generated client artifacts live in `reports/scheiwe/`, and `reports/` is gitignored. They are absent from git and from any fresh clone, but they are real and present on Todd's Mac. A future session that cannot see them in git must not conclude the work was never done — check the filesystem.
 
@@ -102,6 +115,22 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
 ## Open Questions
 
 *Things that need Todd's input before they can be resolved. Remove once answered — move the answer to Decisions.*
+
+- **Do research-only clients need a `clients` row — or is that simply not how they work?**
+  The research path and the intake path have never met. Henry Johnson has no row in `clients`
+  because his report was built from a research markdown Todd supplied directly, not from an intake
+  submission; the whole table is two rows, both Todd's own test accounts. This surfaced when
+  verifying the Drive upload, which keys the report link to `clients.id` and therefore had no real
+  row to write to (verified by querying the table, not assumed).
+
+  `--client-id` bridges the gap going forward, but **every report built before it existed has no
+  way back to a Supabase row** — the report JSON carries only a name. Austin Scheiwe, Henry Johnson
+  and Jensen Harper are all in that state.
+
+  Needs deciding: whether a research-only client gets a `clients` row created for them (and by
+  what, since nothing currently does), or whether report delivery for those clients simply is not
+  database-backed and the Drive link is handed over some other way. Not urgent — it only blocks
+  uploading reports for clients who never filled in the intake form. (Logged Sept 9 2026)
 
 - **Should the parser check that TOP 5 and NEXT 5 FUNCTIONS are disjoint — and at what level?** No such check exists. The parser reads `TOP 5 FUNCTIONS` and `TOP 5 VALUES` and **never reads `NEXT 5 FUNCTIONS` at all**, so an overlap between the two lists passes silently; the only duplicate check in the file is `RANK_DUPLICATE`, which covers `Rank:` values.
 
