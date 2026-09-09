@@ -187,6 +187,10 @@ NAMED_BULLET = re.compile(r"^[ \t]*[-*+][ \t]*([^:\n]{2,80}?):[ \t]+(\S[^\n]*)$"
 PLAIN_BULLET = re.compile(r"^[ \t]*[-*+][ \t]+(\S[^\n]*)$", re.M)
 # Client-profile list items: numbered (v2.3) or bulleted (v1). Both accepted.
 LIST_ITEM    = re.compile(r"^[ \t]*(?:[-*+]|\d+\.)[ \t]+(\S[^\n]*?)[ \t]*$", re.M)
+# Supabase clients.id. Absent is a workflow state; malformed is a typo that would
+# write the report link against no row at all — different failures, different levels.
+CLIENT_ID_RE = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-"
+                          r"[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
 
 CITE = re.compile(r"\s*\[cite:\d+\]")
 strip = lambda s: CITE.sub("", s or "").strip()
@@ -572,6 +576,28 @@ def _print_findings():
     return fails, warns
 
 
+def resolve_client_id(cli_value, judgment):
+    """Resolve the Supabase client id and record a finding about it.
+
+    --client-id wins; otherwise _client_id carried in the judgment file (put
+    there by --propose). Absent -> WARN: the report still builds, only the Drive
+    upload refuses. Malformed -> FAIL: a typo would silently key the report link
+    to nothing.
+    """
+    value = str(cli_value or (judgment or {}).get("_client_id") or "").strip()
+    if not value:
+        warn("document", "CLIENT_ID_ABSENT",
+             "no --client-id and no _client_id in the judgment file; the report "
+             "will build but upload_report.py will refuse it")
+        return None
+    if not CLIENT_ID_RE.match(value):
+        fail("document", "CLIENT_ID_MALFORMED",
+             f"--client-id {value!r} is not a UUID; it would key the report link "
+             f"to no client row")
+        return None
+    return value
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -581,6 +607,11 @@ def main():
     ap.add_argument("--propose", metavar="DRAFT.json",
                     help="phase 1: write a draft judgment with evidence, then stop")
     ap.add_argument("--client", required=True, help="Client full name")
+    ap.add_argument("--client-id", default=None,
+                    help="Supabase clients.id (UUID). Carried through the judgment "
+                         "file into the report JSON so the Drive upload can key the "
+                         "report link to the client row. Optional: absent is a WARN, "
+                         "malformed is a FAIL.")
     ap.add_argument("--report-date", default=None,
                     help='Defaults to today, e.g. "September 4, 2026"')
     ap.add_argument("--strict", action="store_true",
@@ -594,6 +625,9 @@ def main():
     md = Path(args.markdown).read_text()
     judgment = {} if proposing else json.loads(Path(args.judgment).read_text())
     report_date = args.report_date or date.today().strftime("%B %-d, %Y")
+    # Findings are recorded here so CLIENT_ID_ABSENT / _MALFORMED print with
+    # every other finding rather than as a separate special case.
+    client_id = resolve_client_id(args.client_id, judgment)
 
     top_functions = profile_list(md, r"TOP 5 FUNCTIONS")
     top_values = profile_list(md, r"TOP 5 VALUES")
@@ -646,9 +680,12 @@ def main():
     if proposing:
         floor_text = pmap.get("minimum salary", pmap.get("minimum salary requirement", ""))
         draft = {"_confirmed": False,
+                 "_client_id": client_id or "",
                  "_instructions": "Fill function / seniority / low / avg / high per "
                                   "role, set include:false to drop a role, then set "
-                                  "_confirmed:true. _evidence is informational."}
+                                  "_confirmed:true. _evidence is informational. "
+                                  "_client_id is the Supabase clients.id the Drive "
+                                  "upload keys the report link to."}
         for r in roles:
             ev = build_evidence(r["_section"], top_functions, floor_text)
             draft[r["_section"]["heading"]] = {
@@ -750,6 +787,7 @@ def main():
     data = {
         "client": {
             "name": args.client, "first_name": args.client.split()[0],
+            "client_id": client_id,
             "report_date": report_date,
             "values": top_values, "functions": top_functions,
             "work_preferences": {

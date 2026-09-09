@@ -291,6 +291,63 @@ Two-pass build: pass 1 measures pagination, pass 2 writes final page numbers.
 Both graph modes are generated **before** pass 1 — a graph present in only one
 pass shifts pagination and silently corrupts the TOC.
 
+### 6. After Gate 4: upload to Drive
+
+**This runs after Todd approves the PDF, not when the build finishes.** Those are
+different events, which is why upload is its own script rather than a flag on the
+build.
+
+```bash
+$PY $SKILL/upload_report.py <out.json> <output.pdf>
+```
+
+Uploads the approved PDF to the shared Drive folder, sets link sharing to
+*anyone with the link*, and records the link against the client's Supabase row.
+
+**Setup, once per machine** — see `credentials.example.json` at the repo root:
+
+```bash
+mkdir -p ~/.config/career-compass
+cp credentials.example.json ~/.config/career-compass/credentials.json
+chmod 600 ~/.config/career-compass/credentials.json
+# fill in google_oauth_client_id + google_oauth_client_secret, then:
+$PY $SKILL/authorize.py                      # prints the refresh token; paste it in
+$PY $SKILL/upload_report.py --init-folder "Career Compass Reports"
+# paste the folder id in as drive_reports_folder_id
+```
+
+Credentials live **outside the repo** at `~/.config/career-compass/credentials.json`
+(override with `CAREER_COMPASS_CONFIG`), and the scripts refuse to run if that file
+is readable beyond your user. Gitignored is not the same as protected. Supabase
+credentials are *not* duplicated there — the uploader reads
+`NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` from
+`intake-app/.env.local`, the file the Next.js app already uses.
+
+**The client id.** `upload_report.py` keys the link to `clients.id`, which reaches
+it via `--client-id` at the propose step → `_client_id` in the judgment file →
+`client.client_id` in the report JSON. Absent is a **WARN** (`CLIENT_ID_ABSENT`) —
+the report still builds, only the upload refuses. Malformed is a **FAIL**
+(`CLIENT_ID_MALFORMED`), because a typo would key the link to no row at all.
+`--client-id` on the uploader overrides, for a report built before the id was known.
+
+**Naming.** Every upload creates a new file named
+`{First}_{Last}_Career_Compass_Report_{YYYYMMDD-HHMMSS}.pdf`. Nothing is ever
+overwritten, so a revised report cannot destroy a copy the client already has open.
+The Supabase columns point at the newest; the folder is the history.
+
+**Exit codes.** `0` ok · `1` precondition/validation · `2` uploaded but NOT
+recorded · `3` auth.
+
+Exit 2 is the one partial worth knowing: the PDF reached Drive but the database
+write failed, so screen 3 would wait forever with nothing to show. It prints the
+file id and link under `UPLOADED BUT NOT RECORDED`. Recover with `--record-only
+<fileId>`, which finishes the database write **without uploading a second copy**.
+Never re-run the plain command to fix an exit 2 — that uploads a duplicate.
+
+Exit 3 means the refresh token is dead (revoked, or the password changed):
+re-run `authorize.py` and paste the new token in. Nothing retries automatically —
+a retry here would hide exactly the failures worth seeing.
+
 ---
 
 ## Durable Rules
