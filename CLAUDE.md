@@ -88,6 +88,18 @@ The standard it enforces:
 
 If you can't verify something, say that instead of implying it works.
 
+## Delivering a Finished PDF
+
+**Every time a client report PDF is built and saved to Todd's Mac, give him the full file path — without being asked.** Include the folder path as a runnable `open` command so he can get to it in one click:
+
+```
+open "/absolute/path/to/reports/<client>/"
+```
+
+Give the path every time, including on a rebuild that overwrites an existing PDF. Reports land in `reports/<client>/`, which is gitignored and buried several levels deep in the project — Todd should never have to ask where the file went or dig for it.
+
+**This path is for Todd's Gate 4 review — it is not how the client receives the report.** Upload runs *after* his approval, so the local file remains how he first sees a finished report, and the path is still owed every time. What the client receives is the Drive link written by `upload_report.py` — see the report skill's SKILL.md, "After Gate 4: upload to Drive". (Directed by Todd Sept 9 2026; narrowed the same day, once Drive upload was verified end to end.)
+
 ## Skills
 
 | Skill | Fires when... |
