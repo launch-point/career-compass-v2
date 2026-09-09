@@ -685,3 +685,106 @@ not the fonts) and MEMORY has been rewritten twice. Moot — Todd's call.
 
 Gate 4 confirmed for Henry Johnson this session; the run is recorded complete in
 MEMORY.md's Current Status.
+
+---
+
+## Session 6 — 2026-09-09 — Jensen Harper propose + build; seniority_note leak
+
+**Raw observations. Not authoritative.**
+
+### What ran
+
+**Third full client run of the pipeline.** `Jensen-Harper-Roles.md` (7 roles) →
+`--propose` → judgment across three exchanges with Todd → build → **29-page PDF,
+7 roles**, the largest role count shipped so far. Both parse phases reported
+`FINDINGS: none`. Artifacts under gitignored `reports/harper/`:
+`Jensen_Harper_Roles.md`, `draft_judgment.json`, `harper_judgment.json`,
+`harper_jensen_client_report_data.json`,
+`Jensen_Harper_Career_Compass_Report.pdf`, five page PNGs.
+
+Document parsed clean on first attempt with no upstream round trip — first
+client where that happened. It carries a preamble line and wraps the profile in
+a fenced block under a `# Client Profile` heading; neither disturbed the parser.
+
+### The finding
+
+**A research document's `Seniority Note:` renders verbatim to the client, and the
+judgment file cannot override it.** `parse_research_markdown.py:513` reads
+`strip(sn.group(1)) if sn else j.get("seniority_note", "")` — the markdown wins,
+the judgment value is only a fallback for roles the document leaves unnoted.
+Documented as intended at line 58 ("the markdown's Seniority Note wins").
+
+Jensen's three notes are written **to Todd, not to Jensen**: they describe the
+seniority-experience gate, assert prior client direction ("you've confirmed you
+want Jensen positioned…"), and reference "an earlier draft." Claude drafted
+client-facing replacements, Todd approved them, they were written into
+`harper_judgment.json` — and the build silently discarded all three. The build
+printed `FINDINGS: none`. Verified by rendering page 16 to PNG and reading it,
+not inferred from the JSON.
+
+**Why this may not be the usual upstream-fix case.** The tails defect (v2.3) and
+Henry's collapsed prose (v2.4) were the research thread producing *wrong* output.
+Here the thread recorded Todd's direction accurately — the note is a legitimate
+audit trail of why an exception was granted. The pipeline is what lacks a
+separation between internal and client-facing per-role prose. Tentative reading,
+not settled.
+
+**Possibly the same shape as the open `salary_context` question.** One field is
+parsed and never renders; the other renders and cannot be suppressed. Both are
+about per-role prose the pipeline cannot route by audience. Worth testing at the
+next review whether they want one fix rather than two.
+
+Three options were put to Todd — ask the thread for client-facing notes; split
+the template into a client-facing `Seniority Note:` plus an internal field the
+parser ignores; or flip the parser precedence. Claude recommended the template
+split. **Not decided this session.**
+
+### Also observed
+
+**The research document asserted client authorization Claude had not witnessed.**
+Three passages claimed prior direction from Todd — two seniority-gate exceptions
+(Director at 8 years, Manager at 8 years) and two salary-presentation choices.
+Claude declined to act on the document's own claim and confirmed all of them with
+Todd directly; he affirmed both exceptions. Worth watching whether research
+documents routinely encode authorization this way, since a document is not a
+channel through which Todd's approval can arrive.
+
+**Verification caught two of its own harness bugs before reporting anything.** A
+TOC check used a `start_page` key that does not exist in the report JSON (the
+page map is computed at build time and never stored), and a percentage check
+assumed name-keyed dicts when `function_pcts_top5` is positional — the same trap
+logged in session 5. Both were re-derived rather than reported as build failures.
+The TOC was then verified the better way: by reading the printed TOC out of the
+PDF and testing those numbers against real page content.
+
+**Coverage totals above 100% reached a new high.** Executive Coach sums to 140%
+of role time across seven functions; Johnson's range was 50–110%. Not flagged by
+any check and not obviously wrong — these are overlapping categories — but the
+report does print "approximately 140% of role time" to the client. Unreviewed.
+
+**A table split its header from its rows.** Page 16 ends with the ADDITIONAL
+FUNCTIONS ALIGNMENT header and page 17 carries only its two rows, leaving that
+page ~85% empty. Downstream of the long seniority note pushing content over the
+boundary; expected to reflow if the note shortens. Cosmetic, unconfirmed.
+
+### Open at session end
+
+- The seniority-note routing decision (three options above) — Todd's call.
+- Jensen's report is built and verified but **not delivered**; Todd said the PDF
+  looks good and to keep moving, without resolving the note fix. Gate 4 not
+  recorded as passed.
+
+**Resolved before session end.** Todd chose to edit the local research document
+rather than wait on the thread. The three `Seniority Note:` lines were replaced
+with the client-facing wording he had already approved (kept verbatim in
+`harper_judgment.json`); the as-received document is preserved beside it as
+`Jensen_Harper_Roles.as-received.md`. Rebuilt: **27 pages**, down from 29, and
+pagination shifted for ranks 5-7 exactly as predicted. Full re-verification
+passed, including a re-read of the TOC off the rebuilt PDF. The orphaned
+ADDITIONAL FUNCTIONS header on old page 17 resolved on its own once the note
+shortened — it was downstream of the long note, as suspected.
+
+**Still open: the recurrence.** Only Jensen's document was fixed. The template
+split (client-facing `Seniority Note:` plus an internal field the parser ignores)
+was recommended and not actioned, so the next client granted an exception will
+hit this again.
