@@ -107,6 +107,17 @@ export interface Submission {
   /** Side-effect completion markers — let a partial submit be detected. */
   sheetsWrittenAt: string | null;
   webhookDeliveredAt: string | null;
+  /**
+   * Delivered report (written on `clients` by upload_report.py after Gate 4).
+   * A non-null `reportDriveLink` is the terminal state: it means screen 3, and
+   * it refuses edits independently of `locked`. Clearing it is the deliberate
+   * escape hatch that reopens an intake — an admin unlock must not do that.
+   * `report_drive_file_id` is intentionally NOT carried here; the browser needs
+   * the link, not the Drive object id.
+   */
+  reportDriveLink: string | null;
+  reportFileName: string | null;
+  reportUploadedAt: string | null;
   submittedAt: string | null;
   createdAt: string;
   updatedAt: string;

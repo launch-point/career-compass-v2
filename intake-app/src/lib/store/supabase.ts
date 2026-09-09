@@ -22,15 +22,39 @@ type Row = {
   updated_at: string;
 };
 
+/**
+ * The `clients` columns this app reads. `report_drive_file_id` is deliberately
+ * absent — the browser needs the link, not the Drive object id.
+ */
+type ClientRow = {
+  id: string;
+  email: string;
+  report_drive_link: string | null;
+  report_file_name: string | null;
+  report_uploaded_at: string | null;
+};
+const CLIENT_COLS = 'id,email,report_drive_link,report_file_name,report_uploaded_at';
+
 function norm(email: string): string {
   return email.trim().toLowerCase();
 }
 
-function toSubmission(row: Row, email: string): Submission {
+/** Rebuild the client row from a Submission we already hold — avoids a re-read. */
+function clientOf(sub: Submission): ClientRow {
+  return {
+    id: sub.clientId,
+    email: sub.email,
+    report_drive_link: sub.reportDriveLink,
+    report_file_name: sub.reportFileName,
+    report_uploaded_at: sub.reportUploadedAt,
+  };
+}
+
+function toSubmission(row: Row, client: ClientRow): Submission {
   return {
     id: row.id,
     clientId: row.client_id,
-    email,
+    email: client.email,
     status: row.status,
     locked: row.locked,
     currentStepId: row.current_step_id,
@@ -38,6 +62,9 @@ function toSubmission(row: Row, email: string): Submission {
     sheetsWrittenAt: row.sheets_written_at,
     webhookDeliveredAt: row.webhook_delivered_at,
     submittedAt: row.submitted_at,
+    reportDriveLink: client.report_drive_link,
+    reportFileName: client.report_file_name,
+    reportUploadedAt: client.report_uploaded_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -46,14 +73,14 @@ function toSubmission(row: Row, email: string): Submission {
 export class SupabaseStore implements Store {
   private db = createSupabaseServiceClient();
 
-  private async clientIdForEmail(email: string, create: boolean): Promise<{ id: string; email: string } | null> {
+  private async clientIdForEmail(email: string, create: boolean): Promise<ClientRow | null> {
     const e = norm(email);
-    const found = await this.db.from('clients').select('id,email').eq('email', e).maybeSingle();
-    if (found.data) return found.data as { id: string; email: string };
+    const found = await this.db.from('clients').select(CLIENT_COLS).eq('email', e).maybeSingle();
+    if (found.data) return found.data as ClientRow;
     if (!create) return null;
-    const ins = await this.db.from('clients').insert({ email: e }).select('id,email').single();
+    const ins = await this.db.from('clients').insert({ email: e }).select(CLIENT_COLS).single();
     if (ins.error) throw ins.error;
-    return ins.data as { id: string; email: string };
+    return ins.data as ClientRow;
   }
 
   async getOrCreateByEmail(email: string): Promise<Submission> {
@@ -63,14 +90,14 @@ export class SupabaseStore implements Store {
       .select('*')
       .eq('client_id', client.id)
       .maybeSingle();
-    if (existing.data) return toSubmission(existing.data as Row, client.email);
+    if (existing.data) return toSubmission(existing.data as Row, client);
     const created = await this.db
       .from('intake_submissions')
       .insert({ client_id: client.id, answers: {} })
       .select('*')
       .single();
     if (created.error) throw created.error;
-    return toSubmission(created.data as Row, client.email);
+    return toSubmission(created.data as Row, client);
   }
 
   async getByEmail(email: string): Promise<Submission | null> {
@@ -81,15 +108,15 @@ export class SupabaseStore implements Store {
       .select('*')
       .eq('client_id', client.id)
       .maybeSingle();
-    return res.data ? toSubmission(res.data as Row, client.email) : null;
+    return res.data ? toSubmission(res.data as Row, client) : null;
   }
 
   async getById(id: string): Promise<Submission | null> {
     const res = await this.db.from('intake_submissions').select('*').eq('id', id).maybeSingle();
     if (!res.data) return null;
     const row = res.data as Row;
-    const c = await this.db.from('clients').select('email').eq('id', row.client_id).single();
-    return toSubmission(row, (c.data as { email: string }).email);
+    const c = await this.db.from('clients').select(CLIENT_COLS).eq('id', row.client_id).single();
+    return toSubmission(row, c.data as ClientRow);
   }
 
   async saveDraft(
@@ -99,6 +126,9 @@ export class SupabaseStore implements Store {
   ): Promise<Submission> {
     const current = await this.getByEmail(email);
     if (!current) throw new Error('no submission for email');
+    // Defence in depth behind the route checks: delivered is terminal and
+    // outranks `locked`, which an admin can clear.
+    if (current.reportDriveLink) return current;
     if (current.locked) return current; // read-only until admin unlock
     const res = await this.db
       .from('intake_submissions')
@@ -107,7 +137,7 @@ export class SupabaseStore implements Store {
       .select('*')
       .single();
     if (res.error) throw res.error;
-    return toSubmission(res.data as Row, current.email);
+    return toSubmission(res.data as Row, clientOf(current));
   }
 
   async markSubmitted(
@@ -125,7 +155,7 @@ export class SupabaseStore implements Store {
       .select('*')
       .single();
     if (res.error) throw res.error;
-    return { submission: toSubmission(res.data as Row, current.email), alreadySubmitted: false };
+    return { submission: toSubmission(res.data as Row, clientOf(current)), alreadySubmitted: false };
   }
 
   async setSideEffect(
@@ -171,7 +201,7 @@ export class SupabaseStore implements Store {
     if (res.error) throw res.error;
     if (!res.data) return null;
     const row = res.data as Row;
-    const c = await this.db.from('clients').select('email').eq('id', row.client_id).single();
-    return toSubmission(row, (c.data as { email: string }).email);
+    const c = await this.db.from('clients').select(CLIENT_COLS).eq('id', row.client_id).single();
+    return toSubmission(row, c.data as ClientRow);
   }
 }
