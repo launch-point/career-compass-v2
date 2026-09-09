@@ -20,6 +20,12 @@ export async function POST(request: Request) {
   const existing = await store.getByEmail(email);
   if (!existing) return Response.json({ error: 'no draft' }, { status: 400 });
 
+  // Terminal state: a delivered report refuses re-submission outright, and does
+  // so independently of `locked` (see the draft route for why).
+  if (existing.reportDriveLink) {
+    return Response.json({ error: 'delivered', submission: existing }, { status: 423 });
+  }
+
   // Idempotent guard: already submitted + locked → treat as success, no re-fire.
   if (existing.status === 'submitted' && existing.locked) {
     return Response.json({ submission: existing, alreadySubmitted: true });

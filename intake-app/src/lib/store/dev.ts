@@ -69,6 +69,13 @@ export class DevStore implements Store {
           sheetsWrittenAt: null,
           webhookDeliveredAt: null,
           submittedAt: null,
+          // Screen 3 (results ready) is driven by reportDriveLink. In prod this
+          // lives on `clients` and is written by upload_report.py; here it is a
+          // plain field so the screen can be built and tested without Supabase.
+          // Set it by hand in the dev db file to see screen 3.
+          reportDriveLink: null,
+          reportFileName: null,
+          reportUploadedAt: null,
           createdAt: now,
           updatedAt: now,
         };

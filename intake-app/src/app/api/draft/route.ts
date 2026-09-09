@@ -25,6 +25,13 @@ export async function PUT(request: Request) {
 
   const store = await getStore();
   const existing = await store.getByEmail(email);
+  if (existing?.reportDriveLink) {
+    // Terminal state. A delivered report closes the intake permanently, and this
+    // check is deliberately INDEPENDENT of `locked`: an admin unlock must not
+    // reopen a client who already has their report. Clearing report_drive_link
+    // is the explicit escape hatch (and the revision path — clear, re-upload).
+    return Response.json({ error: 'delivered', submission: existing }, { status: 423 });
+  }
   if (existing?.locked) {
     // Post-submit lock: refuse edits, hand back the authoritative server copy.
     return Response.json({ error: 'locked', submission: existing }, { status: 423 });
