@@ -1079,9 +1079,15 @@ document came back and parsed clean.
   garbled research prose ("$137,000 at the 75th percentile near $159,000").
   Midpoints I calculated are marked as such in the judgment file.
 - **Function placements:** my proposed primaries shipped — HR for #1–3, #6, #7;
-  Marketing for #4, #5; Operations for #8, #9. **Accepted by not objecting, not
+  Marketing for #4, #5; Operations for #8, #9. ~~**Accepted by not objecting, not
   by explicit review.** I said they'd follow the table unless he said otherwise,
-  and he didn't. Worth knowing at Gate 4.
+  and he didn't. Worth knowing at Gate 4.~~
+
+  **Superseded at Gate 4, later the same session:** Todd reviewed page 6 (the
+  role landscape) and approved the placements, so they were **reviewed, not
+  shipped by silence**. The struck text was accurate when written and wasn't by
+  session end. Todd pointed out it's a small instance of the expired-note
+  pattern below. Kept rather than deleted so the change is visible.
 - **Rating-led value bullets ship as written**, e.g. "Fun: Moderate — …". 35 of 45.
 - **Seniority by the title rule.** #8 and #9 are Strategist; their notes pointed
   the same way.
@@ -1165,9 +1171,20 @@ was run to measure the colon fix, not to audit Harper.
 
 ### Open at session end
 
-- **Jaleesa's report awaits Gate 4.** In it: #3 Executive Recruiter's mix sums
-  to 85% (as the research states); the rating-led value text; the two rewritten
-  level notes.
+- **Jaleesa's report: Gate 4 approved by Todd, Sept 10 2026.** His stated review
+  (recorded for gate training): page 6 (function placements on the role
+  landscape), the salary bands, and the two rewritten level notes. The PDF he
+  approved is the 10:47 build, 33 pages. **Not uploaded to Drive**, because she
+  has no `clients` row, so the uploader would refuse. Not yet delivered through
+  the chain.
+- **Next session, not now (Todd): research-only clients and the delivery chain.**
+  Four clients have no Supabase row and can't use the delivery chain: Austin,
+  Henry, Harper, Jaleesa. That's every real client so far; the only rows are
+  Todd's test accounts. Todd: worth deciding whether research-only clients get
+  rows created, because "manual for now" is quietly becoming how it works. This
+  is MEMORY's existing Open Question ("Do research-only clients need a
+  `clients` row"), which **still lists three clients**. Jaleesa makes four, so
+  that entry is now out of date too.
 - **Delivered reports still carry what this session found.** Harper: 33 colons,
   the page-9 "Flag:" note, 7 wrong "Immediate" labels. Johnson: 12 colons, 3
   wrong "Immediate" labels. Whether to rebuild and re-deliver is Todd's call.
