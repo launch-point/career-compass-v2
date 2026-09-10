@@ -1,6 +1,6 @@
 # Career Compass v2 — MEMORY.md
 
-*Last updated: Sept 8, 2026*
+*Last updated: Sept 10, 2026*
 
 This file holds **confirmed** facts, decisions, and gotchas. It is authoritative — read at the start of every session and treated as settled.
 
@@ -20,6 +20,12 @@ Keep this file short. If it's getting long, that usually means something belongs
 **State:**
 - **Phase 1 (intake form + minimal admin view): built and deployed.** Live in production at `career.ministrytomarketplace.co`. Supabase-verified **on writes and RLS only** — both confirmed against the live project. **The prod magic-link sign-in path was not part of that verification and may never have had a successful end-to-end run.** `LoginPanel.tsx` routes to a dev-cookie path whenever `NEXT_PUBLIC_SUPABASE_URL` is unset, so local testing bypasses Supabase auth entirely. **Sign-in is now confirmed working end to end in production (Sept 9 2026):** a magic link signed Todd in and resumed his in-progress intake. Do not read the original "Supabase-verified" note as having covered auth — it did not. That was the same class of problem as a stale entry: a note reading broader than what was actually tested end to end. (Narrowed Sept 9 2026; auth confirmed working Sept 9 2026 — both directed by Todd.)
 - **Phase 2 (report build): built, verified, and reviewed.** The full pipeline — Stage-2 research markdown → `parse_research_markdown.py` → `graph_generator.py` → `report_template.py` → branded PDF — has produced a real client report end to end: **Austin Scheiwe, 26 pages.** Independently verified against actual page content, and personally reviewed by Todd. The `career-compass-report` skill has additionally been cold-session verified multiple times across different environments. Phase 2 is not "unverified work" — treat it as proven.
+- **Phase 3 (deep research / market validation): still manual.** Todd does the research himself
+  and hands over the Stage-2 research markdown; the report pipeline starts from that file. **The
+  automated Perplexity/Sonnet research pipeline does not exist in this repo** — it has been built
+  elsewhere and mainly needs porting in, not designing from scratch. Do not go looking for it
+  here, and do not conclude from its absence that Phase 3 was never started. (Stated by Todd,
+  Sept 10 2026)
 - **Phase 4 step 1 (Drive upload after Gate 4): built and verified end to end, Sept 9 2026.**
   `upload_report.py` uploads an approved PDF to Drive, sets link sharing to anyone-with-the-link,
   and records the link on `clients`. Proven with a real run: Henry Johnson's 822KB PDF uploaded to
@@ -118,7 +124,9 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
 - **Email is the join key between Mission Control and Career Compass.** Clients are already logged into Mission Control before reaching the intake iframe; they use the same email for the magic link. No separate identity reconciliation system. (Sept 2026)
 - **No upskilling-tolerance question in intake.** Replaced by a flat downstream rule: any role requiring more than 3 months of upskilling is excluded at the validation stage. (Sept 2026)
 - **No job-history screen.** The four Career Highlight Stories capture last-15-years signal narratively. Current job title is a single text field. (Sept 2026)
-- **Google Drive upload + Mission Control linking deferred to Phase 4.** Do not design or build it during phases 1–3. Interim requirement: every phase writes output tied to the stable client ID in a predictable, loggable way so phase 4 wires existing IDs together rather than retrofitting. (Sept 2026)
+- ~~**Google Drive upload + Mission Control linking deferred to Phase 4.**~~ **Superseded
+  Sept 10 2026 — both are now built and verified in production (Phase 4 steps 1 and 3; see
+  Current Status). Kept for the reasoning behind holding them during Phases 1–3.** Do not design or build it during phases 1–3. Interim requirement: every phase writes output tied to the stable client ID in a predictable, loggable way so phase 4 wires existing IDs together rather than retrofitting. (Sept 2026)
 - **Compact-mode axis-label crowding: left as-is, not reworked.** It is real and
   geometric (see Technical Notes), but at the size the graph is actually placed in the
   PDF every label reads cleanly. The available fixes — shorter abbreviations or less
@@ -376,25 +384,20 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
 *When Todd corrects something, capture it here so the same mistake doesn't repeat. Include what was wrong and what the right behavior is.*
 
 - **Work landing on `phase-2-report` is NOT deployed. Production tracks `main`.**
-  `career.ministrytomarketplace.co` builds from `main`, and as of Sept 9 2026 `main`
-  is **49 commits behind** `phase-2-report`. Todd had been reasoning as though branch
-  work was live; it is not, and neither is anything else merged only to the branch.
-  Verified two ways, not assumed: the old callback route is still the file content at
-  `origin/main`, and a live `GET /auth/callback` returned `location: .../` rather than
-  the new `?auth_error=missing_code`.
+  `career.ministrytomarketplace.co` builds from `main`. On Sept 9 2026 `main` was 49
+  commits behind the branch, the webhook payload refactor had never been live, and Todd
+  had been reasoning as though branch work was live.
 
-  **What this means is already concrete, not hypothetical.** Commit `e69a1dc` — the
-  webhook payload refactor that flattened `functions`/`values` from
-  `top5`/`top10` object arrays to `top5`/`next5` label-string arrays, plus the
-  `admin/[id]/page.tsx` change that adapts the consumer to it — has never been live.
-  **Production still emits the OLD payload shape.** Any downstream consumer built
-  against the new shape is reading a contract that prod does not serve.
+  **That specific gap is closed.** The refactor reached `main` as `0a7bc4f` and was
+  confirmed live through the Slack notification (Sept 9 2026); screen 3 (`3ceee13`) and
+  migration 0002 (`0ea7714`) followed. As of Sept 10 2026 `main` is 61 commits behind,
+  but `intake-app/` is identical on both. The difference is docs, MEMORY/SESSION_LOG,
+  the report skill, `.gitignore` and `credentials.example.json`.
 
-  Only three app files differ between `main` and the branch; everything else in those
-  49 commits is docs, MEMORY/SESSION_LOG, and the report skill, none of which ships in
-  the web app. **Before assuming any intake-app behaviour is live, check it against
-  `origin/main` — not against the working tree or the branch.** (Sept 9 2026 —
-  directed by Todd)
+  **The rule stands:** app changes reach production only by being cherry-picked to
+  `main`. Before assuming any intake-app behaviour is live, check `origin/main`, not the
+  working tree or the branch. Re-measure the gap; don't trust a number written here.
+  (Sept 9 2026, directed by Todd; facts updated Sept 10 2026)
 
 - **Never conclude "absent" from a truncated command.** Ran `ls -R reports | head -40`;
   the pipe cut the output at exactly the `reports/scheiwe:` line, so the directory read as
@@ -467,8 +470,8 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
 
 *Identified but deliberately not being built yet. Don't invent work from this list — it's a parking lot, not a backlog.*
 
-- Google Drive upload + Drive-linked download (Phase 4)
-- Circle DM delivery (Phase 4)
+- Circle DM automation: stays manual with its own human gate by decision. Automate at
+  Gate 4 once the chain has run cleanly across several real clients (see Current Status).
 - Full admin dashboard: client table, top-5 column, PDF download (Phase 4)
 - Agent training loop: pattern surfacing every ~5 sessions to turn Todd's intuitive gate decisions into explicit rules (after phases 1–4)
 - Fixed master role list of 50–100 real roles (Todd building in parallel, manually)
