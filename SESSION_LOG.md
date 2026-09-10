@@ -1270,3 +1270,25 @@ for the review count.**
   internal audience to the client. This one is about a test crossing from a convenient
   path to a claim about the client's path. Both are a scope silently widening between
   what was done and what gets recorded.
+
+### Close — embed verified through Circle
+
+- The fix went live about 20s after the push. Live headers read `frame-ancestors 'self'
+  https://mc.ministrytomarketplace.co https://www.group.ministrytomarketplace.co;` and
+  the sign-in copy was still intact.
+- **Todd tested the client path himself:** loaded
+  `www.group.ministrytomarketplace.co/job-tracker`, opened Career Compass, signed in with
+  the magic link, and landed signed in. That confirms page load and magic-link sign-in
+  through Circle → mc → career. It is also the first observation consistent with the
+  same-site / `SameSite=Lax` reasoning, which until then was reasoned only.
+- **Not covered by that test:** opening the report link inside the three-level chain.
+  It was checked on Sept 9 on the two-level path only. MEMORY records that scope.
+- **MEMORY upgraded only after Todd's test, not after the deploy.** The entry now names
+  the path ("verified Sept 10 2026 through the full client chain, Circle → mc → career —
+  page load and magic-link sign-in both confirmed") instead of "verified in production".
+  **This is the countermeasure from the pattern above, applied for the first time at
+  Todd's direction.** One instance, not yet a habit. Worth checking at the session-10
+  review whether it holds.
+- The narrowing itself mattered once already. Between the deploy and Todd's test, MEMORY
+  said "not yet verified through Circle". Had a session ended there, the next one would
+  have inherited an accurate gap instead of a false "verified".
