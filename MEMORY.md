@@ -16,7 +16,7 @@ Keep this file short. If it's getting long, that usually means something belongs
 
 ## Current Status
 
-**Phase:** 4 — steps 1 and 2 **complete and verified in production**; step 3 (Circle DM) stays manual by decision
+**Phase:** 4 — steps 1–3 (Drive upload, screen 3, Mission Control embed) **complete and verified in production**; Circle DM automation deferred, stays manual by decision
 **State:**
 - **Phase 1 (intake form + minimal admin view): built and deployed.** Live in production at `career.ministrytomarketplace.co`. Supabase-verified **on writes and RLS only** — both confirmed against the live project. **The prod magic-link sign-in path was not part of that verification and may never have had a successful end-to-end run.** `LoginPanel.tsx` routes to a dev-cookie path whenever `NEXT_PUBLIC_SUPABASE_URL` is unset, so local testing bypasses Supabase auth entirely. **Sign-in is now confirmed working end to end in production (Sept 9 2026):** a magic link signed Todd in and resumed his in-progress intake. Do not read the original "Supabase-verified" note as having covered auth — it did not. That was the same class of problem as a stale entry: a note reading broader than what was actually tested end to end. (Narrowed Sept 9 2026; auth confirmed working Sept 9 2026 — both directed by Todd.)
 - **Phase 2 (report build): built, verified, and reviewed.** The full pipeline — Stage-2 research markdown → `parse_research_markdown.py` → `graph_generator.py` → `report_template.py` → branded PDF — has produced a real client report end to end: **Austin Scheiwe, 26 pages.** Independently verified against actual page content, and personally reviewed by Todd. The `career-compass-report` skill has additionally been cold-session verified multiple times across different environments. Phase 2 is not "unverified work" — treat it as proven.
@@ -60,11 +60,33 @@ Keep this file short. If it's getting long, that usually means something belongs
   was added to `main` deliberately: the columns had been applied to production by hand, so
   without the file `main` shipped code querying columns its own migration history never
   created — a trap for anyone provisioning a fresh environment.
+- **Phase 4 step 3 (Mission Control embed): complete and verified in production, Sept 9 2026.**
+  Career Compass renders inside the Job Tracker / Mission Control iframe on
+  `mc.ministrytomarketplace.co`: Todd signed in there, screen 3 displayed, and the report link
+  opened the PDF. **The real unknown was whether auth survives the frame — it does; the session
+  cookie carries through**, so no separate in-frame auth is needed.
+
+  **The embed only works on the published domain.** The CSP is a *static* policy built from
+  `MISSION_CONTROL_ORIGIN` in `next.config.ts`, and production serves exactly
+  `frame-ancestors 'self' https://mc.ministrytomarketplace.co;` (confirmed from the live
+  response headers). **Lovable's editor preview is a different origin and is refused.** That is
+  the policy working, not a bug. **Test the embed on `mc.ministrytomarketplace.co`, never in the
+  preview** — and note that allowing another origin means a config change and a redeploy, not a
+  runtime toggle.
+
+  **The old admin PDF upload path in Job Tracker has been removed.** Reports are delivered
+  through the embedded app now. **Reports uploaded that way previously are still in storage but
+  unreachable from the interface** — if one is ever needed, it exists and must be retrieved from
+  storage directly. Do not conclude from the UI that it is gone.
 
 **The delivery chain is complete except the Circle DM.** Intake → submit → report build →
-Gate 4 → Drive upload → screen 3 all run end to end and are verified in production. Step 3,
-the Circle DM, **stays manual with its own human gate by decision** — not an unfinished
-piece — until the automated chain has run cleanly across several real clients.
+Gate 4 → Drive upload → screen 3 → Mission Control embed all run end to end and are verified
+in production. The **Circle DM stays manual with its own human gate by decision** — not an
+unfinished piece. It is to be automated at Gate 4 later, once the chain has run cleanly across
+several real clients.
+
+*(Step numbering note: step 3 is the embed. An earlier entry called the Circle DM "step 3";
+that was before the embed was scheduled ahead of it. The Circle DM is now a later step.)*
 
 **Do not mistake gitignore for absence.** The Austin Scheiwe report and all generated client artifacts live in `reports/scheiwe/`, and `reports/` is gitignored. They are absent from git and from any fresh clone, but they are real and present on Todd's Mac. A future session that cannot see them in git must not conclude the work was never done — check the filesystem.
 
