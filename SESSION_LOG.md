@@ -788,3 +788,99 @@ shortened — it was downstream of the long note, as suspected.
 split (client-facing `Seniority Note:` plus an internal field the parser ignores)
 was recommended and not actioned, so the next client granted an exception will
 hit this again.
+
+---
+
+## Session 7 — 2026-09-09 — Magic-link fix, Slack pipeline, Phase 4 steps 1–3
+
+**Raw observations. Not authoritative.**
+
+### What ran
+
+**Four things shipped and were verified in production:** the magic-link sign-in
+fix, the Make.com/Slack notification pipeline, Drive upload after Gate 4 (Phase 4
+step 1), screen 3 (step 2), and the Mission Control embed (step 3). `main`
+received five deliberate cherry-picks and nothing else; `phase-2-report` was
+never merged.
+
+Henry Johnson's `--propose` was blocked at the start of the session by
+`VALUE_ABSENT` on all seven roles — his "Why This Fits You" was prose rather than
+five keyed bullets. Sent upstream rather than patched locally; the corrected
+document came back and parsed clean.
+
+### Decisions Todd made
+
+- **Format defects go back to the research thread, never patched at the build
+  step** — even when the fix is lossless and cheap. Promoted to MEMORY.
+- **TOP 5 / NEXT 5 disjointness check: parked** for the 5-session review, not
+  added mid-build.
+- **OAuth over service account** for Drive: `iam.disableServiceAccountKeyCreation`
+  is enforced org-wide. Decided on the `drive.file` scope boundary — a delegate's
+  credential can only touch files the uploader created.
+- **Picker dropped** after the costs were laid out (two console steps, an API key,
+  an extra script, and an unverified assumption about grant persistence).
+- **Credentials outside the repo** (`~/.config/career-compass/`), but **the
+  Supabase key stays in `intake-app/.env.local`** — moving it is a change to how
+  the app loads config, which is a different change from adding an uploader.
+- **Story tabs: any field with content, not all four.** Todd's brief assumed the
+  gate made this moot; it does not — story 4 has no per-screen gate.
+- **A delivered report is terminal.** Clearing `report_drive_link` is the explicit
+  escape hatch; an admin unlock must not reopen a delivered client.
+- **Circle DM stays manual** with its own gate, to be automated at Gate 4 later.
+
+### Corrections from Todd
+
+- **"The service account is untested, not blocked — the Phase 1 note was about a
+  different project."** I had accepted the blocked premise from the brief and
+  designed around it. Todd was right to push; the org-policy block turned out to
+  be real, but only after he asked me to check rather than assume.
+- **`cc_config.py` was not in the design's file list.** Todd stopped the write and
+  asked why a module all credentials pass through had appeared unannounced. Fair:
+  I introduced it during implementation without flagging the change.
+- **Todd corrected his own brief twice** (story tabs, and the Circle DM occupying
+  "step 3" before the embed took that slot) — worth noting that he treats his own
+  framing as revisable evidence, not as instructions to be followed literally.
+
+### Didn't work as expected
+
+- **The callback diagnostics fixed nothing.** `4af9ac8` made failures legible;
+  the actual cause of `otp_expired` was Supabase's **Site URL** still being
+  `http://localhost:3000`, so every emailed link was baked with the wrong base.
+  Recorded in MEMORY explicitly so the commit is not later read as the fix.
+- **The Slack blanks were not the payload refactor.** Two compounding causes: the
+  Make.com webhook had never determined its data structure (no real submission had
+  ever reached it), and the Slack module's references were hand-typed without the
+  module-ID prefix (`{{email}}` rather than `{{2.email}}`), so they rendered as
+  inert text. I led with the payload-shape explanation and it was wrong.
+- **`main` was 49 commits behind** and production tracks it, so the webhook payload
+  refactor and screen 3 had never been live. Todd had been reasoning as though
+  branch work was deployed.
+- **Four of my own harness failures**, all self-inflicted:
+  1. Read a background task's `exit code 0` as `authorize.py` succeeding — it was
+     the wrapper's `echo`; the script exited 3.
+  2. Deleted the authorize output file unconditionally in the same command as the
+     extraction, destroying the error message that explained the failure.
+  3. Python block-buffers stdout when redirected, so the consent URL never
+     appeared until the process exited; needed `-u`.
+  4. Seeded the wrong dev record when testing screen 3, overwriting a pre-existing
+     `todd@launchpoint.co` dev entry's stories and status in `.dev-data/db.json`.
+
+### Patterns (tentative)
+
+- **Three times this session Todd referred to MEMORY entries that do not exist** —
+  a custom-SMTP blocker, the service-account org-policy note, and a recorded
+  intent to have a team member run builds. In each case the underlying fact was
+  true but had never been written down. Tentative reading: MEMORY is being trusted
+  as an index of everything known, while things Todd knows from lived experience
+  outside a Claude session never enter it. Worth testing at the review whether
+  capture needs a path for facts that originate away from the keyboard.
+- **"Check the harness before reporting a failure" earned its place again**, in
+  both directions: `VALUE_ABSENT` was a real document defect (verified against
+  Austin's canonical format before reporting), while the exit-code and buffering
+  problems were mine, not the code's. The existing MEMORY entry says to re-derive
+  the expectation as an explicit step; it worked where I did it and failed where
+  I skipped it.
+- **Diagnostics and fixes are being conflated in commit history.** Twice the thing
+  that made a failure visible was mistaken — by me — for the thing that repaired
+  it. Worth a habit of stating "this changes legibility, not behaviour" in the
+  commit message itself.
