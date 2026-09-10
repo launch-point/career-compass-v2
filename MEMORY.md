@@ -16,7 +16,7 @@ Keep this file short. If it's getting long, that usually means something belongs
 
 ## Current Status
 
-**Phase:** 4 step 1 — Drive upload (**complete and verified**); steps 2–3 not started
+**Phase:** 4 — steps 1 and 2 **complete and verified in production**; step 3 (Circle DM) stays manual by decision
 **State:**
 - **Phase 1 (intake form + minimal admin view): built and deployed.** Live in production at `career.ministrytomarketplace.co`. Supabase-verified **on writes and RLS only** — both confirmed against the live project. **The prod magic-link sign-in path was not part of that verification and may never have had a successful end-to-end run.** `LoginPanel.tsx` routes to a dev-cookie path whenever `NEXT_PUBLIC_SUPABASE_URL` is unset, so local testing bypasses Supabase auth entirely. **Sign-in is now confirmed working end to end in production (Sept 9 2026):** a magic link signed Todd in and resumed his in-progress intake. Do not read the original "Supabase-verified" note as having covered auth — it did not. That was the same class of problem as a stale entry: a note reading broader than what was actually tested end to end. (Narrowed Sept 9 2026; auth confirmed working Sept 9 2026 — both directed by Todd.)
 - **Phase 2 (report build): built, verified, and reviewed.** The full pipeline — Stage-2 research markdown → `parse_research_markdown.py` → `graph_generator.py` → `report_template.py` → branded PDF — has produced a real client report end to end: **Austin Scheiwe, 26 pages.** Independently verified against actual page content, and personally reviewed by Todd. The `career-compass-report` skill has additionally been cold-session verified multiple times across different environments. Phase 2 is not "unverified work" — treat it as proven.
@@ -33,6 +33,38 @@ Keep this file short. If it's getting long, that usually means something belongs
   there — the uploader reads them from `intake-app/.env.local`. Migration `0002` is applied to
   production. Verified against the test row `todd+careertest1@launchpoint.co`, whose columns were
   nulled afterwards so it does not look like a real delivery.
+- **Phase 4 step 2 (screen 3, results ready): complete and verified in production, Sept 9 2026.**
+  The intake app's third state — the report link, with the client's Career Highlight Stories
+  below it as clickable tabs, each story rendered as four labelled parts rather than run
+  together as narrative. **Verified by Todd signing in to production as
+  `todd+careertest1@launchpoint.co` and seeing the report link and the story tabs**, which
+  closed the one gap the build could not: the Supabase read and the page render proven
+  together against a real session, not separately.
+
+  **Story tabs use "any field has content", not "all four".** The submit gate only enforces
+  all-four on stories 1–3 (`wizardGating.ts`) and requires 3 of 4 complete overall
+  (`answers.ts`), so a partially-filled story 4 is a legal submission; requiring all four
+  would silently drop something the client wrote. Inside a tab only non-empty parts render,
+  so no label ever appears over nothing.
+
+  **The transition is one-way and enforced server-side.** `page.tsx` resolves the state and
+  does not render the wizard at all when a report link exists — there is no form URL to
+  reach, since `/` is the only client route. `PUT /api/draft` and `POST /api/submit` both
+  refuse with **423 `delivered`**, deliberately **independent of `locked`**, so an admin
+  unlock cannot reopen a delivered client. **Clearing `report_drive_link` is the explicit
+  escape hatch and the revision path** — clear, re-upload, the client transitions again.
+  Verified: with `locked=false` and the link still set, the form does not come back and both
+  routes return 423; clearing the link reopens it and `PUT` returns 200.
+
+  **`main` now carries screen 3 (`3ceee13`) and migration `0002` (`0ea7714`).** The migration
+  was added to `main` deliberately: the columns had been applied to production by hand, so
+  without the file `main` shipped code querying columns its own migration history never
+  created — a trap for anyone provisioning a fresh environment.
+
+**The delivery chain is complete except the Circle DM.** Intake → submit → report build →
+Gate 4 → Drive upload → screen 3 all run end to end and are verified in production. Step 3,
+the Circle DM, **stays manual with its own human gate by decision** — not an unfinished
+piece — until the automated chain has run cleanly across several real clients.
 
 **Do not mistake gitignore for absence.** The Austin Scheiwe report and all generated client artifacts live in `reports/scheiwe/`, and `reports/` is gitignored. They are absent from git and from any fresh clone, but they are real and present on Todd's Mac. A future session that cannot see them in git must not conclude the work was never done — check the filesystem.
 
