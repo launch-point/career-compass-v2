@@ -854,13 +854,20 @@ def build_job_page(story, role, values, functions, compact_png):
             for p in problems:
                 title_text = sanitize_html(p["title"])
                 desc_text = sanitize_html(p["description"])
-                story.append(Paragraph(f"\u2022&nbsp;&nbsp;{title_text}: {desc_text}", s_bullet))
+                # A bullet with no detail is a single sentence: end it, don't leave a bare colon.
+                line = f"{title_text}: {desc_text}" if desc_text else f"{title_text}."
+                story.append(Paragraph(f"\u2022&nbsp;&nbsp;{line}", s_bullet))
 
         action_groups = day_to_day.get("actions_taken", [])
         if action_groups:
             story.append(Paragraph("Actions Taken", s_subsection_head))
             for group in action_groups:
                 label_clean = sanitize_html(group["problem_label"])
+                # A group with no detail is a single-sentence item: render it as a
+                # plain bullet, not as a label with nothing under it.
+                if not group["actions"]:
+                    story.append(Paragraph(f"\u2022&nbsp;&nbsp;{label_clean}.", s_bullet))
+                    continue
                 story.append(Paragraph(
                     f'<font name="{FONT_HEAD}" color="{CHARCOAL.hexval()}">{label_clean}</font>',
                     ParagraphStyle("ActionLabel", parent=s_body, fontSize=8.5, leading=12, spaceBefore=5, spaceAfter=1, textColor=CHARCOAL)
@@ -878,7 +885,8 @@ def build_job_page(story, role, values, functions, compact_png):
                 bstyle = s_bullet
                 if mi == len(metrics) - 1:
                     bstyle = ParagraphStyle("BulletKeep", parent=s_bullet, keepWithNext=True)
-                story.append(Paragraph(f"\u2022&nbsp;&nbsp;{title_text}: {desc_text}", bstyle))
+                line = f"{title_text}: {desc_text}" if desc_text else f"{title_text}."
+                story.append(Paragraph(f"\u2022&nbsp;&nbsp;{line}", bstyle))
 
     # Tech + Travel kept together at the end of Page 3
     tail_items = []
