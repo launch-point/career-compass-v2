@@ -995,3 +995,45 @@ document came back and parsed clean.
   audience that nothing records or enforces, in the UI and in the report
   pipeline. Note that the `seniority_note` half is itself still a raw session-6
   observation and a MEMORY open question, not a confirmed fact.
+
+  **Addendum, Sept 10 2026 (added during the Jaleesa McCreary build, at Todd's
+  direction): a third instance, and it is now three routes into the same
+  problem, not two.** Found while rebuilding Harper's report to measure a
+  template change; confirmed by reading the **delivered** PDF directly, not the
+  rebuild.
+
+  | Route | What was internal | How it reached the client |
+  |---|---|---|
+  | `seniority_note` on Jensen (session 6) | Notes written to Todd in the research doc's `Seniority Note:` field | Parser treats the document's note as authoritative; renders verbatim as "A NOTE ON LEVEL" |
+  | "Mission Control" line in the sign-in copy (session 8) | Internal naming for the Job Tracker | Written into client-facing UI copy |
+  | **"Flag:" note in Harper's technical requirement (this addendum)** | A research-thread flag addressed to Todd, inline in a **content** field | Technical Requirements prose is rendered verbatim; it is on page 9 of Harper's delivered report |
+
+  The page-9 text: *"Flag: this exceeds the standard upskilling threshold. Given
+  how directly this role matches Jensen's strongest functions … it's a real time
+  and cost commitment he should weigh deliberately rather than assume is
+  optional."* Written about the client in the third person, to Todd.
+
+  **Why this one matters for the fix:** routes 1 and 3 both start in the
+  research document, but through different fields. `seniority_note` is a
+  dedicated note field, so the options on the table for it (a client-facing
+  `Seniority Note:` plus an internal field the parser ignores, or asking the
+  research thread for client-facing notes) would **not** reach this one. The
+  flag sits inside ordinary content prose, so any fix scoped to one field
+  leaves the others open. That strengthens the case for treating it as one
+  problem (per-text audience that nothing records or enforces) at the
+  session-10 review, not solving each field separately.
+
+  Also found in the same scan, same PDF: page 21, in Travel, *"Flag: travel
+  expectations vary widely by employer and account type — …"*. It's the same
+  marker but reads as a caveat rather than a note to Todd. Not yet judged
+  whether it counts. Scope of the scan: every PDF under `reports/` (Scheiwe,
+  Johnson, Harper, McCreary) for `Flag:`, `Todd`, `client direction`,
+  `earlier draft`, `he/she should weigh`, `graph placement`, `flagging`. Hits
+  only in Harper. A phrase scan is not proof of absence.
+
+  Also observed on that page: the same technical requirement says the
+  certification takes "3+ months", then the template's appended label says
+  "Time to acquire: Immediate — no barrier identified". The client sees both.
+  That is the known-gap tech-requirements label, not the audience problem,
+  but here it contradicts the prose rather than just repeating it.
+  Unconfirmed; raw observation.
