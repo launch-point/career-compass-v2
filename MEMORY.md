@@ -172,6 +172,28 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   correctly, which is the outcome the rule exists to buy. One confirmed instance, not
   yet a pattern. (Sept 8 2026)
 
+  **Where the rule stops: a renderer that can't handle valid input gets fixed
+  locally.** The test is whether the research produced something **invalid**, or
+  something **valid that the template mishandles**. Invalid input goes upstream,
+  as above. Valid input that renders badly is a template bug, and sending it
+  upstream would just ask the research thread to write around the renderer.
+
+  The case that set the line: "Problems Solved", "Actions Taken" and "Results
+  That Mean Success" printed as `{lead}: {detail}`, with no fallback when there
+  was no detail. Every one-sentence bullet ended in a bare colon. Jaleesa
+  McCreary's document writes every bullet as one sentence (54 dangling colons),
+  and it looked at first like a format drift to send back. It wasn't. Harper and
+  Johnson followed the format and their delivered reports still carried 33 and 12
+  of them. **A one-sentence bullet is legitimate content, not a defect**; the
+  template assumed two parts. Fixed in `report_template.py`: a bullet with no
+  detail renders as a plain sentence. Rebuilding Harper or Johnson changes only
+  their Day-to-Day pages; page counts and the TOC are unchanged.
+
+  **Why it's written down:** the first call on Jaleesa's colons went the wrong
+  way. The upstream rule was applied without first asking whether the input was
+  actually invalid. Decide which side of the line a defect is on before choosing
+  where to fix it. (Sept 10 2026 — directed by Todd)
+
 ---
 
 ## Open Questions
