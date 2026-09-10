@@ -7,7 +7,13 @@ import type { NextConfig } from 'next';
 // client can also open the app directly. We deliberately do NOT set
 // X-Frame-Options: DENY, which would block all framing.
 const mcOrigin = process.env.MISSION_CONTROL_ORIGIN;
-const frameAncestors = ["'self'", mcOrigin].filter(Boolean).join(' ');
+// Clients reach Mission Control through the Circle community (/job-tracker), so the
+// real chain is Circle → Mission Control → this app. frame-ancestors is checked
+// against EVERY ancestor, not just the parent, so Circle must be allowed too.
+// Hardcoded rather than an env var: it is the same in every environment and there
+// is no local Circle. Origin only (no path); the www. must match exactly.
+const circleOrigin = 'https://www.group.ministrytomarketplace.co';
+const frameAncestors = ["'self'", mcOrigin, circleOrigin].filter(Boolean).join(' ');
 
 const nextConfig: NextConfig = {
   async headers() {
