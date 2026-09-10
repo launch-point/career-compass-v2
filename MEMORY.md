@@ -16,7 +16,7 @@ Keep this file short. If it's getting long, that usually means something belongs
 
 ## Current Status
 
-**Phase:** 4 — steps 1–2 (Drive upload, screen 3) **complete and verified in production**; step 3 (Mission Control embed) **verified two levels deep only — the client path through Circle is untested**; Circle DM automation deferred, stays manual by decision
+**Phase:** 4 — steps 1–2 (Drive upload, screen 3) **complete and verified in production**; step 3 (Mission Control embed) **verified Sept 10 2026 through the full client chain, Circle → mc → career**; Circle DM automation deferred, stays manual by decision
 **State:**
 - **Phase 1 (intake form + minimal admin view): built and deployed.** Live in production at `career.ministrytomarketplace.co`. Supabase-verified **on writes and RLS only** — both confirmed against the live project. **The prod magic-link sign-in path was not part of that verification and may never have had a successful end-to-end run.** `LoginPanel.tsx` routes to a dev-cookie path whenever `NEXT_PUBLIC_SUPABASE_URL` is unset, so local testing bypasses Supabase auth entirely. **Sign-in is now confirmed working end to end in production (Sept 9 2026):** a magic link signed Todd in and resumed his in-progress intake. Do not read the original "Supabase-verified" note as having covered auth — it did not. That was the same class of problem as a stale entry: a note reading broader than what was actually tested end to end. (Narrowed Sept 9 2026; auth confirmed working Sept 9 2026 — both directed by Todd.)
 - **Phase 2 (report build): built, verified, and reviewed.** The full pipeline — Stage-2 research markdown → `parse_research_markdown.py` → `graph_generator.py` → `report_template.py` → branded PDF — has produced a real client report end to end: **Austin Scheiwe, 26 pages.** Independently verified against actual page content, and personally reviewed by Todd. The `career-compass-report` skill has additionally been cold-session verified multiple times across different environments. Phase 2 is not "unverified work" — treat it as proven.
@@ -66,29 +66,36 @@ Keep this file short. If it's getting long, that usually means something belongs
   was added to `main` deliberately: the columns had been applied to production by hand, so
   without the file `main` shipped code querying columns its own migration history never
   created — a trap for anyone provisioning a fresh environment.
-- **Phase 4 step 3 (Mission Control embed): verified two levels deep only (mc → career),
-  Sept 9 2026. The client path through Circle is untested — do not read this entry as verified
-  until Todd has signed in through Circle, and do not upgrade it because a fix deployed.**
-  On Sept 9 Todd opened `mc.ministrytomarketplace.co` in its own window and signed in; screen 3
+- **Phase 4 step 3 (Mission Control embed): verified Sept 10 2026 through the full client
+  chain, Circle → mc → career — page load and magic-link sign-in both confirmed.** Todd loaded
+  `www.group.ministrytomarketplace.co/job-tracker`, opened Career Compass, signed in with the
+  magic link, and landed signed in. **Scope of that test:** page load and sign-in through the
+  three-level chain. Opening the report link was checked only on the Sept 9 two-level path,
+  not through Circle.
+
+  *How it got here:* on Sept 9 Todd opened `mc.ministrytomarketplace.co` in its own window and signed in; screen 3
   displayed and the report link opened the PDF. Auth survived that frame. **That is not how
   clients reach it.** The real chain is three levels: the Circle community
   (`https://www.group.ministrytomarketplace.co`, page `/job-tracker`) →
   `mc.ministrytomarketplace.co` → `career.ministrytomarketplace.co`. `frame-ancestors` is checked
   against *every* ancestor, not just the parent, and the policy allowed only `'self'` and mc,
   so the innermost frame is refused on the client path. The Sept 9 test was real; it just was
-  not the path. (Narrowed Sept 10 2026 — directed by Todd.)
+  not the path. (Narrowed Sept 10 2026 — directed by Todd; upgraded the same day only after
+  Todd's own sign-in through Circle, not on the strength of the fix deploying.)
 
-  **Fix deployed Sept 10 2026 (`87b2feb`), not yet verified through Circle:** `next.config.ts`
-  adds the Circle origin, hardcoded alongside `MISSION_CONTROL_ORIGIN` (`85f4eb7` on the
-  branch). Production now serves `frame-ancestors 'self' https://mc.ministrytomarketplace.co
-  https://www.group.ministrytomarketplace.co;` (read from the live headers). That proves the
-  header, not the embed.
-  Hardcoded because the origin is the same in every environment, there is no local Circle, and
-  an unset env var would be dropped silently by the `.filter(Boolean)`. The auth cookie is
-  `SameSite=Lax` (the `@supabase/ssr` default; the app does not override it). That *should*
-  hold, because all three levels are same-site (`https` + `ministrytomarketplace.co`) —
-  **reasoned, not observed.** It would break if Circle wraps the embed in a further iframe on
-  another domain, or sandboxes it without `allow-same-origin`.
+  **The fix, deployed Sept 10 2026 (`87b2feb`):** `next.config.ts` adds the Circle origin,
+  hardcoded alongside `MISSION_CONTROL_ORIGIN` (`85f4eb7` on the branch). Production serves
+  `frame-ancestors 'self' https://mc.ministrytomarketplace.co
+  https://www.group.ministrytomarketplace.co;` (read from the live headers). Hardcoded because
+  the origin is the same in every environment, there is no local Circle, and an unset env var
+  would be dropped silently by the `.filter(Boolean)`.
+
+  **The auth cookie is `SameSite=Lax`** (the `@supabase/ssr` default; the app does not override
+  it), and it holds because all three levels are same-site (`https` +
+  `ministrytomarketplace.co`). SameSite keys on site, not origin. This was reasoned first and is
+  now consistent with Todd's sign-in through Circle. **It would break if Circle ever moves off
+  `ministrytomarketplace.co`, wraps the embed in a further iframe on another domain, or
+  sandboxes it without `allow-same-origin`.** Any of those needs a re-test through Circle.
 
   **The embed only works on the published domain.** The CSP is a *static* policy built in
   `next.config.ts`. Before the Circle fix, production served exactly
@@ -104,10 +111,10 @@ Keep this file short. If it's getting long, that usually means something belongs
   unreachable from the interface** — if one is ever needed, it exists and must be retrieved from
   storage directly. Do not conclude from the UI that it is gone.
 
-**The delivery chain is built except the Circle DM — with one verification gap.** Intake →
-submit → report build → Gate 4 → Drive upload → screen 3 are verified in production. The
-Mission Control embed is verified only with mc opened directly; the client path through Circle
-has not been tested (see step 3). The **Circle DM stays manual with its own human gate by decision** — not an
+**The delivery chain is built except the Circle DM.** Intake → submit → report build →
+Gate 4 → Drive upload → screen 3 are verified in production, and the Mission Control embed is
+verified through the full client chain, Circle → mc → career (Sept 10 2026; see step 3 for
+exactly what that covered). The **Circle DM stays manual with its own human gate by decision** — not an
 unfinished piece. It is to be automated at Gate 4 later, once the chain has run cleanly across
 several real clients.
 
