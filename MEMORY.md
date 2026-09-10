@@ -16,7 +16,7 @@ Keep this file short. If it's getting long, that usually means something belongs
 
 ## Current Status
 
-**Phase:** 4 — steps 1–3 (Drive upload, screen 3, Mission Control embed) **complete and verified in production**; Circle DM automation deferred, stays manual by decision
+**Phase:** 4 — steps 1–2 (Drive upload, screen 3) **complete and verified in production**; step 3 (Mission Control embed) **verified two levels deep only — the client path through Circle is untested**; Circle DM automation deferred, stays manual by decision
 **State:**
 - **Phase 1 (intake form + minimal admin view): built and deployed.** Live in production at `career.ministrytomarketplace.co`. Supabase-verified **on writes and RLS only** — both confirmed against the live project. **The prod magic-link sign-in path was not part of that verification and may never have had a successful end-to-end run.** `LoginPanel.tsx` routes to a dev-cookie path whenever `NEXT_PUBLIC_SUPABASE_URL` is unset, so local testing bypasses Supabase auth entirely. **Sign-in is now confirmed working end to end in production (Sept 9 2026):** a magic link signed Todd in and resumed his in-progress intake. Do not read the original "Supabase-verified" note as having covered auth — it did not. That was the same class of problem as a stale entry: a note reading broader than what was actually tested end to end. (Narrowed Sept 9 2026; auth confirmed working Sept 9 2026 — both directed by Todd.)
 - **Phase 2 (report build): built, verified, and reviewed.** The full pipeline — Stage-2 research markdown → `parse_research_markdown.py` → `graph_generator.py` → `report_template.py` → branded PDF — has produced a real client report end to end: **Austin Scheiwe, 26 pages.** Independently verified against actual page content, and personally reviewed by Todd. The `career-compass-report` skill has additionally been cold-session verified multiple times across different environments. Phase 2 is not "unverified work" — treat it as proven.
@@ -66,18 +66,34 @@ Keep this file short. If it's getting long, that usually means something belongs
   was added to `main` deliberately: the columns had been applied to production by hand, so
   without the file `main` shipped code querying columns its own migration history never
   created — a trap for anyone provisioning a fresh environment.
-- **Phase 4 step 3 (Mission Control embed): complete and verified in production, Sept 9 2026.**
-  Career Compass renders inside the Job Tracker / Mission Control iframe on
-  `mc.ministrytomarketplace.co`: Todd signed in there, screen 3 displayed, and the report link
-  opened the PDF. **The real unknown was whether auth survives the frame — it does; the session
-  cookie carries through**, so no separate in-frame auth is needed.
+- **Phase 4 step 3 (Mission Control embed): verified two levels deep only (mc → career),
+  Sept 9 2026. The client path through Circle is untested — do not read this entry as verified
+  until Todd has signed in through Circle, and do not upgrade it because a fix deployed.**
+  On Sept 9 Todd opened `mc.ministrytomarketplace.co` in its own window and signed in; screen 3
+  displayed and the report link opened the PDF. Auth survived that frame. **That is not how
+  clients reach it.** The real chain is three levels: the Circle community
+  (`https://www.group.ministrytomarketplace.co`, page `/job-tracker`) →
+  `mc.ministrytomarketplace.co` → `career.ministrytomarketplace.co`. `frame-ancestors` is checked
+  against *every* ancestor, not just the parent, and the policy allowed only `'self'` and mc,
+  so the innermost frame is refused on the client path. The Sept 9 test was real; it just was
+  not the path. (Narrowed Sept 10 2026 — directed by Todd.)
 
-  **The embed only works on the published domain.** The CSP is a *static* policy built from
-  `MISSION_CONTROL_ORIGIN` in `next.config.ts`, and production serves exactly
+  **Fix committed, not yet deployed or verified:** `next.config.ts` adds the Circle origin,
+  hardcoded alongside `MISSION_CONTROL_ORIGIN` (`85f4eb7`; on `main-deploy` as `87b2feb`).
+  Hardcoded because the origin is the same in every environment, there is no local Circle, and
+  an unset env var would be dropped silently by the `.filter(Boolean)`. The auth cookie is
+  `SameSite=Lax` (the `@supabase/ssr` default; the app does not override it). That *should*
+  hold, because all three levels are same-site (`https` + `ministrytomarketplace.co`) —
+  **reasoned, not observed.** It would break if Circle wraps the embed in a further iframe on
+  another domain, or sandboxes it without `allow-same-origin`.
+
+  **The embed only works on the published domain.** The CSP is a *static* policy built in
+  `next.config.ts`. Before the Circle fix, production served exactly
   `frame-ancestors 'self' https://mc.ministrytomarketplace.co;` (confirmed from the live
-  response headers). **Lovable's editor preview is a different origin and is refused.** That is
-  the policy working, not a bug. **Test the embed on `mc.ministrytomarketplace.co`, never in the
-  preview** — and note that allowing another origin means a config change and a redeploy, not a
+  response headers, Sept 9 and 10 2026). **Lovable's editor preview is a different origin and is
+  refused.** That is the policy working, not a bug. **Test the embed the way clients reach it —
+  through `www.group.ministrytomarketplace.co/job-tracker` — not by opening mc directly, and
+  never in the preview.** Allowing another origin means a config change and a redeploy, not a
   runtime toggle.
 
   **The old admin PDF upload path in Job Tracker has been removed.** Reports are delivered
@@ -85,9 +101,10 @@ Keep this file short. If it's getting long, that usually means something belongs
   unreachable from the interface** — if one is ever needed, it exists and must be retrieved from
   storage directly. Do not conclude from the UI that it is gone.
 
-**The delivery chain is complete except the Circle DM.** Intake → submit → report build →
-Gate 4 → Drive upload → screen 3 → Mission Control embed all run end to end and are verified
-in production. The **Circle DM stays manual with its own human gate by decision** — not an
+**The delivery chain is built except the Circle DM — with one verification gap.** Intake →
+submit → report build → Gate 4 → Drive upload → screen 3 are verified in production. The
+Mission Control embed is verified only with mc opened directly; the client path through Circle
+has not been tested (see step 3). The **Circle DM stays manual with its own human gate by decision** — not an
 unfinished piece. It is to be automated at Gate 4 later, once the chain has run cleanly across
 several real clients.
 
