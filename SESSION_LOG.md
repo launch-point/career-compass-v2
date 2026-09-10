@@ -1185,6 +1185,11 @@ was run to measure the colon fix, not to audit Harper.
   is MEMORY's existing Open Question ("Do research-only clients need a
   `clients` row"), which **still lists three clients**. Jaleesa makes four, so
   that entry is now out of date too.
+
+  **Resolved before session end, not carried:** Todd decided it. Future clients
+  come through intake. The four are transitional and get manual delivery. Matt
+  Fabin is a known exception. The uploader's refusal is correct behaviour. Now in
+  MEMORY Decisions Made; the Open Question is removed.
 - **Delivered reports still carry what this session found.** Harper: 33 colons,
   the page-9 "Flag:" note, 7 wrong "Immediate" labels. Johnson: 12 colons, 3
   wrong "Immediate" labels. Whether to rebuild and re-deliver is Todd's call.
