@@ -497,6 +497,12 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
 - Full admin dashboard: client table, top-5 column, PDF download (Phase 4)
 - Agent training loop: pattern surfacing every ~5 sessions to turn Todd's intuitive gate decisions into explicit rules (after phases 1–4)
 - Fixed master role list of 50–100 real roles (Todd building in parallel, manually)
+- **Technical Requirements: one "Time to acquire" label per role.** The parser collapses
+  the whole section into one string (`tech_req_2` is always "None"), so a role listing
+  several requirements with different timeframes shows at most one, the first
+  `N–M months` range found. Left alone by decision while the fabricated-"Immediate"
+  fallback was removed. Detail in the report skill's SKILL.md Known Gaps.
+  (Todd, Sept 10 2026)
 - Slack message cosmetics (not blocking; pipeline works): the four arrays render
   comma-separated on one line rather than one item per line, and `submittedAt` renders as
   raw ISO (`2026-09-09T14:31:59.899+00:00`) rather than a readable date. (Noted Sept 9 2026)
