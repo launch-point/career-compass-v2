@@ -1037,3 +1037,144 @@ document came back and parsed clean.
   That is the known-gap tech-requirements label, not the audience problem,
   but here it contradicts the prose rather than just repeating it.
   Unconfirmed; raw observation.
+
+  *(Resolved later the same day in session 9: the "Immediate" label was a
+  fabricated parser fallback, removed in `11153fb`. See session 9.)*
+
+---
+
+## Session 9 — 2026-09-10 — Jaleesa McCreary build; dangling colons; fabricated "Immediate"
+
+**Raw observations. Not authoritative.**
+
+### What ran
+
+- **Jaleesa McCreary report built from Todd's research markdown**: 9 roles,
+  propose clean (0 FAIL), 33-page PDF at `reports/mccreary/`. **Not delivered;
+  it's waiting on Gate 4.** She has no Supabase `clients` id because she filled in
+  the intake before ids were active, so this was a local build only, by Todd's
+  direction. `CLIENT_ID_ABSENT` is expected on her.
+- **The two Seniority Notes written to Todd (#8 Director of Events, #9 Program
+  Director) were replaced** in a working copy of the markdown with client-facing
+  rewrites Todd approved. The as-received file is kept alongside, following the
+  Harper precedent.
+- **Commits:** `b24c512` template, one-sentence bullets render as plain sentences ·
+  `f50ce2c` MEMORY, where the format-defect rule stops · `4bd51ef` SESSION_LOG,
+  the third audience route (session-8 addendum) · `11153fb` parser + template +
+  SKILL.md, no fabricated "Time to acquire" and a new `TECH_TIME_NOT_FOUND` WARN
+  · `775b62c` MEMORY, one-label-per-role deferred. All on `phase-2-report`. None
+  touches `intake-app/`, so nothing needed to reach `main`.
+- **Verification on each rebuild:** Functional Mix re-read from the markdown and
+  diffed against the JSON; TOC page numbers against page content; zero
+  `[cite:`; conditional notes only where expected; embedded fonts; dangling
+  colons and time labels counted from the data, not from PDF text. Pages
+  rendered and looked at each time. Drift suite 14/14 after the parser change.
+  JSON diffed against the committed parser's output: only `tech_time_1` changed.
+
+### Todd's gate decisions (his, not defaults)
+
+- **All 9 roles ship.**
+- **Base salary bands (Option A) on every role.** #2 uses the general-market
+  band because the niche band states no low. #7's high is $137,000, read out of
+  garbled research prose ("$137,000 at the 75th percentile near $159,000").
+  Midpoints I calculated are marked as such in the judgment file.
+- **Function placements:** my proposed primaries shipped — HR for #1–3, #6, #7;
+  Marketing for #4, #5; Operations for #8, #9. **Accepted by not objecting, not
+  by explicit review.** I said they'd follow the table unless he said otherwise,
+  and he didn't. Worth knowing at Gate 4.
+- **Rating-led value bullets ship as written**, e.g. "Fun: Moderate — …". 35 of 45.
+- **Seniority by the title rule.** #8 and #9 are Strategist; their notes pointed
+  the same way.
+
+### The sequence (Todd asked for this recorded)
+
+One cosmetic complaint led to four findings, three of them in already-delivered
+work:
+
+1. **Dangling colons on Jaleesa's Day-to-Day pages**: every one-sentence bullet
+   rendered as "lead:" with nothing after it.
+2. **Checking whether that was new showed it already shipped**: 33 in Harper's
+   delivered report, 12 in Johnson's. Fixed in the template (`b24c512`).
+3. **Rebuilding Harper to measure that fix surfaced the "Flag:" note** on page 9,
+   a research-thread flag addressed to Todd, printed inside a delivered
+   technical requirement. It's the third audience-routing route (session-8
+   addendum).
+4. **The same page showed "3+ months" with "Time to acquire: Immediate — no
+   barrier identified" under it.** That traced to a parser fallback that
+   fabricated "Immediate" whenever no `N–M months` range matched: 9 of 18 roles
+   across the three delivered reports. Fixed in `11153fb`.
+
+None of the four was caught by a check. Each was found by reading a rendered
+page, and #3 and #4 turned up while measuring something else. The Harper rebuild
+was run to measure the colon fix, not to audit Harper.
+
+### Corrections from Todd
+
+- **Colons: I recommended sending them upstream under the format-defect rule.
+  Wrong.** Harper and Johnson followed the format and still produced them. A
+  one-sentence bullet is valid content; the template assumed two parts. The
+  line, now in MEMORY: invalid research goes upstream; valid research the
+  template mishandles gets fixed in the template.
+- **"Time to acquire": blank plus a WARN, not a wider pattern.** Todd:
+  extending the regex just moves the silent failure to the next phrasing nobody
+  anticipated. Same principle as `FUNCTION_DESC_MISSING`.
+- **My counts were low.** I first gave 25 / 10 / 55 from PDF text extraction,
+  which misses bullets that wrap. Counted from the data: 33 / 12 / 54. Same
+  family as the Corrections Log entry on truncated evidence: the extraction
+  quietly undercounted, and I reported its number before cross-checking it.
+- Todd interrupted my first attempt to apply the colon fix to ask whether it
+  belonged upstream. That question is what produced the rule above.
+
+### Didn't work as expected
+
+- **The Edit tool wrote a literal `•`** where `report_template.py` uses `\u2022`
+  escapes, on the first patch. Caught by `cmp` against the scratch copy I'd
+  tested, then corrected. On the second patch it wrote escapes. Inconsistent,
+  and output-identical either way, but byte-compare against the tested copy
+  caught it where a read-through would not have. **It happened again writing
+  this entry**: `\u2022` typed into an edit landed as `•`, so the tool decodes
+  escape text in its input. Fixed by writing that line through Python.
+- **Two bugs in my own check scripts**, both caught as harness failures before
+  being reported as findings: an unquoted heredoc let bash expand `$[` into
+  arithmetic, and a recursive JSON diff walked into equal strings. The Corrections
+  Log step (check the harness before reporting a failure) held this time.
+- **`reports/scheiwe/` holds two PDFs**: the 26-page one (Sept 4) that MEMORY
+  records as delivered, and a 30-page `_v24` build (Sept 7) that nothing records
+  as delivered. Its status is unknown.
+
+### Patterns (tentative)
+
+- **A note that expired without anyone noticing.** This is Todd's framing, and
+  it's the mechanism behind finding #4. The known-gap note called the tech label
+  "cosmetic redundancy", and **it was accurate when written**: Scheiwe's
+  research phrased requirements as "no immediate barrier", so "Immediate" only
+  repeated it. From Johnson onward the research phrased timeframes differently.
+  The note didn't change, and a description that was once true is why nobody
+  looked again.
+
+  This differs from the Corrections Log entry on "Functions 6-10". That note
+  was **wrong when written**; this one was **right when written and expired**.
+  A wrong note fails any honest check. An expired note passes every check made
+  against the inputs it was written about, and nothing ties it to those inputs,
+  so a change upstream doesn't flag it. For the session-10 review, as a question
+  rather than a proposal: should notes about client-visible output record which
+  inputs they were observed against, so a change in input triggers a re-check?
+
+- **Audience routing is now three routes**: the level-note field, UI copy, and a
+  flag inside content prose. Detail in the session-8 addendum.
+
+### Open at session end
+
+- **Jaleesa's report awaits Gate 4.** In it: #3 Executive Recruiter's mix sums
+  to 85% (as the research states); the rating-led value text; the two rewritten
+  level notes.
+- **Delivered reports still carry what this session found.** Harper: 33 colons,
+  the page-9 "Flag:" note, 7 wrong "Immediate" labels. Johnson: 12 colons, 3
+  wrong "Immediate" labels. Whether to rebuild and re-deliver is Todd's call.
+  **A rebuild from saved JSON reprints the fabricated label**, so it needs the
+  parser's build step first. Harper's "Flag:" text is in the research prose
+  itself, so a rebuild prints it too unless the markdown changes.
+- Harper's page-21 Travel "Flag:" is logged as ambiguous, per Todd. It reads as a
+  caveat, not a note to him.
+- One label per role on technical requirements: deferred (MEMORY).
+- **Session 10 is the 5-session review.**
