@@ -884,3 +884,114 @@ document came back and parsed clean.
   that made a failure visible was mistaken — by me — for the thing that repaired
   it. Worth a habit of stating "this changes legibility, not behaviour" in the
   commit message itself.
+
+---
+
+## Session 8 — 2026-09-10 — Status read, MEMORY corrections, "Mission Control" out of client copy
+
+**Raw observations. Not authoritative.**
+
+### What ran
+
+- **Status read from MEMORY.md**, checked against git. `main` was 61 commits
+  behind `phase-2-report`, but `intake-app/` was identical on both; the gap was
+  docs, MEMORY/SESSION_LOG, the report skill, `.gitignore` and
+  `credentials.example.json`.
+- **Phase 3 status written directly to MEMORY** (Todd: "record that"): still
+  manual; the Perplexity/Sonnet pipeline is built elsewhere and needs porting.
+- **Three MEMORY corrections**, drafted, approved as drafted, committed
+  separately (`593bcd7`): the stale Sept 9 deploy-gap entry, the Deferred list,
+  and the header date. Todd added a fourth: mark the Drive/Mission Control
+  deferral in Decisions **superseded, not deleted**, because it records why Drive
+  was held during Phases 1–3.
+- **Client-facing copy change** (`79c5ff7`, cherry-picked to `main` as
+  `4cd0b1f`, deployed): sign-in title → "Career Compass Sign In"; body names "your
+  Job Tracker"; "Didn’t get it?" line drops the channel ("contact your coach");
+  Wizard header → "Career Compass". `MISSION_CONTROL_ORIGIN`, identifiers and
+  code comments left alone, since renaming means Vercel env vars and the CSP.
+- **Verification:** Todd walked all three screens locally. I confirmed the live
+  sign-in HTML serves the new title and body with no "Mission Control" and no
+  "Career Compass Intake", and the CSP is unchanged. **Not observed in
+  production:** the "Didn’t get it?" line and the Wizard header. Both render only
+  after an interaction or sign-in, which fetching the page cannot reach.
+
+### Decisions Todd made
+
+- Client-facing copy says **Job Tracker**; "Mission Control" stays as the internal
+  name in code, env vars and comments.
+- **Line 116: drop the channel rather than name one.** "Naming Circle would be
+  another guess dressed as a fact, which is exactly how 'Mission Control' got
+  there."
+- **Em dash, not hyphen**, in client copy. The app is consistent and a lone
+  hyphen reads as a typo.
+- Push `phase-2-report` alongside `main`: a branch left behind origin causes
+  rebase friction later.
+
+### Corrections from Todd
+
+- **Line 116's "message your coach in Mission Control" was a guess made during
+  the Phase 1 build with no spec behind it, and it sat in production copy until
+  today.** Traced: `git log -S` puts its introduction at `51ab67f` ("wizard UI,
+  admin view, error states"), and the spec contains no "check spam" or "didn't get
+  it" text and says nothing about how clients reach their coach. Nothing in the
+  repo records where clients actually message their coach; the only messaging on
+  record is the Circle DM, which runs the other way.
+- **Todd corrected his own instruction** (Wizard header → "Career Compass Sign
+  In"). I held that one edit and flagged that the header sits above every intake
+  step after sign-in; Todd agreed: "My instruction was wrong." This matches session
+  7's note that Todd treats his own framing as revisable.
+- **Hyphen:** I applied Todd's text verbatim, hyphen included, and flagged it;
+  he chose the em dash. Asking first would have cost the same round trip and saved
+  an edit.
+
+### Didn't work as expected
+
+- **`intake-app/.env.local` points at the production Supabase project and the
+  live Make.com webhook.** A plain `next dev` would send real magic-link emails and
+  write drafts to production. Worked around by starting the dev server with
+  `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+  `SUPABASE_SERVICE_ROLE_KEY`, `ORCHESTRATOR_WEBHOOK_URL` and
+  `CAREER_COMPASS_WEBHOOK_SECRET` set to empty. `@next/env` only fills a variable
+  that is undefined, so an empty override holds (read from
+  `node_modules/@next/env`). Confirmed before any typing: `POST
+  /api/auth/dev-send` returned 200, and that route refuses whenever Supabase is
+  configured. Candidate for Technical Notes if it recurs.
+- **No browser tools this session.** The Chrome extension was declined, so Todd
+  walked the local flow himself. Fetching the page covers only server-rendered
+  text, which leaves post-interaction and post-sign-in copy unobservable from
+  here in production.
+- **Local `main` is stale** (`3d8951e`); `main-deploy` tracks `origin/main` and
+  is what gets cherry-picked onto and pushed as `main-deploy:main`.
+- **`.dev-data/db.json` mtime advanced during Todd's walk (08:50)**, but every
+  record's timestamps are still 2026-09-03 and no new record appeared. It is
+  gitignored with no copy, so whether any content changed is unknown. Compare
+  session 7, where a local walk did overwrite a dev record.
+
+### Patterns (tentative)
+
+- **Internal assumptions made while building reach client-facing text, and
+  nothing in the pipeline catches it.** Todd asked for this to be recorded as a
+  pattern, not a one-off. Two instances, different layers, same shape:
+
+  | Instance | What was internal | How it reached the client |
+  |---|---|---|
+  | Line 116 (this session) | A builder's guess about where clients message their coach | Written into UI copy during the Phase 1 build; live until today |
+  | `seniority_note` (session 6) | Notes written **to Todd** | Rendered verbatim into a client report; the build printed `FINDINGS: none` |
+
+  In both, text written for an internal audience crossed to the client with no
+  audience boundary, and in both it was caught only by a human reading the
+  rendered client-facing output. No check fired either time.
+
+  Possibly a second mechanism under the same pattern, **not verified:** the
+  *original* sign-in body ("same email you use for Mission Control") closely
+  mirrors the spec's own wording ("tied to the same email as Mission Control",
+  spec line 139). If so, that line was not a guess but the spec's internal
+  vocabulary copied into client copy. That would be a separate route from the
+  line-116 guess: one fills a gap with an assumption, the other carries internal
+  naming across unchanged. The spec still uses "Mission Control" throughout, so
+  building from it could reintroduce the name.
+
+  Worth testing at the session-10 review whether this is one problem: per-text
+  audience that nothing records or enforces, in the UI and in the report
+  pipeline. Note that the `seniority_note` half is itself still a raw session-6
+  observation and a MEMORY open question, not a confirmed fact.
