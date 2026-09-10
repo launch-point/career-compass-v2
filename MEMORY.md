@@ -78,8 +78,11 @@ Keep this file short. If it's getting long, that usually means something belongs
   so the innermost frame is refused on the client path. The Sept 9 test was real; it just was
   not the path. (Narrowed Sept 10 2026 — directed by Todd.)
 
-  **Fix committed, not yet deployed or verified:** `next.config.ts` adds the Circle origin,
-  hardcoded alongside `MISSION_CONTROL_ORIGIN` (`85f4eb7`; on `main-deploy` as `87b2feb`).
+  **Fix deployed Sept 10 2026 (`87b2feb`), not yet verified through Circle:** `next.config.ts`
+  adds the Circle origin, hardcoded alongside `MISSION_CONTROL_ORIGIN` (`85f4eb7` on the
+  branch). Production now serves `frame-ancestors 'self' https://mc.ministrytomarketplace.co
+  https://www.group.ministrytomarketplace.co;` (read from the live headers). That proves the
+  header, not the embed.
   Hardcoded because the origin is the same in every environment, there is no local Circle, and
   an unset env var would be dropped silently by the `.filter(Boolean)`. The auth cookie is
   `SameSite=Lax` (the `@supabase/ssr` default; the app does not override it). That *should*
