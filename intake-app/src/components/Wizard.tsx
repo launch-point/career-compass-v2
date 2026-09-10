@@ -135,7 +135,7 @@ export function Wizard() {
       {/* Header: section rail + overall progress */}
       <header className="mb-5">
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-sm font-bold">Career Compass Intake</span>
+          <span className="text-sm font-bold">Career Compass</span>
           <SaveIndicator />
         </div>
         <div className="mb-2 flex gap-1">

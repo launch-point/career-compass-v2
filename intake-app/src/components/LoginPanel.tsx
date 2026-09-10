@@ -75,10 +75,10 @@ export function LoginPanel() {
   return (
     <div className="flex min-h-full items-center justify-center px-4 py-16">
       <Card className="w-full max-w-md">
-        <h1 className="text-xl font-bold">Career Compass Intake</h1>
+        <h1 className="text-xl font-bold">Career Compass Sign In</h1>
         <p className="mt-1 text-sm text-muted">
-          Sign in with the same email you use for Mission Control. We’ll send you a secure sign-in
-          link — no password needed.
+          Sign in with the same email you use for your Job Tracker. We’ll send you a secure sign-in
+          link to your email — no password needed.
         </p>
 
         {!sent ? (
@@ -113,7 +113,7 @@ export function LoginPanel() {
               {cooldown > 0 ? `Resend link (wait ${cooldown}s)` : 'Resend link'}
             </Button>
             <p className="text-center text-xs text-muted">
-              Didn’t get it? Check spam, or message your coach in Mission Control.
+              Didn’t get it? Check spam, or contact your coach.
             </p>
           </div>
         )}
