@@ -521,9 +521,33 @@ Run before telling Todd anything is done. Show real output, never a description.
 
 ## Known Gaps
 
-- **Tech requirements read redundantly** when the source sentence already states
-  timing ("…no immediate barrier. — Time to acquire: Immediate"). Cosmetic;
-  worth one pass across all clients rather than a per-client fix.
+- **"Time to acquire" was a fabricated answer, not cosmetic redundancy.** The
+  parser reads a timeframe only when the Technical Requirements prose contains an
+  explicit `N–M month(s)` range. Until Sept 10 2026, anything else — "3+ months",
+  "1 month", "under one month", "immediate to a few weeks" — fell back to the
+  literal string "Immediate — no barrier identified".
+
+  This note used to call that cosmetic redundancy. That was only true of
+  Scheiwe's documents, whose prose itself said "no immediate barrier". From
+  Johnson onward the research wrote timeframes the pattern can't read, and the
+  label turned into a confident wrong answer. In the three delivered reports
+  (Scheiwe's 26-page one, Johnson, Harper), **9 of 18 roles print "Immediate"
+  where the text gives a longer timeframe.** The worst is Harper's Executive
+  Coach, whose text says "3+ months" and "exceeds the standard upskilling
+  threshold". The stale "cosmetic" description is why nobody looked again.
+
+  **Now:** when no range matches, the line is omitted and the requirement text
+  stands alone, and `TECH_TIME_NOT_FOUND` (WARN) names the role at propose.
+  Blank over fabrication, same as `FUNCTION_DESC_MISSING`. **Do not widen the
+  pattern to clear the warning**; that moves the silent failure to the next
+  phrasing nobody anticipated. **Report JSON built before the change still
+  holds the fabricated string**, so rebuilding a delivered report from its
+  saved JSON prints it again. Re-run the parser's build phase first.
+
+  **Still open, deliberately:** one label per role. The whole section is
+  collapsed into one string (`tech_req_2` is always "None"), so a role that
+  lists several requirements with different timeframes shows at most one, the
+  first range found. (Todd, Sept 10 2026: leave it for now.)
 - **Print legibility of small type** (5.8pt compact / 7.0pt overview axis labels)
   has only been judged on screen, never on paper.
 - **`actions_taken` grouping** is inferred: the source gives flat bullets, and the

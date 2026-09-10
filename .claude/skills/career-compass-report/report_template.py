@@ -891,18 +891,15 @@ def build_job_page(story, role, values, functions, compact_png):
     # Tech + Travel kept together at the end of Page 3
     tail_items = []
     tail_items.append(Paragraph("TECHNICAL REQUIREMENTS", s_section_head))
+    # No parsed duration -> no "Time to acquire" line; the requirement text stands alone.
     if role["tech_req_1"] != "None":
         tr1 = sanitize_html(role["tech_req_1"])
-        tail_items.append(Paragraph(
-            f'\u2022&nbsp;&nbsp;<b>{tr1}</b> \u2014 Time to acquire: {role["tech_time_1"]}',
-            s_bullet
-        ))
+        t1 = f' \u2014 Time to acquire: {role["tech_time_1"]}' if role["tech_time_1"] else ""
+        tail_items.append(Paragraph(f'\u2022&nbsp;&nbsp;<b>{tr1}</b>{t1}', s_bullet))
     if role["tech_req_2"] != "None":
         tr2 = sanitize_html(role["tech_req_2"])
-        tail_items.append(Paragraph(
-            f'\u2022&nbsp;&nbsp;<b>{tr2}</b> \u2014 Time to acquire: {role["tech_time_2"]}',
-            s_bullet
-        ))
+        t2 = f' \u2014 Time to acquire: {role["tech_time_2"]}' if role["tech_time_2"] else ""
+        tail_items.append(Paragraph(f'\u2022&nbsp;&nbsp;<b>{tr2}</b>{t2}', s_bullet))
     if role["tech_req_1"] == "None" and role["tech_req_2"] == "None":
         tail_items.append(Paragraph("No essential technical requirements at the 80%+ threshold.", s_body))
     tail_items.append(Paragraph("TRAVEL", s_section_head))

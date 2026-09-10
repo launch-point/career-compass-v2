@@ -500,6 +500,17 @@ def parse_role(sec, judgment, top_functions, top_values, check_judgment=True):
     if not tech:
         warn(where, "TECH_EMPTY", "Technical Requirements section is empty")
     tm = re.search(r"(\d+[–—-]\d+\s*month[s]?)", tech)
+    # Only an explicit "N-M month(s)" range is read as a duration. Anything else
+    # leaves the label blank and the template omits the line: the prose already
+    # states the timeframe, and the old fabricated "Immediate" contradicted it
+    # (Harper's "3+ months", Johnson's "1 month"). Blank over fabrication - the
+    # same reason FUNCTION_DESC_MISSING refuses rather than synthesising a tail.
+    # Do not widen the pattern to clear this warning: that only moves the silent
+    # failure to the next phrasing nobody anticipated.
+    if tech and not tm:
+        warn(where, "TECH_TIME_NOT_FOUND",
+             "no 'N-M months' duration in Technical Requirements; the report "
+             "omits the 'Time to acquire' line and the requirement text stands alone")
 
     salary_prose = prose(subsection(body, SUBSECTIONS["salary"]))
     if not salary_prose and not j.get("salary_context"):
@@ -530,7 +541,7 @@ def parse_role(sec, judgment, top_functions, top_values, check_judgment=True):
             "success_metrics": titled("metrics"),
         },
         "tech_req_1": tech,
-        "tech_time_1": tm.group(1) if tm else "Immediate — no barrier identified",
+        "tech_time_1": tm.group(1) if tm else "",
         # Literal "None" is the template's sentinel for an unused second slot.
         "tech_req_2": "None", "tech_time_2": "None",
         "travel": prose(subsection(body, SUBSECTIONS["travel"])),
