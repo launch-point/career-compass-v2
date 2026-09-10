@@ -193,6 +193,29 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   way. The upstream rule was applied without first asking whether the input was
   actually invalid. Decide which side of the line a defect is on before choosing
   where to fix it. (Sept 10 2026 — directed by Todd)
+- **Research-only clients get manual delivery; no `clients` rows are created for
+  them.** *(Moved from Open Questions, Sept 10 2026.)* Every future client comes
+  through the intake form, so each has a Supabase row and the full delivery chain
+  works: Drive upload, screen 3, Mission Control embed. The research-only clients
+  are **transitional**: **Austin Scheiwe, Henry Johnson, Jensen Harper and Jaleesa
+  McCreary**. Their reports were built from research markdown Todd supplied
+  directly, not from an intake submission, and they get manual delivery. The
+  open question listed only the first three; Jaleesa, built and approved at Gate
+  4 on Sept 10 2026, is the fourth.
+
+  **Known exception: Matt Fabin**, the one future client who will not come
+  through the intake form. With no row, he falls under the same manual delivery.
+
+  **`upload_report.py` refusing a report with no client id is correct behaviour,
+  not a gap to work around.** Do not create rows by hand, invent a `--client-id`,
+  or otherwise route these clients into the chain. The refusal is the system
+  correctly saying the report isn't database-backed.
+
+  Background from when this was open: the research path and the intake path have
+  never met. It surfaced while verifying the Drive upload, which keys the report
+  link to `clients.id` and had no real row to write to (verified by querying the
+  table). `--client-id` bridges the gap for any client who has a row; reports
+  built before it existed carry only a name. (Decided by Todd, Sept 10 2026)
 
 ---
 
@@ -225,22 +248,6 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   `Seniority Note:` plus an internal field the parser ignores, or flip the parser
   precedence. The template split was recommended. Todd has deliberately not decided; this
   is a real choice and not one to make at the end of a long session. (Logged Sept 9 2026)
-
-- **Do research-only clients need a `clients` row — or is that simply not how they work?**
-  The research path and the intake path have never met. Henry Johnson has no row in `clients`
-  because his report was built from a research markdown Todd supplied directly, not from an intake
-  submission; the whole table is two rows, both Todd's own test accounts. This surfaced when
-  verifying the Drive upload, which keys the report link to `clients.id` and therefore had no real
-  row to write to (verified by querying the table, not assumed).
-
-  `--client-id` bridges the gap going forward, but **every report built before it existed has no
-  way back to a Supabase row** — the report JSON carries only a name. Austin Scheiwe, Henry Johnson
-  and Jensen Harper are all in that state.
-
-  Needs deciding: whether a research-only client gets a `clients` row created for them (and by
-  what, since nothing currently does), or whether report delivery for those clients simply is not
-  database-backed and the Drive link is handed over some other way. Not urgent — it only blocks
-  uploading reports for clients who never filled in the intake form. (Logged Sept 9 2026)
 
 - **Should the parser check that TOP 5 and NEXT 5 FUNCTIONS are disjoint — and at what level?** No such check exists. The parser reads `TOP 5 FUNCTIONS` and `TOP 5 VALUES` and **never reads `NEXT 5 FUNCTIONS` at all**, so an overlap between the two lists passes silently; the only duplicate check in the file is `RANK_DUPLICATE`, which covers `Rank:` values.
 
