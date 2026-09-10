@@ -1200,3 +1200,73 @@ was run to measure the colon fix, not to audit Harper.
   caveat, not a note to him.
 - One label per role on technical requirements: deferred (MEMORY).
 - **Session 10 is the 5-session review.**
+
+---
+
+## Session 8, continued — 2026-09-10 evening — Embed chain through Circle
+
+**Raw observations. Not authoritative.** Same conversation as session 8. It lands after
+session 9 in this file only because session 9 ran in between. **Not a separate session
+for the review count.**
+
+### What ran
+
+- Todd identified that the embed is a **three-level chain**: Circle community
+  (`https://www.group.ministrytomarketplace.co`, page `/job-tracker`) →
+  `mc.ministrytomarketplace.co` → `career.ministrytomarketplace.co`. `frame-ancestors`
+  allowed only `'self'` and mc, and it is checked against every ancestor, so the
+  innermost frame is refused on the client path.
+- **Fix:** Circle origin hardcoded in `next.config.ts` (`85f4eb7`; cherry-picked to
+  `main-deploy` as `87b2feb`). **Not pushed; awaiting Todd's go.** The local dev server,
+  with `MISSION_CONTROL_ORIGIN` set to the prod value, produced `frame-ancestors 'self'
+  https://mc.ministrytomarketplace.co https://www.group.ministrytomarketplace.co;`, and
+  `tsc` passed.
+- **Cookie check:** the auth cookie is `SameSite=Lax` (`@supabase/ssr` 0.12.5 default,
+  no override in the app). Reasoned to be fine, because all three levels are same-site
+  (`https` + `ministrytomarketplace.co`) and SameSite keys on site, not origin.
+  **Not observed.** It breaks if Circle adds its own intermediate iframe on another
+  domain or sandboxes the embed without `allow-same-origin`.
+- MEMORY narrowed (approved by Todd): Phase 4 step 3 is "verified two levels deep
+  only". Todd: **leave it narrowed until he has tested through Circle; do not upgrade
+  it on the strength of the fix deploying.**
+
+### Decisions Todd made
+
+- **Hardcode the Circle origin, not a second env var.** Reasons given: same in every
+  environment, no local Circle, an unset env var would be dropped silently by
+  `.filter(Boolean)` and ship the old policy with no error, and a static CSP needs a
+  redeploy to change either way. `MISSION_CONTROL_ORIGIN` stays an env var because mc
+  has a local instance.
+
+### Correction from Todd — why this happened
+
+- **The Sept 9 embed test opened mc directly in its own window.** In Todd's words: that
+  was the convenient thing to do, and it happened to be a different chain than the one
+  clients use. **The test was real, it just wasn't the path.** MEMORY then recorded the
+  embed as "complete and verified in production" and "auth survives the frame", which
+  claimed the scope of the path clients use while only having the scope of the path
+  tested.
+- My own gap: I read that MEMORY entry this morning and repeated "the embed is verified
+  in production" in the status summary without asking what the test path was.
+
+### Patterns (tentative)
+
+- **The convenient test path is not the client path, and the verified claim silently
+  takes the client path's scope.** Instances, same shape:
+
+  | Instance | Path tested | Path clients take |
+  |---|---|---|
+  | Phase 1 "Supabase-verified" (narrowed Sept 9) | Writes + RLS; local dev bypasses auth | Magic-link sign-in in production |
+  | Sept 9 embed test | mc opened directly, two levels | Circle → mc → career, three levels |
+  | Today's copy walk (session 8) | Local dev mode, dev-cookie sign-in | Magic-link sign-in, inside the Circle chain |
+
+  The third did no harm, because the copy is identical on both paths and I said so
+  when reporting. It is listed because the shape is the same, not because it failed.
+  Tentative countermeasure worth testing at the session-10 review: a completion claim
+  for anything client-facing names the path it was tested on, and MEMORY records
+  that path next to the word "verified".
+- Related to, but distinct from, the audience-leak pattern logged earlier in session 8
+  (and extended by session 9's third route). That one is about text crossing from an
+  internal audience to the client. This one is about a test crossing from a convenient
+  path to a claim about the client's path. Both are a scope silently widening between
+  what was done and what gets recorded.
