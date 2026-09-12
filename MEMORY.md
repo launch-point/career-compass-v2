@@ -250,31 +250,60 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
 
 *Things that need Todd's input before they can be resolved. Remove once answered — move the answer to Decisions.*
 
-- **Are `seniority_note` and `salary_context` one problem — per-role prose the pipeline
-  cannot route by audience?** Two symptoms, opposite directions, same shape:
+- **Does per-role research prose have any way to say who it is written for?** ("Problem A"
+  of the Sept 11 2026 audit; full detail in SESSION_LOG.) The research document is
+  simultaneously Todd's evidence packet and the client's copy source, and **nothing in it
+  marks audience.** Every sentence written inside a role section reaches the client except
+  the Salary prose, `Rank:` and `Confirmed Seniority Level:` — so when the research has
+  something to tell Todd, the only place to put it is inside a client-facing field.
 
-  | Field | Behaviour |
-  |---|---|
-  | `salary_context` | parsed into the report JSON and **never rendered** |
-  | `seniority_note` | **rendered verbatim and cannot be suppressed** — `parse_research_markdown.py:513` treats the document's `Seniority Note:` as authoritative and the judgment value as a fallback only |
+  Confirmed in delivered reports: Harper's Technical Requirements (`**Flag:** this exceeds
+  the standard upskilling threshold … he should weigh deliberately`) and his Travel
+  (`**Flag:** …`); **Johnson's three "A NOTE ON LEVEL" notes that are not about level**,
+  one saying the schedule tension "needs to travel with the role rather than be resolved
+  silently"; Scheiwe v24's "This role passed the seniority screen".
 
-  The `seniority_note` half is the serious one. On Jensen Harper's build, three notes
-  written **to Todd** — one asserting prior client direction, one referencing "an earlier
-  draft" — were replaced with client-facing text Todd approved, written into the judgment
-  file, and then silently discarded by the build, which printed `FINDINGS: none`. **A note
-  written to Todd shipping to a client, with no finding raised, is a silent override of his
-  judgment in the worst direction.** Caught only by rendering the page and reading it.
-  Detail in SESSION_LOG session 6 — raw observation, not yet confirmed.
+  **Two things make audience unrecoverable after the fact.** "You" means Todd in Harper's
+  salary prose ("per your direction") and the client in Johnson's and Scheiwe v24's. And
+  two fields are dual-use by design: `--propose` reads the `Seniority Note` as placement
+  evidence while the build prints it as page text, and the Salary prose is Todd's evidence
+  for the integer call.
 
-  Neither field distinguishes internal prose from client-facing prose; the pipeline has no
-  concept of audience for per-role text. **Worth testing at the next review whether one fix
-  covers both** rather than solving them separately.
+  **Narrowed Sept 11 2026 — this is research-authored prose only.** An earlier framing
+  added a second route, client-facing text authored in the *judgment file* in an internal
+  voice, on the strength of Scheiwe v1's "Worth settling before it drives search strategy".
+  **That attribution is unproven and must not be repeated as fact:** the method only showed
+  the rendered text matched the judgment value, which cannot distinguish judgment-only from
+  identical-in-both, and no Scheiwe research markdown exists on disk to check. Judgment-
+  authored internal voice is an unestablished route, not a known one. (Directed by Todd.)
 
-  **The fix itself stays open.** Three options were put to Todd for `seniority_note` — ask
-  the research thread for client-facing notes, split the template into a client-facing
-  `Seniority Note:` plus an internal field the parser ignores, or flip the parser
-  precedence. The template split was recommended. Todd has deliberately not decided; this
-  is a real choice and not one to make at the end of a long session. (Logged Sept 9 2026)
+  **The precedence half is fixed** (`46cf1a9`, Sept 11 2026): the judgment now wins over
+  the document for both `seniority_note` and `salary_context`, and every replaced document
+  value prints under `OVERRIDDEN`. That ends the silent override of Todd's judgment; it
+  gives prose no audience, so this question stays open. **No way to suppress a note was
+  added, deliberately** — a note that should not have been written is a symptom of this
+  open problem, not something to build a sentinel around.
+
+  **Upstream or local is undecided and depends on the v2.4 research template**, which Todd
+  is checking against five questions: does it designate any place for notes to him; does it
+  state an audience per field (especially `Seniority Note`); where does it tell the
+  researcher to record flags (upskilling threshold, salary floor, seniority gate,
+  client-direction exceptions); what voice convention does it set; are scenario and intake
+  cross-references allowed inside content bullets.
+
+  **The current workaround is hand-editing the notes in the local markdown before the
+  build** (done for Harper and McCreary). Per Todd, Harper's defect **almost certainly
+  never went back to the research thread** — he fixed the document locally and built from
+  it. McCreary's document arriving the next day with the same defect is consistent with
+  that.
+
+  **Prior art, not a menu** (Todd's framing, Sept 11 2026): three options were floated for
+  `seniority_note` alone on Sept 9 — ask the research thread for client-facing notes, split
+  the template into a client-facing `Seniority Note:` plus an internal field the parser
+  ignores, or flip the parser precedence (the last is now done, and it was the smallest of
+  the three). All were scoped **before** the Technical Requirements instance showed the
+  problem is not confined to one field. (Logged Sept 9 2026; rewritten and narrowed
+  Sept 11 2026.)
 
 - **Should the parser check that TOP 5 and NEXT 5 FUNCTIONS are disjoint — and at what level?** No such check exists. The parser reads `TOP 5 FUNCTIONS` and `TOP 5 VALUES` and **never reads `NEXT 5 FUNCTIONS` at all**, so an overlap between the two lists passes silently; the only duplicate check in the file is `RANK_DUPLICATE`, which covers `Rank:` values.
 
@@ -302,6 +331,17 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   band itself, or something else. Dropping the role is the current workaround and it
   discards research Todd may want shown. **Todd's call — a template change to proven
   Phase 2 code, so it wants a presented diff and a pagination re-verify.** (Sept 8 2026)
+
+  **`salary_context` is dormant, not safe — this question and that field are one
+  problem** (Todd, Sept 11 2026). The field carries internal-voice text in every delivered
+  client, and rendering it as it stands would ship exactly that. From the research prose:
+  "per your direction" and "you want Jensen positioned…" (Harper), "Given her
+  Director-level functional scope" (McCreary), "You have elected to keep this role despite
+  the conditional read" (Scheiwe v24), "comes close to 90% of $100,000" (Johnson). From the
+  judgment file, which now wins after `46cf1a9`: Todd's own integer-decision notes ("OTE
+  basis, not base salary…", "Senior Development Director scenario selected"). **Both
+  candidate sources are written for Todd**, so whatever renders a salary caveat needs a
+  client-facing source of its own — it cannot just switch the template on.
 
 ---
 
@@ -537,6 +577,20 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   `N–M months` range found. Left alone by decision while the fabricated-"Immediate"
   fallback was removed. Detail in the report skill's SKILL.md Known Gaps.
   (Todd, Sept 10 2026)
+- **Stale boilerplate in `report_template.py` — three items, Todd's own piece of work,
+  deliberately NOT part of the audience-routing fix.** All three are fixed copy written
+  once into the template rather than per-client routing, and all three are in every
+  delivered report. (Directed by Todd, Sept 11 2026.)
+  1. **"Roles are ranked 1–5"** (`report_template.py:378`) prints whatever the role count
+     is. True only of Scheiwe's 5-role report; Johnson has 6, Harper 7, Scheiwe v24 8,
+     McCreary 9.
+  2. **The coverage line** (`report_template.py:789`): "Combined, **the client's** Top 10
+     functions account for approximately N% of role time." Three defects in one sentence —
+     third-person "the client's" in client-facing copy, N above 100% (Harper 140/115/110,
+     Johnson 110, Scheiwe v24 110), and "Top 10" when only 5–7 functions are ever listed.
+  3. **"NARROW JOB TYPES tab in your Career Compass"** (`report_template.py:396`). No such
+     tab exists in the v2 intake app (grepped). **Whether it exists anywhere clients
+     actually go is unconfirmed — Todd is checking.** Do not "fix" it blind.
 - Slack message cosmetics (not blocking; pipeline works): the four arrays render
   comma-separated on one line rather than one item per line, and `submittedAt` renders as
   raw ISO (`2026-09-09T14:31:59.899+00:00`) rather than a readable date. (Noted Sept 9 2026)
