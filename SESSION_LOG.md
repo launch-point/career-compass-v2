@@ -1292,3 +1292,89 @@ for the review count.**
 - The narrowing itself mattered once already. Between the deploy and Todd's test, MEMORY
   said "not yet verified through Circle". Had a session ended there, the next one would
   have inherited an accurate gap instead of a false "verified".
+
+---
+
+## Session 8, continued — 2026-09-11 — Audience-routing audit; precedence fix
+
+**Raw observations. Not authoritative.** Same conversation as session 8. Still not a
+separate session for the review count.
+
+### What ran
+
+Todd commissioned an audit — map every field where research prose reaches a client, say
+what distinguishes internal from client-facing, check the delivered reports, and describe
+the shape of the problem. **Audit only: no fix proposed until the map existed.**
+
+### Method, and what it can and cannot establish
+
+- Extracted every rendered research-derived string from all five delivered report JSONs
+  (Scheiwe v1 and v24, Johnson, Harper, McCreary) — **1,046 strings** — and **read all of
+  them**, rather than phrase-searching. A second pass scanned the same fields for the
+  client's name, third-person pronouns and process vocabulary; **it surfaced nothing the
+  read had missed** (its extra hits were false positives: "sourcing" as a recruiting term,
+  "on the floor", "intake" as an HR term).
+- Verified each of the 1,046 strings appears in its PDF. The first attempt reported 63
+  missing; that was the **check**, not the data — flat `extract_text()` interleaves wrapped
+  table cells (SKILL.md says so). Re-run with cell-level extraction and a column crop:
+  **all 1,046 present**, one Scheiwe metric split across a page break.
+- Checked whether the parser silently drops research lines: **zero** in Harper's and
+  McCreary's documents, as received and as built. Confirmed the check could see a drop by
+  planting two and catching both.
+- **Cannot establish:** the borderline cases ("verify per organization" reads as both
+  client advice and a note to Todd); what never reached Scheiwe or Johnson, since their
+  research markdown is not on disk; anything visual — extracted text only.
+
+### Findings beyond the four instances Todd already knew
+
+- **Johnson (delivered, Gate 4 approved):** three "A NOTE ON LEVEL" notes that are not
+  about level. One is process instruction — the tension "needs to travel with the role
+  rather than be resolved silently". Two carry salary-scenario analysis ("Salary research
+  surfaced a sharp split … materially changes this role's viability").
+- **Scheiwe v24:** "This role passed the seniority screen."
+- **Harper:** "well under the 3-month threshold" (Tech); "(Senior scenario only)" in an
+  action bullet, cross-referencing a salary scenario the client never sees.
+- **Scheiwe v1:** "assumed per intake default" (Travel); "much as Austin's Story 1 …"
+  (Actions); research-provenance narration throughout ("Sourced descriptions…", "Hotel GM
+  sourcing…").
+- **McCreary is clean** in rendered fields — the one client where the notes were fixed
+  before the build rather than after.
+- **The research's own marker is erased:** the only audience signal it uses is
+  `**Flag:**`, and `sanitize_html` strips the bold (`report_template.py:218`).
+- **The one working audience boundary in the pipeline** is the judgment file's
+  underscore-prefixed keys, which never reach the JSON — confirmed absent from all five.
+
+### Corrections from Todd
+
+- **"`salary_context` isn't safe, it's dormant."** Every quoted example would ship the
+  moment it renders, and rendering is already queued as the salary-basis fix. Treat them as
+  one problem. Recorded in MEMORY against that open question.
+- **Fixed boilerplate copy ("B") is its own piece of work**, not part of this. The three
+  items are parked in MEMORY.
+- **Source attribution was wrong, and Todd accepted the narrowing it forced.** I labelled a
+  note "judgment-authored" whenever rendered text matched the judgment value — which cannot
+  distinguish judgment-only from identical-in-both. Caught by an edge-case test, not by
+  review. Consequence: "judgment-authored internal voice" is **not** an established route,
+  and problem A is narrower than the audit first framed it.
+
+### Answers still open (Todd, Sept 11 2026)
+
+1. **Which Scheiwe PDF Austin received** — unconfirmed; Todd would have to check sent mail.
+   Both were audited.
+2. **Whether Harper's notes went back to the research thread** — **almost certainly not,
+   per Todd**: he fixed the document locally and built from it. McCreary's document
+   arriving the next day with the same defect is consistent with that. Worth watching as
+   evidence about the upstream rule's actual reach.
+3. **Whether "NARROW JOB TYPES" exists anywhere clients go** — Todd is checking.
+
+*(Todd's answers arrived twice as literal `[answer]` placeholders before he supplied them
+in plain text. Nothing was guessed in between.)*
+
+### The fix that was made
+
+Precedence only (`46cf1a9`): the confirmed judgment now wins over the document for
+`seniority_note` and `salary_context`, with `OVERRIDDEN` printing both texts. Built on a
+scratch copy and shown to Todd before the repo was touched. Harper changes exactly 8
+fields, McCreary is byte-identical, drift suite 14/14, `--propose` byte-identical.
+**Deliberately no suppression sentinel** — Todd: "I'd rather not build around a problem I
+haven't solved yet."
