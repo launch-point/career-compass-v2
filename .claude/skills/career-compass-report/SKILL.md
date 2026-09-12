@@ -233,7 +233,12 @@ over-producing is expected, and narrowing is what the gate is for.
   Director or GM belongs there, not under Communications or Operations.
 - `seniority` — Specialist / Integrator / Strategist. See the mapping rule below.
 - `low` / `avg` / `high` — integers. The source states prose ranges.
-- `seniority_note` — visible page text; empty string when the role needs none.
+- `seniority_note` — visible page text. **Wins over the document's
+  `Seniority Note:`**; an empty string means no override, and the document's
+  note, if any, renders. The build prints every replaced document value under
+  `OVERRIDDEN`, so an override is never silent.
+- `salary_context` — same precedence over the parsed Salary prose. Not rendered
+  by the template.
 
 ### 4. Graphs
 

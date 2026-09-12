@@ -54,14 +54,19 @@ in the markdown:
       "function": "Operations",
       "seniority": "Strategist",
       "low": 101000, "avg": 113000, "high": 125000,
-      "salary_context": "optional; parsed Salary prose wins when present",
-      "seniority_note": "optional; the markdown's Seniority Note wins",
+      "salary_context": "optional; wins over the parsed Salary prose",
+      "seniority_note": "optional; wins over the markdown's Seniority Note",
       "title": "optional shorter title for the report",
       "_reasoning": "why this placement — kept for gate training",
       "_note": "Todd's correction rationale, if he changed it",
       "_evidence": { ... written by --propose, ignored on build ... }
     }
   }
+
+Where the judgment and the markdown both supply `seniority_note` or
+`salary_context`, the JUDGMENT wins: it is the decision confirmed at the gate.
+Every replaced document value prints under OVERRIDDEN, so nothing is discarded
+silently. An empty judgment value means "no override" and the markdown stands.
 
 `include: false` drops a role from the report. It is an EXPLICIT flag, never an
 absence: a missing entry still means "not reviewed" and still fails NO_JUDGMENT.
@@ -378,6 +383,24 @@ def build_evidence(sec, top_functions, floor_text=""):
     }
 
 
+def judged(field, doc_value, j, overrides):
+    """The confirmed judgment value for `field`, falling back to the document's.
+
+    The markdown used to win, which silently threw away a value Todd had
+    approved: on Jensen Harper's build his rewritten client-facing notes were
+    discarded and the build still printed FINDINGS: none. An override is
+    recorded rather than warned, because it is a decision, not a defect; the
+    document text it replaced still prints, so what the research wrote stays
+    visible instead of vanishing.
+    """
+    mine = (j.get(field) or "").strip()
+    if not mine:
+        return doc_value
+    if doc_value and doc_value != mine:
+        overrides.append((field, doc_value, mine))
+    return mine
+
+
 def parse_role(sec, judgment, top_functions, top_values, check_judgment=True):
     """Parse one classified section into a role dict. Records findings."""
     head, body, where = sec["heading"], sec["body"], sec["heading"]
@@ -518,18 +541,21 @@ def parse_role(sec, judgment, top_functions, top_values, check_judgment=True):
              "no Salary prose and no judgment salary_context")
 
     sn = SCALARS["seniority_note"].search(body)
+    overrides = []
     return {
         "rank": rank,
         "title": j.get("title", head),
         "alt_titles": alts,
         "function": j.get("function"),
         "seniority_level": j.get("seniority"),
-        # v2.3 states this in the markdown; judgment is the fallback.
-        "seniority_note": strip(sn.group(1)) if sn else j.get("seniority_note", ""),
+        # Judgment wins; the markdown's note is the fallback. See judged().
+        "seniority_note": judged("seniority_note", strip(sn.group(1)) if sn else "",
+                                 j, overrides),
         "salary_low": j.get("low"), "salary_avg": j.get("avg"), "salary_high": j.get("high"),
         # v2.3 reverted salary to prose; it carries the scenario split the
         # integer call is made from, so it is captured rather than dropped.
-        "salary_context": salary_prose or j.get("salary_context", ""),
+        # Same precedence as seniority_note: judgment first, prose as fallback.
+        "salary_context": judged("salary_context", salary_prose, j, overrides),
         "function_pcts_top5": pcts,
         "function_descriptions_top5": descs,
         "additional_functions": additional,
@@ -553,6 +579,7 @@ def parse_role(sec, judgment, top_functions, top_values, check_judgment=True):
         "research_rank": rank,
         "_section": sec,     # reporting only; stripped before serialising
         "_include": include, # selection flag; stripped before serialising
+        "_overrides": overrides,  # reporting only; stripped before serialising
     }
 
 
@@ -767,6 +794,15 @@ def main():
         print(f"DROPPED         : {len(dropped)} role(s) with include:false — "
               + ", ".join(f"{d['_section']['heading']} (research rank "
                           f"{d['research_rank']})" for d in dropped))
+    overridden = [(r, o) for r in roles for o in r["_overrides"]]
+    if overridden:
+        clip = lambda s: repr(s[:110]) + ("…" if len(s) > 110 else "")
+        print(f"OVERRIDDEN      : {len(overridden)} document value(s) replaced by the "
+              f"confirmed judgment")
+        for r, (field, doc, mine) in overridden:
+            print(f"   - {r['title']} ({field})")
+            print(f"       document: {clip(doc)}")
+            print(f"       judgment: {clip(mine)}")
     _report_document(sections, skipped, len(roles) + len(dropped), len(roles),
                      top_functions, top_values, pmap, known, gaps, dupes)
 
@@ -795,6 +831,7 @@ def main():
     for r in roles:
         del r["_section"]
         del r["_include"]
+        del r["_overrides"]
     data = {
         "client": {
             "name": args.client, "first_name": args.client.split()[0],
