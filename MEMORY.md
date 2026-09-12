@@ -220,6 +220,36 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   way. The upstream rule was applied without first asking whether the input was
   actually invalid. Decide which side of the line a defect is on before choosing
   where to fix it. (Sept 10 2026 — directed by Todd)
+- **Audience routing ("problem A") is resolved UPSTREAM. No pipeline change is needed,
+  and none should be built.** The Sept 11 2026 audit found research prose written to Todd
+  rendering on client pages — Harper's two `**Flag:**` passages, Johnson's three "A NOTE ON
+  LEVEL" notes that are not about level, Scheiwe v24's "passed the seniority screen". The
+  cause was in the research template, not in this repo. **The research thread was following
+  the instructions it had** (Todd, Sept 12 2026, after checking the research project
+  against the audit's five questions):
+
+  - Two channels for notes to Todd already existed — **Layer 2 internal notes** and the
+    **handoff message**.
+  - **C-1 said "flag it to Todd" without naming a destination**, so flags landed inline in
+    whatever field the writer was in.
+  - **E-1 described the Seniority Note purely as a build signal** and never said it prints
+    verbatim to the client.
+
+  **Fixed upstream in `00_Output_Format.md`** with five additions: a **B-0** stating every
+  line in a role section is client-facing; an **E-1** addition saying the note renders under
+  "A NOTE ON LEVEL"; a **C-1** rewrite naming the handoff message as the flag destination
+  and stating there is no inline flag marker; and two **PART C** bullets covering voice and
+  references to material the client never sees. `02` and `03` were updated to match, and
+  the project instructions pane as well.
+
+  **The two halves, so neither is mistaken for the whole:** `46cf1a9` was the **local**
+  half — the confirmed judgment now wins over the document and replacements print under
+  `OVERRIDDEN`. The template additions are the **upstream** half, and they are what stops
+  Todd-facing prose being written into client fields in the first place. A parser-side
+  audience mechanism is **not** wanted on top of this.
+
+  Not covered by this: the salary-basis question below, which stays open, and the reports
+  already delivered with the old text. (Todd, Sept 12 2026)
 - **Research-only clients get manual delivery; no `clients` rows are created for
   them.** *(Moved from Open Questions, Sept 10 2026.)* Every future client comes
   through the intake form, so each has a Supabase row and the full delivery chain
@@ -249,61 +279,6 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
 ## Open Questions
 
 *Things that need Todd's input before they can be resolved. Remove once answered — move the answer to Decisions.*
-
-- **Does per-role research prose have any way to say who it is written for?** ("Problem A"
-  of the Sept 11 2026 audit; full detail in SESSION_LOG.) The research document is
-  simultaneously Todd's evidence packet and the client's copy source, and **nothing in it
-  marks audience.** Every sentence written inside a role section reaches the client except
-  the Salary prose, `Rank:` and `Confirmed Seniority Level:` — so when the research has
-  something to tell Todd, the only place to put it is inside a client-facing field.
-
-  Confirmed in delivered reports: Harper's Technical Requirements (`**Flag:** this exceeds
-  the standard upskilling threshold … he should weigh deliberately`) and his Travel
-  (`**Flag:** …`); **Johnson's three "A NOTE ON LEVEL" notes that are not about level**,
-  one saying the schedule tension "needs to travel with the role rather than be resolved
-  silently"; Scheiwe v24's "This role passed the seniority screen".
-
-  **Two things make audience unrecoverable after the fact.** "You" means Todd in Harper's
-  salary prose ("per your direction") and the client in Johnson's and Scheiwe v24's. And
-  two fields are dual-use by design: `--propose` reads the `Seniority Note` as placement
-  evidence while the build prints it as page text, and the Salary prose is Todd's evidence
-  for the integer call.
-
-  **Narrowed Sept 11 2026 — this is research-authored prose only.** An earlier framing
-  added a second route, client-facing text authored in the *judgment file* in an internal
-  voice, on the strength of Scheiwe v1's "Worth settling before it drives search strategy".
-  **That attribution is unproven and must not be repeated as fact:** the method only showed
-  the rendered text matched the judgment value, which cannot distinguish judgment-only from
-  identical-in-both, and no Scheiwe research markdown exists on disk to check. Judgment-
-  authored internal voice is an unestablished route, not a known one. (Directed by Todd.)
-
-  **The precedence half is fixed** (`46cf1a9`, Sept 11 2026): the judgment now wins over
-  the document for both `seniority_note` and `salary_context`, and every replaced document
-  value prints under `OVERRIDDEN`. That ends the silent override of Todd's judgment; it
-  gives prose no audience, so this question stays open. **No way to suppress a note was
-  added, deliberately** — a note that should not have been written is a symptom of this
-  open problem, not something to build a sentinel around.
-
-  **Upstream or local is undecided and depends on the v2.4 research template**, which Todd
-  is checking against five questions: does it designate any place for notes to him; does it
-  state an audience per field (especially `Seniority Note`); where does it tell the
-  researcher to record flags (upskilling threshold, salary floor, seniority gate,
-  client-direction exceptions); what voice convention does it set; are scenario and intake
-  cross-references allowed inside content bullets.
-
-  **The current workaround is hand-editing the notes in the local markdown before the
-  build** (done for Harper and McCreary). Per Todd, Harper's defect **almost certainly
-  never went back to the research thread** — he fixed the document locally and built from
-  it. McCreary's document arriving the next day with the same defect is consistent with
-  that.
-
-  **Prior art, not a menu** (Todd's framing, Sept 11 2026): three options were floated for
-  `seniority_note` alone on Sept 9 — ask the research thread for client-facing notes, split
-  the template into a client-facing `Seniority Note:` plus an internal field the parser
-  ignores, or flip the parser precedence (the last is now done, and it was the smallest of
-  the three). All were scoped **before** the Technical Requirements instance showed the
-  problem is not confined to one field. (Logged Sept 9 2026; rewritten and narrowed
-  Sept 11 2026.)
 
 - **Should the parser check that TOP 5 and NEXT 5 FUNCTIONS are disjoint — and at what level?** No such check exists. The parser reads `TOP 5 FUNCTIONS` and `TOP 5 VALUES` and **never reads `NEXT 5 FUNCTIONS` at all**, so an overlap between the two lists passes silently; the only duplicate check in the file is `RANK_DUPLICATE`, which covers `Rank:` values.
 
@@ -404,6 +379,23 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   **The URLs are deliberately not changed, and `/tmp/fonts` is left unpopulated.** Whether pulling the identical asset from a permitted host is acceptable, or is the "routing around" the agent-proxy README forbids, is an organization egress-policy question — Todd's, not a technical one, and not to be settled as a side effect of wanting a build to work tonight. Three routes would each fix it (allowlist `github.com`, change the URLs in both modules, or pre-populate `/tmp/fonts` from the permitted host); **none is taken pending his decision.** (Todd, Sept 8 2026)
 
   Three independent remote sessions have now hit this host block (Sept 4, Sept 5, Sept 8 2026) — settled behavior, not a fragile one-off. **Never satisfy the import by placing a substitute TTF at `/tmp/fonts/DMSans.ttf`:** registration is by filename and prints no warning, so the resulting PDF would look and claim to be branded while silently not being — destroying the only signal that catches it. This is why correction 2 matters in practice: a 200 from any host is not evidence of a genuine face, and the name-table check above is the bar. If a future environment's policy changes, re-verify before revising this. Until the policy question is answered, run the build locally. (Sept 5 2026; corrected Sept 8 2026)
+- **An installed research-template file had silently drifted BACK to a pre-v2.3 format
+  spec — and that stale copy is what produced two defects already blamed on the research
+  thread.** Found Sept 12 2026 while fixing audience routing upstream: `02` was still
+  installed carrying pre-v2.3 rules — **"Why This Fits You is ONE PROSE PARAGRAPH"** and an
+  instruction for the **Functional Mix to omit functions that don't apply**.
+
+  Those two rules are the direct cause of **Austin's missing Function 1** and **Henry's
+  prose "Why This Fits You"** — the latter being the defect that was sent upstream in
+  session 4 and treated as a one-off research error. It was a stale installed file
+  regenerating the same output. **This is the same drift C-3 had already recorded once**,
+  which is what makes it a pattern rather than an accident.
+
+  **The corrected `02` now carries a detection test for it.** Practical rule for this repo:
+  when a research document breaks a format rule that was supposedly fixed before, suspect
+  the installed template copy, not only the thread that wrote the document. Those files
+  live in the research project and cannot be checked from here — ask Todd to verify which
+  version is actually installed. (Todd, Sept 12 2026)
 - **`salary_context` is parsed into the report JSON and never rendered.** The parser
   writes it (`parse_research_markdown.py:517`, parsed Salary prose winning over any
   judgment value), but `report_template.py` never reads the key — the only salary output
