@@ -375,7 +375,7 @@ def build_intro_page(story, client_name, role_count):
 
     story.append(Paragraph("How to Read the Rankings", s_intro_head_tight))
     story.append(Paragraph(
-        "Roles are ranked 1\u20135 based on function alignment, value alignment, salary fit, and experience transferability. Higher-ranked roles represent a stronger overall match, but every role on this list is a viable career path. The rankings are a starting point for conversation \u2014 personal interests, geographic preferences, and networking opportunities may elevate a lower-ranked role above a higher-ranked one.",
+        "Roles are ranked based on function alignment, value alignment, salary fit, and experience transferability. Higher-ranked roles represent a stronger overall match, but every role on this list is a viable career path. The rankings are a starting point for conversation \u2014 personal interests, geographic preferences, and networking opportunities may elevate a lower-ranked role above a higher-ranked one.",
         s_intro_tight
     ))
 
@@ -392,36 +392,32 @@ def build_action_page(story):
     s_action = ParagraphStyle("ActionBody", parent=s_intro_body, fontSize=10, leading=14.5, spaceAfter=6)
     s_action_step = ParagraphStyle("ActionStep", parent=s_action, leftIndent=20, firstLineIndent=-20, spaceAfter=8)
 
+    # Points at the Action Plan rather than restating its instructions. The old
+    # copy walked the client through a "NARROW JOB TYPES" tab column by column;
+    # that tab does not exist, and the Clarity section carries the instructions
+    # now. Pointing is deliberate \u2014 duplicated instructions are what drifted
+    # apart here in the first place. (Todd, Sept 12 2026)
     story.append(Paragraph(
-        'Complete the following in the <b>"NARROW JOB TYPES"</b> tab in your Career Compass. '
-        'Move across the page right to left, completing each column.',
+        "Once you\u2019ve read through this report, continue through the Clarity section in "
+        "your Action Plan and follow the instructions to narrow your top jobs down even further.",
         s_action
     ))
     story.append(Spacer(1, 6))
 
     steps = [
-        'After reviewing the notes from this report, for any Job Types you are interested in, '
-        'click the check box next to it in the <b>"Interested"</b> column.',
+        'After reviewing your Career Compass report, for any Job Types you are interested in, '
+        'note the jobs you are interested in.',
 
-        'Next, with the information from this report, check the boxes where you already have '
-        'all the required technical skills (or it wouldn\u2019t be difficult for you to obtain them).',
+        'Next, with the information from the report, note which jobs you already have all the '
+        'required technical skills for (or it wouldn\u2019t be difficult for you to obtain them).',
 
         'For each of the Job Types, add any notes you find important from the report or other '
         'personal notes for your reference.',
 
-        'Now it is time to start having your Confirmation Conversations. You can find how to '
-        'discover and have confirmation conversations in your Action Plan under the <b>Job Clarity</b> '
-        'section in the Ministry To Marketplace community. Watch those videos and start setting '
-        'up conversations.',
+        'Now it is time to start having your Confirmation Conversations. (next in your Action Plan)',
 
-        'After having at least one conversation about a specific job type, check the box in the '
-        '<b>"Vision"</b> column next to the job type if it aligns with your personal vision '
-        'exercise. Continue until you have a sense of which 3\u20135 job types you would really '
-        'enjoy and would fit you.',
-
-        'Finally, put a check next to the job types that make it into your Top 3\u20135 job types '
-        'in the <b>"Top 3\u20135 Job Types"</b> column. You want to end up with 2\u20133 that you '
-        'want to pursue in the <b>#Translation + Resume</b> section in the Action Plan.',
+        'As you have those, your goal is to narrow the list down to 2 or 3 that you get excited '
+        'about and that you have the experience to do.',
     ]
 
     for i, step in enumerate(steps, 1):
@@ -778,17 +774,16 @@ def build_job_page(story, role, values, functions, compact_png):
         story.append(add_tbl)
         story.append(Spacer(1, 8))
 
-    # Total coverage italic line
-    total_cov = role.get("total_function_coverage")
-    if total_cov is not None:
-        coverage_style = ParagraphStyle(
-            "CoverageItalic", parent=s_body, fontSize=8.5, leading=11,
-            textColor=TEXT_MID, alignment=TA_LEFT
-        )
-        story.append(Paragraph(
-            f'<i>Combined, the client\u2019s Top 10 functions account for approximately {int(total_cov)}% of role time.</i>',
-            coverage_style
-        ))
+    # No total-coverage line, deliberately. `total_function_coverage` sums EVERY
+    # Functional Mix bullet, and those percentages overlap rather than dividing
+    # one whole: on Harper's Executive Coach, "Counseling, coaching, empowering
+    # 40%" covers the same session time already counted under "Diagnosing 35%"
+    # and "Using intuition 25%", summing to 140%. Measured totals ran 40-140
+    # across the five delivered reports, and different research documents
+    # normalise differently. So it is not a percentage of role time and no
+    # wording makes it one. The field stays in the JSON as propose-time
+    # evidence; it is simply never printed. Do not reintroduce a total.
+    # (Todd, Sept 12 2026)
 
     story.append(PageBreak())
 
