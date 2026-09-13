@@ -405,8 +405,7 @@ def build_action_page(story):
     story.append(Spacer(1, 6))
 
     steps = [
-        'After reviewing your Career Compass report, for any Job Types you are interested in, '
-        'note the jobs you are interested in.',
+        'After reviewing your Career Compass report, note the Job Types you are interested in.',
 
         'Next, with the information from the report, note which jobs you already have all the '
         'required technical skills for (or it wouldn\u2019t be difficult for you to obtain them).',
