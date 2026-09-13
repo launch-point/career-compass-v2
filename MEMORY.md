@@ -583,6 +583,14 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   3. **"NARROW JOB TYPES tab in your Career Compass"** (`report_template.py:396`). No such
      tab exists in the v2 intake app (grepped). **Whether it exists anywhere clients
      actually go is unconfirmed — Todd is checking.** Do not "fix" it blind.
+- **Upstream queue — `00` should state that Functional Mix percentages are NOT shares of a
+  whole and need not sum to 100.** They overlap by nature: on Harper's Executive Coach,
+  "Counseling, coaching, empowering 40%" describes the same session time already counted
+  under "Diagnosing 35%" and "Using intuition 25%". Measured totals ran 40–140 across the
+  five delivered reports, and the spread by document (Scheiwe v1 40–90, McCreary 85–100)
+  suggests different sessions assumed different things. **Now that nothing prints a total
+  the ambiguity is harmless** — the point of saying it is so nobody reintroduces one.
+  (Todd, Sept 12 2026)
 - Slack message cosmetics (not blocking; pipeline works): the four arrays render
   comma-separated on one line rather than one item per line, and `submittedAt` renders as
   raw ISO (`2026-09-09T14:31:59.899+00:00`) rather than a readable date. (Noted Sept 9 2026)
