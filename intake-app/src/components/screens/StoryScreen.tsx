@@ -6,7 +6,7 @@ const PROMPTS: { field: 'moment' | 'involvement' | 'actions' | 'enjoyment'; labe
   {
     field: 'moment',
     label:
-      'Think back through the last 15 years of your career. In one of your jobs, identify a specific task, project, responsibility, or moment where the work came naturally to you. This should be a time when you were at your best and felt deeply satisfied. Make sure to include any details that are important to you.',
+      'Think back through the last 15 years of your career. In one of your jobs, identify a specific task, project, responsibility, or moment where the work came naturally to you. This should be a time when you were at your best and felt deeply satisfied. Make sure to include any details that are important to you. Aim for 3–6 sentences.',
   },
   { field: 'involvement', label: 'What got you involved in this task, project, responsibility, or moment?' },
   { field: 'actions', label: 'What specific actions did you take?' },
