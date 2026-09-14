@@ -330,7 +330,15 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   which is the same fabrication ruled out by "the parser refuses rather than synthesizes".
   The check names the duplicated label and **both positions**, and is to be written to
   **match the existing values pattern (slot occupancy)** rather than inventing a new one —
-  values already catch this correctly today. **Not yet built.** (Todd, Sept 14 2026)
+  values already catch this correctly today. (Todd, Sept 14 2026)
+
+  **Built, `be0552b` (Sept 14 2026):** `TOP_FUNCTION_DUPLICATE`, FAIL, fires once per role —
+  matching values rather than reducing noise, because divergence between the two checks
+  is how they drifted apart in the first place (Todd). If the research also never names
+  the duplicated label, `TOP_FUNCTION_ABSENT` prints too. The propose refusal footer points
+  at the client's TOP 5 FUNCTIONS when a duplicate is among the failures. Drift suite 16/16
+  on Price, Harper and McCreary; build JSON byte-identical to the previous parser for all
+  three, so pagination cannot have moved.
 
   **This ships alone, as its own change.** The related webhook change — carrying function
   and value ids alongside labels so Slack can tell two identical labels apart — is a
@@ -355,11 +363,22 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   **The clean result is not reassurance — Henry Johnson is how close it came.** Three of his
   five top functions — `Performing, acting`, `Using personal charisma`, and `Presenting to
   people via TV, films, seminars, speeches` — each have an identical or near-identical twin
-  elsewhere in the function list, and he picked only one from each pair. Two of those twins
-  are byte-identical (`Performing, acting`; `Presenting to people…`), so taking both halves
-  of either pair would have produced a report telling him one of his own selections is "Not
-  a core function of this role" on every role page, with nothing raised. (The charisma twin
-  differs by "your", so it would not trip `index()` — it would only read as a duplicate.)
+  elsewhere in the function list. Two of those twins are byte-identical (`Performing,
+  acting`; `Presenting to people…`), so both halves of either pair in his top 5 would have
+  produced a report telling him one of his own selections is "Not a core function of this
+  role" on every role page, with nothing raised. (The charisma twin differs by "your", so it
+  would not trip `index()` — it would only read as a duplicate.)
+
+  **Tighter than "he picked only one from each pair": both byte-identical labels DID land in
+  his selections, split across tiers.** His research document as first received listed
+  `Performing, acting` at top #1 **and** next #10, and `Presenting to people via TV, films,
+  seminars, speeches` at top #5 **and** next #6 (report SKILL.md Known Gaps, Sept 8 2026;
+  the NEXT 5 copies were later removed upstream). **The collision was avoided by the tier
+  boundary, not by the labels being distinguishable** — one of each pair falling one tier
+  higher would have put it in the top 5 twice. The parser never reads NEXT 5, so the same
+  labels one tier over passed without a finding. (Johnson is research-only, so there are no
+  intake ids to say which category each copy came from.)
+
   That is the argument for building the FAIL. (Todd, Sept 14 2026)
 
 ---
@@ -411,6 +430,15 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
 ## Technical Notes & Gotchas
 
 *Things that cost time to figure out once and shouldn't cost time again.*
+
+- **The drift suite can only run against clients whose research markdown is still on disk
+  — a standing limitation, not a one-off gap.** It takes `<research.md> <judgment.json>`
+  and mutates the document; the report JSON alone is not enough. As of Sept 14 2026 that is
+  **Harper, McCreary and Price** (`reports/<client>/*_Roles.md`). **Scheiwe and Johnson
+  cannot be tested** — their folders hold judgment files, report JSON and PDFs but no
+  research markdown. A parser change "verified by the drift suite" is verified against
+  those three documents only; say so rather than implying all delivered clients.
+  (Todd, Sept 14 2026)
 
 - **Make.com: a scenario built by hand and never run against real traffic silently
   renders every field empty — and unprefixed `{{field}}` references are inert text.**
