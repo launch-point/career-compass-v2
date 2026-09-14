@@ -250,6 +250,21 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
 
   Not covered by this: the salary-basis question below, which stays open, and the reports
   already delivered with the old text. (Todd, Sept 12 2026)
+
+  **Wesley Price's document is NOT evidence either way about whether this fix works.** His
+  research was completed **before** Todd reinstalled the updated template files; only the
+  final assembly ran afterward, and the Close step reformatted the existing notes rather
+  than rewriting them. So its Todd-facing text (six Seniority Notes — "client-directed",
+  "by explicit client instruction", "this project's screening threshold" — and one Technical
+  Requirements sentence, "per your review") was written under the old rules. **This is not
+  the Sept 12 fix failing, and it must not be recorded as a third occurrence** of the
+  template-drift pattern below.
+
+  Because the upstream thread is already corrected, **no upstream correction is owed**: the
+  lines are fixed locally, with Todd approving the client-facing wording before it is
+  written. This does not loosen the upstream rule — it applies only because the defect
+  predates a fix already in place. **The real test is the first client researched entirely
+  after the reinstall.** (Todd, Sept 14 2026)
 - **Research-only clients get manual delivery; no `clients` rows are created for
   them.** *(Moved from Open Questions, Sept 10 2026.)* Every future client comes
   through the intake form, so each has a Supabase row and the full delivery chain

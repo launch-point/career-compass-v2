@@ -1378,3 +1378,64 @@ scratch copy and shown to Todd before the repo was touched. Harper changes exact
 fields, McCreary is byte-identical, drift suite 14/14, `--propose` byte-identical.
 **Deliberately no suppression sentinel** — Todd: "I'd rather not build around a problem I
 haven't solved yet."
+
+---
+
+## Session 10 (count tentative — see note) — 2026-09-13/14 — Wesley Price build, Gate 4, Drive upload
+
+*Session count: the log's last numbered entry is session 9; two "Session 8, continued"
+entries follow it, and Sept 12–13 commits (template boilerplate, MEMORY) have no log entry.
+Calling this session 10 is a best guess, which would make it the 5th-session review point.
+Confirm the count with Todd before running the review.*
+
+### What ran
+- Research file `Price_David_CareerCompass_Roles.md` (6 roles) → `reports/price/`, the
+  as-received copy kept beside the working copy. Propose: 6 roles, ranks 1–6, 0 FAIL.
+- Seven Todd-facing lines in client-rendered fields (six Seniority Notes, one Product
+  Manager Technical Requirements sentence) plus an eighth found while grepping (Program
+  Manager Tech Req, "given his existing systems background") were rewritten in the working
+  copy with Todd approving the exact wording first. Implementation Specialist's note was
+  removed entirely (title matches the work). Diff against as-received = exactly those 8.
+- Client id `4f06561f-…0cf0` (`dwesleyprice@gmail.com`), confirmed by Todd. Report name
+  "Wesley Price" (goes by his middle name).
+- Built 30 pages; verified (re-parse identical, pct 0 mismatches, TOC vs page content,
+  0 cite markers, no Todd-facing phrases, fonts DM Sans/Inter, 9 pages viewed).
+- CSM salary revised; rebuild text-diffed against the prior PDF — only the CSM band and
+  its TOC line changed. Todd: "Confirmed. Ship it."
+- `upload_report.py` exit 0: `Wesley_Price_Career_Compass_Report_20260914-083248.pdf`,
+  file `1Hpocyi9ptWPmmU3nUCAGKc_RSNIM6ClH`. Row read back through PostgREST with all four
+  `report_*` columns set; anonymous download byte-identical (sha256) to the local PDF.
+  **Not verified:** screen 3 rendering for Wesley's real session (no sign-in as him).
+
+### Decisions Todd made
+- **Audience-routing leak in Wesley's document is pre-reinstall, not the Sept 12 fix
+  failing** — logged directly to MEMORY.md ("log that"). Not a third occurrence.
+- **Integrator is about the altitude of the work, not managing people.** Product Manager,
+  Program Manager and Project Manager are all Integrator despite being IC by function:
+  "their job is to integrate strategic decisions and pass them along to people who are
+  doing the front-line work"; a PM without reports still "work[s] with others and
+  determine[s] decisions and what gets worked on." **This contradicts SKILL.md's mapping
+  table (Individual Contributor → Specialist) and the Seniority Note section, which treats
+  "individual contributor by function" as pointing to Specialist.** Candidate rule change
+  for review — not applied to the skill.
+- **Project Manager and Program Manager generally sit under Product**, not Operations
+  (my proposal put both in Operations). Tentative: may be a general placement pattern.
+- Salary: general scenario for all roles except CSM, which Todd set to
+  $80,000 / $115,000 / $150,000 — general-scenario low, higher-scope posting top,
+  derived midpoint. Project Manager kept at the general scenario after reviewing
+  higher-scope options.
+
+### Not acted on — open for Todd
+- **Near-empty spill pages (8, 12, 16, 20, 24, 28).** Wesley's research lists all ten
+  functions per role, so Additional Functions has 5 rows; the table splits and the forced
+  PageBreak before Value Alignment strands 1–4 rows on a page. Valid input, template-side.
+  Shipped as-is.
+- **Minimum Salary renders unformatted ("120000")** — template prints the research string
+  verbatim; Harper's delivered report has "90000". Shipped as-is.
+- Research salary prose still contains "David-fit search… his IT/systems background"
+  (salary_context, not rendered). Harmless now; relevant to the open salary_context question.
+
+### Patterns (tentative)
+- The seniority mapping rule has now been overridden by Todd in the IC→Integrator
+  direction on three roles in one report. Whether the rule should key on "integrates
+  decisions across people" rather than direct reports is a question, not a finding.
