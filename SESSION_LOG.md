@@ -1445,3 +1445,58 @@ Confirm the count with Todd before running the review.*
   gates — the first client delivered end to end from a real intake row (Drive upload →
   screen 3 link recorded). MEMORY.md's "Current Status" still counts only Scheiwe and Johnson
   as delivered; not updated without Todd's say-so.
+
+---
+
+## Session 11 (count tentative — see session 10 note) — 2026-09-14 — functions.json duplicate audit; parser index() defect
+
+### MEMORY corrections from Todd
+- The three stale-boilerplate items in `report_template.py` are **done** (`88e8a7f`,
+  `5018764`), not deferred. Verified in the file before writing: "ranked 1" absent, coverage
+  line absent, NARROW JOB TYPES surviving only inside the explanatory comment at :396 with
+  the client-facing copy now pointing at the Clarity section. Moved from Deferred to
+  Decisions. The upstream `00` note about percentages not summing to 100 stays queued —
+  the local comment does not discharge it.
+- **Wesley Price is delivered; nothing pending.** Todd fixed the seven Todd-facing lines
+  before building and sent the Circle DM by hand in the Circle app. I flagged an apparent
+  conflict between commit `009097c` ("delivered") and Todd's phrasing ("in flight, paused");
+  Todd confirmed delivered and the log entry accurate. MEMORY updated to say so explicitly
+  so it does not read as in-flight later.
+
+### The audit (full findings in MEMORY, Technical Notes)
+- `functions.json`: 151 items / 19 categories, no duplicate ids, **four label collisions**;
+  all four present in `docs/functions-values-source.md`, so the defect is upstream.
+- `Communicating verbally with` is **house style, not truncation** — six one-on-one labels
+  end in a dangling preposition and the branch supplies the implied object. Todd's initial
+  read was that it looked truncated; the family is the evidence against that.
+- App dedupes by id, never by label. Top-10/Top-5 pickers render the bare label.
+- IDs are in Supabase at rest; only `serialize.ts:73` flattens them for the webhook.
+- `values.json` clean.
+
+### The parser defect — ran it, did not reason it
+Exercised the real `parse_role()` against a duplicated top-5 label. One bullet leaves slot 1
+at the `NO_DESC` default ("Not a core function of this role.") with **no finding raised**;
+two bullets overwrite index 0, losing a description and a percentage. Values catch the same
+shape loudly via `VALUE_ABSENT` because they test slot occupancy rather than name membership.
+
+### Decisions
+- FAIL at the gate, naming the label and both positions; match the values pattern rather
+  than inventing one. Not built.
+- Parser fix and webhook-id change ship **separately** — correctness vs observability.
+- Picker category context scoped but not built; it is the only change that *prevents* the
+  collision rather than revealing it after the fact.
+
+### Unfinished — next session starts here
+The duplicate check across the five delivered reports was **mid-run** when the session
+ended. A first pass queried `client.top_functions`, which does not exist (the real key is
+`client.functions`), so its "none for all six files" result is meaningless. Redo against the
+right key before anything else. If a delivered client carries a duplicate, that is Todd's
+decision before any fix is built.
+
+### Noticed (tentative — not for MEMORY without confirmation)
+- Two separate times this session a first-pass check returned a clean result that was an
+  artifact of the check, not the data (the wrong JSON key here; the `head -40` truncation and
+  the PDF-text legend search recorded in earlier sessions). The Corrections Log entry about
+  re-deriving the expectation before reporting a verification result did not fire on its own
+  — it fired because Todd interrupted. Possible pattern: the guard needs to run *before* the
+  first result is believed, not before the result is reported.

@@ -260,11 +260,16 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   the Sept 12 fix failing, and it must not be recorded as a third occurrence** of the
   template-drift pattern below.
 
-  Because the upstream thread is already corrected, **no upstream correction is owed**: the
-  lines are fixed locally, with Todd approving the client-facing wording before it is
-  written. This does not loosen the upstream rule — it applies only because the defect
-  predates a fix already in place. **The real test is the first client researched entirely
-  after the reinstall.** (Todd, Sept 14 2026)
+  Because the upstream thread is already corrected, **no upstream correction was owed**:
+  Todd rewrote the seven lines locally, in client-facing wording, **before** building. This
+  does not loosen the upstream rule — it applied only because the defect predates a fix
+  already in place. **The real test is the first client researched entirely after the
+  reinstall.**
+
+  **Wesley Price is delivered and nothing is pending on him** — report built after the
+  seven rewrites, and the Circle DM sent by hand in the Circle app (not through Claude
+  Code), per the standing decision that the DM stays manual. Any note anywhere reading as
+  though his build is paused or in flight is stale. (Todd, Sept 14 2026)
 - **Research-only clients get manual delivery; no `clients` rows are created for
   them.** *(Moved from Open Questions, Sept 10 2026.)* Every future client comes
   through the intake form, so each has a Supabase row and the full delivery chain
@@ -288,6 +293,40 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   link to `clients.id` and had no real row to write to (verified by querying the
   table). `--client-id` bridges the gap for any client who has a row; reports
   built before it existed carry only a name. (Decided by Todd, Sept 10 2026)
+
+- **The three stale-boilerplate items in `report_template.py` are fixed, not deferred.**
+  (`88e8a7f`, `5018764` — Sept 14 2026.) "Roles are ranked 1–5" dropped. The NARROW JOB
+  TYPES walkthrough replaced with a pointer to the Clarity section in the Action Plan —
+  **pointing rather than restating is deliberate**, since duplicated instructions drifting
+  apart is what produced the dead reference in the first place. **The coverage line was
+  deleted rather than reworded:** `total_function_coverage` sums every Functional Mix
+  bullet, and those percentages overlap rather than dividing one whole, so the number is
+  not a percentage of role time and no wording makes it one. The field stays in the JSON
+  as a propose-time signal, and the reasoning lives in a comment at
+  `report_template.py:776` so nobody reintroduces the line. Verified by Todd against a
+  rebuilt-today baseline across all five reports; pagination held.
+
+  The upstream note owed to `00` (Functional Mix percentages are not shares of a whole)
+  is a **separate** item and is still queued — the local comment does not discharge it.
+
+- **A duplicate in `top_functions` is a hard FAIL at propose — the parser does not
+  disambiguate.** A duplicated label means the intake is wrong, and no report built from it
+  is correct. Disambiguating would be the parser guessing which slot the research meant,
+  which is the same fabrication ruled out by "the parser refuses rather than synthesizes".
+  The check names the duplicated label and **both positions**, and is to be written to
+  **match the existing values pattern (slot occupancy)** rather than inventing a new one —
+  values already catch this correctly today. **Not yet built.** (Todd, Sept 14 2026)
+
+  **This ships alone, as its own change.** The related webhook change — carrying function
+  and value ids alongside labels so Slack can tell two identical labels apart — is a
+  *separate* change: observability, in the intake app, future submissions only, no
+  client-facing output. The parser fix is *correctness*, in the report skill, affecting the
+  PDF, and it touches proven Phase 2 code, so it wants a presented diff and a pagination
+  re-verify. Bundling them would put a Slack nicety behind the same approval as a silent
+  client-facing data defect. The research template stays label-based and needs no ids.
+
+  **Neither change prevents the collision** — only category context in the picker does
+  (scoped, not built; see the Technical Note below).
 
 ---
 
@@ -332,6 +371,20 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   basis, not base salary…", "Senior Development Director scenario selected"). **Both
   candidate sources are written for Todd**, so whatever renders a salary caveat needs a
   client-facing source of its own — it cannot just switch the template on.
+
+- **Does any delivered report contain a duplicated top-5 function? UNRESOLVED — the check
+  was mid-run when the session ended, and next session starts here.** Five clients are
+  delivered (Scheiwe including v24, Johnson, Harper, McCreary, Price).
+
+  **A first pass returned "none" for all six report JSONs and that result is meaningless —
+  do not read it as an all-clear.** It looked for `client.top_functions`, which does not
+  exist; the client's lists live under **`client.functions` / `client.values`**. The key
+  returned `None` for every file, so `Counter` found no duplicates in an empty list. Redo it
+  against the right key.
+
+  If any delivered client does carry a duplicate, **that is a decision for Todd before any
+  fix is built** — what their pages currently say, and whether the report is re-issued or
+  corrected in place. (Sept 14 2026)
 
 ---
 
@@ -480,6 +533,79 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   check: the pre-v2.4 code turned an empty tail into `"."` and printed a bare period in
   every row. A missing tail is a research-document fix. (Sept 7 2026)
 
+- **The intake function list contains four identical / near-identical label pairs, and they
+  come from the source document — this is not a conversion bug.** Audited Sept 14 2026:
+  `intake-app/src/config/functions.json`, 151 items across 19 categories, against
+  `docs/functions-values-source.md`. **No duplicate ids.** The four label collisions:
+
+  | Label | IDs |
+  |---|---|
+  | `Designing events or educational experiences` | `creating-designing-and-using-imagination__09` / `problem-solving-...-to-a-gro__08` |
+  | `Performing, acting` | `creating-designing-and-using-imagination__11` / `entertaining-and-hosting-group-functions__03` |
+  | `Presenting to people via TV, films, seminars, speeches` | `creating-designing-and-using-imagination__12` / `entertaining-and-hosting-group-functions__04` |
+  | `Using your personal charisma` / `Using personal charisma` | `supporting-enabling-hosting-entertaining__12` / `influencing-and-persuading-a-group__02` |
+
+  The first three are **deliberate cross-category listings** — the same activity filed under
+  both Information-Oriented and People-Oriented. **The charisma pair is inconsistency, not
+  dual-filing:** both are People-Oriented, split across the one-on-one / group branch, and
+  the wording differs only by the word "your", which is not a scale marker. **All four are
+  present in the source doc**, so fixing the JSON without fixing the source will drift back.
+
+  **`Communicating verbally with` is NOT truncated.** It belongs to a family of six
+  one-on-one labels ending in a dangling preposition — `Advising, consulting with`,
+  `Entertaining, amusing, conversing with`, `Giving pleasure to`, `Giving instructions,
+  providing information to`. That is the source list's house style for the **Primarily
+  One-on-One** branch: the branch supplies the implied object, so there is no missing text to
+  restore. It still reads as truncated to a client, and it still collides with the group
+  entry `Communicating verbally with groups, public speaking, or communicating verbally
+  through the media`. Three prefix pairs sit beside it: `Hosting` / `Hosting, entertaining
+  socially`, and `Creating activities, games` / `Creating activities, games, or other
+  experiential learning activities`.
+
+  **`values.json` is clean** — 94 items, no duplicate ids or labels, nothing malformed. The
+  only substring hits (`Control`/`Self-Controlled`, `Love`/`Mature Love`,
+  `Happiness`/`Family Happiness`) are legitimately distinct values. No action.
+
+  **The app dedupes by ID and never by label.** Selection state is keyed by item id
+  throughout (`items[id]`, `pool.includes(id)`, `toggle(id, ...)`), so two identical labels
+  are two fully independent selectable items. **The Top-10 and Top-5 pickers render the label
+  alone** — `FunctionScreens.tsx:230`, `label={functionItemLabel[id]}` — with no category or
+  branch, so a client narrowing 10 to 5 sees two byte-identical pills and cannot tell them
+  apart. Earlier phases are grouped under category headings, so the collision is visible
+  there; it is specifically the two narrowing screens that flatten.
+
+  **IDs are already stored in Supabase — nothing is lost at rest.**
+  `intake_submissions.answers` is jsonb holding `IntakeAnswers`, whose `functions.items` and
+  `values.items` are both `Record<itemId, ...>` (`types.ts:28`, `:45`). Only
+  `serialize.ts:73` (`labelsOnly()`) flattens ids to labels, and only for the webhook. A
+  collision in an already-delivered intake is therefore recoverable after the fact.
+
+  Surfaced by the research agent's H0 check on **Mike Farnsley's** intake, which caught two
+  tier collisions. (Sept 14 2026)
+
+- **`top_functions.index(name)` silently misattributes a duplicated top-5 function, and the
+  report then tells the client one of their own selections is "Not a core function of this
+  role."** `parse_research_markdown.py:474`. **Demonstrated by running the real
+  `parse_role()`, not reasoned.** With `top_functions = [DUP, DUP, ...]`, `index()` returns
+  `0` both times:
+
+  - **One Functional Mix bullet** (the normal case, research names the function once):
+    `pcts [35, 0, 25, 20, 15]`, and `descs[1]` keeps its `NO_DESC` default —
+    `"Not a core function of this role."` **Nothing is raised.** That is not a blank cell;
+    it is an affirmative false statement about the client's own selection, on every role page.
+  - **Two bullets:** the second write lands on index 0 again — `pcts[0]` goes 35 to 25 and
+    the first description is destroyed. Slot 1 is still false. Still silent.
+
+  `TOP_FUNCTION_ABSENT` cannot catch it: it tests `f not in seen`, and the duplicated name
+  **is** in `seen`. There is no dedupe on `top_functions` anywhere — `profile_list()` returns
+  the list verbatim.
+
+  **The asymmetry is the part worth keeping.** The identical pattern for values at `:500`
+  **fails loudly** (`VALUE_ABSENT: 1 of 5 values not listed`), because `absent_v` tests
+  `not vals[i]` — slot *occupancy* — while functions test name *membership*. Same bug,
+  opposite outcome: a duplicate value is caught at the gate, a duplicate function ships.
+  (Sept 14 2026)
+
 ---
 
 ## Corrections Log
@@ -584,20 +710,6 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   `N–M months` range found. Left alone by decision while the fabricated-"Immediate"
   fallback was removed. Detail in the report skill's SKILL.md Known Gaps.
   (Todd, Sept 10 2026)
-- **Stale boilerplate in `report_template.py` — three items, Todd's own piece of work,
-  deliberately NOT part of the audience-routing fix.** All three are fixed copy written
-  once into the template rather than per-client routing, and all three are in every
-  delivered report. (Directed by Todd, Sept 11 2026.)
-  1. **"Roles are ranked 1–5"** (`report_template.py:378`) prints whatever the role count
-     is. True only of Scheiwe's 5-role report; Johnson has 6, Harper 7, Scheiwe v24 8,
-     McCreary 9.
-  2. **The coverage line** (`report_template.py:789`): "Combined, **the client's** Top 10
-     functions account for approximately N% of role time." Three defects in one sentence —
-     third-person "the client's" in client-facing copy, N above 100% (Harper 140/115/110,
-     Johnson 110, Scheiwe v24 110), and "Top 10" when only 5–7 functions are ever listed.
-  3. **"NARROW JOB TYPES tab in your Career Compass"** (`report_template.py:396`). No such
-     tab exists in the v2 intake app (grepped). **Whether it exists anywhere clients
-     actually go is unconfirmed — Todd is checking.** Do not "fix" it blind.
 - **Upstream queue — `00` should state that Functional Mix percentages are NOT shares of a
   whole and need not sum to 100.** They overlap by nature: on Harper's Executive Coach,
   "Counseling, coaching, empowering 40%" describes the same session time already counted
