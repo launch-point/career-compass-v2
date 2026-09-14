@@ -1439,3 +1439,9 @@ Confirm the count with Todd before running the review.*
 - The seniority mapping rule has now been overridden by Todd in the IC→Integrator
   direction on three roles in one report. Whether the rule should key on "integrates
   decisions across people" rather than direct reports is a question, not a finding.
+
+### Close
+- Todd sent the Circle DM manually (Sept 14 2026). Wesley Price is delivered through all four
+  gates — the first client delivered end to end from a real intake row (Drive upload →
+  screen 3 link recorded). MEMORY.md's "Current Status" still counts only Scheiwe and Johnson
+  as delivered; not updated without Todd's say-so.
