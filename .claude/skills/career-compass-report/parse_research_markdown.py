@@ -445,6 +445,7 @@ def parse_role(sec, judgment, top_functions, top_values, check_judgment=True):
     # --- Functional Mix ---
     pcts = [0] * len(top_functions)
     descs = [NO_DESC] * len(top_functions)
+    filled = [False] * len(top_functions)
     additional, coverage, seen = [], 0, []
     for name, pct, desc in PCT_BULLET.findall(subsection(body, SUBSECTIONS["functional_mix"]) or ""):
         name, pct, desc = strip(name), int(pct), strip(desc)
@@ -472,6 +473,7 @@ def parse_role(sec, judgment, top_functions, top_values, check_judgment=True):
 
         if name in top_functions:
             i = top_functions.index(name)
+            filled[i] = True
             pcts[i] = pct
             # At 0% the sentinel stands: the template says the report renders
             # "Not a core function of this role" automatically there.
@@ -485,7 +487,36 @@ def parse_role(sec, judgment, top_functions, top_values, check_judgment=True):
     # Presence by NAME, independent of bullet count: if a top function is
     # omitted, a Next-5 function slides into its slot, the count still reads 5,
     # and a top function vanishes silently. Counting cannot catch that.
-    absent = [f for f in top_functions if f not in seen]
+    #
+    # Tested by SLOT OCCUPANCY, as values are below, not by `f in seen`. A
+    # duplicated label passes a membership test - the name IS seen - but
+    # index() fills only its first position, so the second would render "Not a
+    # core function of this role" against the client's own selection. That is
+    # an intake defect, reported as such; never guess which slot was meant.
+    absent, duplicated = [], []
+    for i, f in enumerate(top_functions):
+        if filled[i]:
+            continue
+        if top_functions.count(f) > 1:
+            if f not in duplicated:
+                duplicated.append(f)
+            # A later copy of a duplicated label is empty by construction; only
+            # an empty FIRST position means the research never named it.
+            if i != top_functions.index(f):
+                continue
+        absent.append(f)
+    for f in duplicated:
+        pos = [str(p + 1) for p, x in enumerate(top_functions) if x == f]
+        if filled[top_functions.index(f)]:
+            effect = ("only the first is filled, so the rest would render "
+                      "'Not a core function of this role'")
+        else:
+            effect = ("no Functional Mix bullet names it, so none is filled "
+                      "(also reported as TOP_FUNCTION_ABSENT)")
+        fail(where, "TOP_FUNCTION_DUPLICATE",
+             f"{f!r} is listed at TOP 5 FUNCTIONS positions "
+             f"{', '.join(pos[:-1])} and {pos[-1]}; {effect}. "
+             f"A duplicated label is an intake defect, not a research one")
     if absent:
         fail(where, "TOP_FUNCTION_ABSENT",
              f"{len(absent)} of {len(top_functions)} top functions not listed: {absent}")
@@ -759,8 +790,20 @@ def main():
             print(f"       salary scenarios named: {ev['salary_scenario_count']}")
         _print_findings()
         if fails:
-            print(f"\nREFUSED: {len(fails)} FAIL. No draft written — fix the "
-                  f"research document before proposing judgment for it.")
+            # A duplicated top function is fixed in the client's intake, not in
+            # the research, so the footer must not send Todd to the wrong place.
+            intake = sum(1 for f in fails if f[2] == "TOP_FUNCTION_DUPLICATE")
+            if intake == len(fails):
+                where_to_fix = ("the client's TOP 5 FUNCTIONS — a duplicated "
+                                "label is an intake defect, not a research one — "
+                                "before proposing judgment.")
+            elif intake:
+                where_to_fix = ("the client's TOP 5 FUNCTIONS (an intake defect) "
+                                "and the research document before proposing "
+                                "judgment for it.")
+            else:
+                where_to_fix = "the research document before proposing judgment for it."
+            print(f"\nREFUSED: {len(fails)} FAIL. No draft written — fix {where_to_fix}")
             sys.exit(1)
         Path(args.propose).write_text(json.dumps(draft, indent=2, ensure_ascii=False))
         print(f"\nWrote draft judgment: {args.propose}")

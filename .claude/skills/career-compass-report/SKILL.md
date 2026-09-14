@@ -130,7 +130,19 @@ renaming "Mapping Revision Notes" to "Appendix" changes nothing. Any FAIL
 refuses to write JSON and exits 1 — an empty role list is never a valid parse.
 Run `$SKILL/fixtures/drift_suite.py <research.md> <judgment.json>` after any
 parser change; it covers dropped/duplicate ranks, dropped and reordered values,
-an omitted top function, heading-case and field-order drift, and a v1 document.
+an omitted top function, a duplicated top function, heading-case and
+field-order drift, and a v1 document.
+
+A **duplicated label in TOP 5 FUNCTIONS** is `TOP_FUNCTION_DUPLICATE` (FAIL),
+naming the label and every position it holds. Presence is tested by slot
+occupancy, the same test values use: `index()` only ever fills a duplicated
+label's first position, so the later one would render "Not a core function of
+this role" against the client's own selection. It is an intake defect — the
+parser never guesses which slot was meant, and it is not reported as
+`TOP_FUNCTION_ABSENT`, which means the research omitted a function — unless the
+research also never names the label, in which case both are true and both
+print. The propose-phase refusal points at the client's TOP 5 FUNCTIONS when a
+duplicate is among the failures, not only at the research document.
 
 #### Description tails (v2.4)
 

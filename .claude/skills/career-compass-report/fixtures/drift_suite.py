@@ -104,6 +104,30 @@ def edit_first_fm_bullet(block, fn):
     raise SystemExit("drift suite: no Functional Mix bullet found")
 
 
+def duplicate_top_function(md, src, dst, label=None):
+    """Overwrite TOP 5 FUNCTIONS item `dst` with item `src`'s label (0-based).
+
+    The intake list carries byte-identical labels under different categories,
+    and the Top-5 picker renders them as indistinguishable pills, so a client
+    can select both. This is that intake, as the research document receives it.
+
+    With `label`, BOTH positions become `label` instead. Only the TOP 5 list is
+    touched: a whole-document replace would rename the Functional Mix bullets
+    too, and the research would then name the label after all.
+    """
+    m = re.search(r"^TOP 5 FUNCTIONS[^\n]*\n((?:[ \t]*(?:[-*+]|\d+\.)[ \t]+[^\n]*\n)+)",
+                  md, re.M | re.I)
+    if not m:
+        raise SystemExit("drift suite: no TOP 5 FUNCTIONS list in the base document")
+    items = [re.match(r"^([ \t]*(?:[-*+]|\d+\.)[ \t]+)(.*)$", l)
+             for l in m.group(1).split("\n") if l]
+    lines = [it.group(0) for it in items]
+    lines[dst] = items[dst].group(1) + (label or items[src].group(2))
+    if label:
+        lines[src] = items[src].group(1) + label
+    return md[:m.start(1)] + "\n".join(lines) + "\n" + md[m.end(1):]
+
+
 def to_v1_format(md):
     """v1 shape: no `Rank:` lines, bulleted client profile, v1 heading names."""
     md = re.sub(r"^Rank:[ \t]*\d+[ \t]*\n\n?", "", md, flags=re.M)
@@ -174,6 +198,21 @@ def main():
          in_role(base, first, lambda b: drop_nth_bullet(b, r"Functional\s+Mix", 1)),
          1, ["TOP_FUNCTION_ABSENT"], []),
 
+        # A duplicated top-5 label: index() lands both on the first position,
+        # the second keeps its "Not a core function" default, and every name
+        # is still "seen" - so a name-membership test passes it silently. It is
+        # an intake defect, not a research omission, so it must not be
+        # reported as TOP_FUNCTION_ABSENT.
+        ("duplicated top function fails, naming both positions",
+         duplicate_top_function(base, 0, 1),
+         1, ["TOP_FUNCTION_DUPLICATE"], ["TOP_FUNCTION_ABSENT"]),
+
+        # Duplicated AND never named by the research: both are true, so both
+        # are reported. The label cannot occur in any real document.
+        ("duplicated top function the research never names is also absent",
+         duplicate_top_function(base, 0, 1, label="Drift suite function no role names"),
+         1, ["TOP_FUNCTION_DUPLICATE", "TOP_FUNCTION_ABSENT"], []),
+
         ("heading case drift costs nothing",
          base.replace("### Functional Mix", "### FUNCTIONAL MIX")
              .replace("### Why This Fits You", "### why this fits you")
@@ -235,6 +274,12 @@ def main():
             vals = payload["roles"][0]["value_alignments"]
             if not all(vals):
                 problems.append("a value slot came back empty after reordering")
+        # the code alone is not enough: Todd has to be told which two slots
+        if name.startswith("duplicated top function") and "positions 1 and 2" not in out:
+            problems.append("finding does not name positions 1 and 2")
+        if name.startswith("duplicated top function the research never names") \
+                and "no Functional Mix bullet names it" not in out:
+            problems.append("finding claims a position was filled when none was")
         status = "PASS" if not problems else "FAIL"
         failures += bool(problems)
         print(f"  {status}  {name:<{width}}  exit={code} codes={sorted(codes) or '[]'}")
