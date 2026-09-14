@@ -123,12 +123,27 @@ that was before the embed was scheduled ahead of it. The Circle DM is now a late
 
 **Do not mistake gitignore for absence.** The Austin Scheiwe report and all generated client artifacts live in `reports/scheiwe/`, and `reports/` is gitignored. They are absent from git and from any fresh clone, but they are real and present on Todd's Mac. A future session that cannot see them in git must not conclude the work was never done — check the filesystem.
 
-**Two client reports delivered through all four gates.** Austin Scheiwe (26 pages) and
-**Henry Johnson (24 pages, 6 roles, Gate 4 approved by Todd Sept 8 2026)**. Henry's run
-selected 6 of 7 researched roles — Adjunct Professor dropped at the judgment gate — and
-both parse phases reported `FINDINGS: none`. Artifacts in the gitignored `reports/johnson/`.
-The pipeline is now proven across two clients with different role counts, function spreads
+**Five client reports delivered through all four gates.** All research-only (manual
+delivery, see Decisions). Page and role counts are from the PDFs and report JSONs on disk,
+Sept 14 2026:
+
+| Client | Pages | Roles | Folder | Notes |
+|---|---|---|---|---|
+| Austin Scheiwe | 26 | 5 | `reports/scheiwe/` | v24 rebuild on disk too (30 pages, 8 roles) |
+| Henry Johnson | 24 | 6 | `reports/johnson/` | Gate 4 Sept 8 2026. 6 of 7 researched roles; Adjunct Professor dropped at the judgment gate; both parse phases `FINDINGS: none` |
+| Jensen Harper | 27 | 7 | `reports/harper/` | |
+| Jaleesa McCreary | 33 | 9 | `reports/mccreary/` | Gate 4 Sept 10 2026 |
+| Wesley Price | 30 | 6 | `reports/price/` | Delivered Sept 14 2026; seven Todd-facing lines rewritten before build; Circle DM sent by hand |
+
+The pipeline is proven across five clients with different role counts, function spreads
 and salary structures.
+
+**All five are delivered and CLOSED. None will be reissued.** They are not perfect, and this
+file records several defects they carry — dangling colons on Day-to-Day bullets, fabricated
+"Time to acquire" labels, Harper's inline `**Flag:**` text. **Those are historical records of
+what shipped, not work items.** Anything found in a delivered report from here on is
+information about the pipeline, not a task: do not propose a rebuild, re-upload, correction
+or reissue for any of these clients. (Todd, Sept 14 2026)
 
 *(Phase 1 status confirmed by Todd Sept 4 2026. Phase 2 completion confirmed by Todd Sept 7 2026; 26-page count and embedded DM Sans/Inter independently re-confirmed from the PDF that same day. Henry Johnson run confirmed complete by Todd Sept 8 2026.)*
 
@@ -328,6 +343,25 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   **Neither change prevents the collision** — only category context in the picker does
   (scoped, not built; see the Technical Note below).
 
+  **No delivered report carries a duplicate — checked, not assumed.** *(Moved from Open
+  Questions, Sept 14 2026.)* All six report JSONs (Scheiwe and v24, Johnson, Harper,
+  McCreary, Price) were checked against **`client.functions` and `client.values`**: every
+  list exactly 5 non-empty items, no exact duplicates, and none after normalizing case,
+  punctuation and the word "your". A positive control, Johnson's slot 1 copied into slot 2,
+  was caught (`{'Performing, acting': 2}`). **An earlier pass that same day returned "none"
+  by reading `client.top_functions`, which does not exist** — `Counter` over an empty list.
+  The re-run asserts list shape first so that cannot recur silently.
+
+  **The clean result is not reassurance — Henry Johnson is how close it came.** Three of his
+  five top functions — `Performing, acting`, `Using personal charisma`, and `Presenting to
+  people via TV, films, seminars, speeches` — each have an identical or near-identical twin
+  elsewhere in the function list, and he picked only one from each pair. Two of those twins
+  are byte-identical (`Performing, acting`; `Presenting to people…`), so taking both halves
+  of either pair would have produced a report telling him one of his own selections is "Not
+  a core function of this role" on every role page, with nothing raised. (The charisma twin
+  differs by "your", so it would not trip `index()` — it would only read as a duplicate.)
+  That is the argument for building the FAIL. (Todd, Sept 14 2026)
+
 ---
 
 ## Open Questions
@@ -371,20 +405,6 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   basis, not base salary…", "Senior Development Director scenario selected"). **Both
   candidate sources are written for Todd**, so whatever renders a salary caveat needs a
   client-facing source of its own — it cannot just switch the template on.
-
-- **Does any delivered report contain a duplicated top-5 function? UNRESOLVED — the check
-  was mid-run when the session ended, and next session starts here.** Five clients are
-  delivered (Scheiwe including v24, Johnson, Harper, McCreary, Price).
-
-  **A first pass returned "none" for all six report JSONs and that result is meaningless —
-  do not read it as an all-clear.** It looked for `client.top_functions`, which does not
-  exist; the client's lists live under **`client.functions` / `client.values`**. The key
-  returned `None` for every file, so `Counter` found no duplicates in an empty list. Redo it
-  against the right key.
-
-  If any delivered client does carry a duplicate, **that is a decision for Todd before any
-  fix is built** — what their pages currently say, and whether the report is re-issued or
-  corrected in place. (Sept 14 2026)
 
 ---
 
