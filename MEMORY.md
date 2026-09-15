@@ -121,17 +121,33 @@ several real clients.
 *(Step numbering note: step 3 is the embed. An earlier entry called the Circle DM "step 3";
 that was before the embed was scheduled ahead of it. The Circle DM is now a later step.)*
 
-**Circle DM script: built, not yet used on a client (Sept 14 2026).**
+**Circle DM script: built and tested end to end against a test member; not yet used on a
+client (Sept 14–15 2026).**
 `send_circle_dm.py` in the report skill — standalone, run by hand, not wired to Gate 4.
 Circle Admin API v2 **can** send the DM: verified by one real send to Taylor
 (taylor@launchpoint.co, co-owner), HTTP 200. The sender is the token's owner (Todd).
 Message wording, first name from Circle's member record, no link, and migration `0003`
 (DM record tied to the report's Drive file id) are all Todd's decisions; detail in the
 skill's SKILL.md section 7. **Migration 0003 is applied** to `duyojjvnjyhxqyhjomgp` — all
-four `circle_dm_*` columns confirmed by Todd in `information_schema` (Sept 14 2026). First
-real `--dry-run` against the test row (`b85ccba3-…`, `todd+careertest1@launchpoint.co`)
-passed check 3 and refused at check 9, as expected: that alias is not a Circle member.
-**The confirm screen has not yet been reached against a real row.**
+four `circle_dm_*` columns confirmed by Todd in `information_schema` (Sept 14 2026).
+
+**Full test, Sept 15 2026, against the test row** (`b85ccba3-…`,
+`todd+careertest1@launchpoint.co`). Before the alias was a Circle member, a dry run passed
+check 3 and refused at check 9 (not a member). Todd then added the alias to Circle as
+**"Todd Test"** (member `92552919`, kept deliberately for future tests), and:
+1. **Dry run** reached the full confirm screen — first name "Todd" from Circle — and wrote
+   nothing (columns read back NULL).
+2. **Real run, typed something other than `send`** — refused at the prompt (run by Todd).
+3. **Real send** (run by Todd) — message `2152042476`, chat room `ea826fcb-…`, sender Todd
+   Linder. Read back from the row: all four columns set, `circle_dm_sent_at`
+   `2026-09-15T10:35:09.826+00:00` is **Circle's own timestamp** (millisecond precision),
+   and `circle_dm_report_drive_file_id` equals the row's `report_drive_file_id`.
+4. **Re-run refused at check 6** — "this report was already announced" — before the
+   Circle token loaded, the member lookup ran, or the prompt appeared. Exit 1.
+
+The test row's four `circle_dm_*` columns were then **cleared** so it stays reusable (one
+row affected, read back NULL; report columns untouched). Clear them again after any future
+real send to the alias.
 
 **Never run the script for Wesley Price or Bill Finnell.** Both are delivered, and Todd sent
 both DMs **by hand in the Circle app**. Their `circle_dm_*` columns stay NULL on purpose:

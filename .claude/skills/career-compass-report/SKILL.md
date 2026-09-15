@@ -404,6 +404,15 @@ Bill Finnell**: both DMs were sent by hand in the Circle app, and their `circle_
 columns are deliberately empty, so the already-announced check cannot stop a run
 against them.
 
+**Tested end to end, Sept 15 2026**, against the test row `b85ccba3-…`
+(`todd+careertest1@launchpoint.co`), whose alias is the Circle member **"Todd
+Test"** — kept for exactly this. A dry run reached the full confirm screen and
+wrote nothing; a real run declined at the prompt; a real send (message
+`2152042476`) wrote all four columns, with `circle_dm_sent_at` as **Circle's own
+timestamp**; and a re-run refused at the already-announced check **before the
+Circle token loaded or the prompt appeared**. To test again, clear the test row's
+four `circle_dm_*` columns first — they were cleared after this run.
+
 **Exit codes.** `0` ok or dry run · `1` precondition/validation/declined/usage ·
 `2` sent but NOT recorded · `3` Circle rejected the token. Usage errors exit 1,
 not argparse's 2, so a typo can never read as a DM that went out.
