@@ -127,9 +127,18 @@ Circle Admin API v2 **can** send the DM: verified by one real send to Taylor
 (taylor@launchpoint.co, co-owner), HTTP 200. The sender is the token's owner (Todd).
 Message wording, first name from Circle's member record, no link, and migration `0003`
 (DM record tied to the report's Drive file id) are all Todd's decisions; detail in the
-skill's SKILL.md section 7. **Migration 0003 is written but NOT applied** — Todd applies it
-in the SQL editor, then a real `--dry-run` against a live row comes before any client send.
-Never run it for Wesley Price (DM sent by hand; columns deliberately empty).
+skill's SKILL.md section 7. **Migration 0003 is applied** to `duyojjvnjyhxqyhjomgp` — all
+four `circle_dm_*` columns confirmed by Todd in `information_schema` (Sept 14 2026). First
+real `--dry-run` against the test row (`b85ccba3-…`, `todd+careertest1@launchpoint.co`)
+passed check 3 and refused at check 9, as expected: that alias is not a Circle member.
+**The confirm screen has not yet been reached against a real row.**
+
+**Never run the script for Wesley Price or Bill Finnell.** Both are delivered, and Todd sent
+both DMs **by hand in the Circle app**. Their `circle_dm_*` columns stay NULL on purpose:
+the columns record what the script sent, not what was sent by any means, so a hand-written
+record would contradict what they mean. Nothing in the database marks them as already
+messaged, so the script's already-announced check will **not** stop a run against either —
+the only guard is not running it. Two clients are now in that state. (Todd, Sept 14 2026)
 
 **KNOWN LIMITATION — must be closed before the DM runs unattended at Gate 4.** After an
 exit 2 (sent, not recorded), nothing in the database stops a plain re-run from sending a

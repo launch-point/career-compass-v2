@@ -399,8 +399,10 @@ yourself"). Cloudflare refuses Python's default User-Agent (403, error 1010), so
 this report already announced (`circle_dm_report_drive_file_id` equals
 `report_drive_file_id`) · not an active Circle member · Circle has no first name.
 The record is tied to the report, so a revised, re-uploaded report can be
-announced without clearing anything by hand. **Never run it for Wesley Price**:
-his DM was sent by hand and his `circle_dm_*` columns are deliberately empty.
+announced without clearing anything by hand. **Never run it for Wesley Price or
+Bill Finnell**: both DMs were sent by hand in the Circle app, and their `circle_dm_*`
+columns are deliberately empty, so the already-announced check cannot stop a run
+against them.
 
 **Exit codes.** `0` ok or dry run · `1` precondition/validation/declined/usage ·
 `2` sent but NOT recorded · `3` Circle rejected the token. Usage errors exit 1,
