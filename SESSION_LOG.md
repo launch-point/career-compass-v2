@@ -1769,3 +1769,58 @@ The script is now built and tested end to end; whether that meets the condition 
 - **Stale MEMORY entry fixed at Todd's direction:** the test row's `report_*` columns are
   populated (Henry Johnson's PDF from Sept 9), not nulled. Todd named it the recurring
   pattern: accurate when written, quietly false now.
+
+
+— reviewed 2026-09-15, sessions 6–13 —
+
+Covers every entry after "— reviewed 2026-09-08, sessions 1–5 —": sessions 6–13 plus the three
+"continued" entries (session 8 ×2, session 12 ×1). Todd ruled on each item.
+
+**Promoted (all nine confirmed):**
+1. Any fact headed for a commit message, MEMORY or SKILL.md is re-derived from full output at
+   the moment of writing — widened from "numbers", since only one instance was a number.
+   Amended into the existing Corrections Log entry on client-visible claims.
+2. Expired notes, with the countermeasure "name the inputs; never write 'all'" — lighter than
+   formal input tracking. Technical Notes.
+3. The harness-first guard covers failures; the misses were false successes. "Before believing
+   a clean or passing result, confirm the check can fail" — **CLAUDE.md Verification Standard
+   step 2**, with the history amended into the Corrections Log entry.
+4. Name the tested path next to "verified". Corrections Log.
+5. PDF text extraction is unreliable for counts and presence. Technical Notes.
+6. Local dev against the production `.env.local`: blank the vars, confirm via dev-send, back up
+   `.dev-data/`. Technical Notes.
+7. `main-deploy` mechanics and file-only migration commits. Appended to the deploy entry.
+8. Ask once when Todd states a fact MEMORY lacks; don't re-ask. **CLAUDE.md Non-Negotiables.**
+9. Flag an instruction that conflicts with the data rather than following it literally.
+   **CLAUDE.md Non-Negotiables.**
+
+**Watch list (unchanged, Todd agreed):** Todd extends one mechanism over adding parallel ones;
+Todd interrupts long writes to see content first; permission-prompt friction (re-characterise:
+one classifier denial, the rest were content control); graph legibility influencing placement;
+"legibility, not behaviour" in commit messages; literal placeholder answers; research documents
+encoding authorization; internal vocabulary reintroduced from the spec.
+
+**MEMORY corrections — checks run, not claims edited:**
+- Duplicate check re-run on seven JSONs including Finnell, positive control caught: no
+  duplicates.
+- Drift suite run on `Finnell_Bill_CareerCompass_Roles.md` + `finnell_judgment.json`: 16/16.
+  Testable set is now Harper, McCreary, Price, Finnell.
+- "Last updated" and "delivery chain built except the Circle DM" corrected.
+- Bill's research timing vs the template reinstall recorded as UNKNOWN (Todd doesn't know).
+
+**Decided:**
+- D1 — no TOP 5 / NEXT 5 disjointness check; reasoning recorded. I added a precision note: an
+  exact-label check would have fired on Johnson's document, not on Farnsley's (his split pairs
+  have different labels).
+- D3 — which Scheiwe PDF Austin received: unresolved, closed, not worth pursuing.
+- D4 — five dots in a cell accepted, no graph change. **Flagged before recording:** Todd's
+  reason ("dots stay in-cell") conflicts with session 13's only five-dot render, where outer
+  dots crossed into neighbouring columns. Todd directed it be recorded; the conflicting
+  observation is written beside the decision in MEMORY and SKILL.md.
+
+**Still open:**
+- **D2 — seniority mapping (Integrator by altitude of work, not reports; PM roles under
+  Product). Todd is thinking. REMIND HIM AT THE START OF THE NEXT SESSION.** Open Question in
+  MEMORY.
+
+**Next review:** after five more sessions from here (session 14 onward).
