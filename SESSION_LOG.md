@@ -1608,3 +1608,58 @@ decision before any fix is built.
   context line on Rating, Top-10 and Top-5, verified live through Circle, with the caveat that
   it does not prevent selecting both halves; the duplicate-FAIL decision no longer calls picker
   context "scoped, not built."
+
+---
+
+## Session 13 — 2026-09-14 — Bill Finnell propose, build, Gate 4, Drive upload
+
+**The 5-session review is still due and still deferred by Todd** (until the Circle DM work is
+finished, per session 12 close). Not run this session.
+
+### What happened
+- Research doc `Finnell_Bill_CareerCompass_Roles.md` (from ~/Downloads) copied to
+  `reports/finnell/`. Propose: 6 roles, 0 FAIL, 3 WARN (`CLIENT_ID_ABSENT`,
+  `TECH_TIME_NOT_FOUND` on Executive Coach and Marketplace Chaplain). No Seniority Notes, no
+  cite markers, TOP 5 / NEXT 5 disjoint, all five NEXT 5 functions named in Functional Mix.
+- Built 24 pages, 6 roles. Gate 4 approved by Todd. Uploaded:
+  `Bill_Finnell_Career_Compass_Report_20260914-210152.pdf`, file id
+  `1BmOOO5ebMC6IYeaP0YyIzJbqPoiX1btl`, client `128e45c1-1bb2-42f1-94b1-b41613353a7a`.
+  Verified: all four `report_*` columns read back; anonymous fetch byte-identical (838,704 B).
+- **Not verified:** screen 3 as Bill (no sign-in as him). Circle DM is Todd's, manual.
+
+### Decisions (Todd)
+- Placements: OD Consultant, Executive Coach, HRBP, Marketplace Chaplain → Human Resources /
+  Specialist; Director of Operations → Operations / Strategist; Change Management → first HR,
+  then **moved to Operations** after the rendered overview showed five dots in HR/Specialist.
+  Chaplain explicitly kept in HR.
+- Salary picks: OD A (broad, 77,000/110,000/160,000 — avg stated as "$109,800 to $110,000",
+  110,000 used); Change Mgmt A (79,000/114,500/167,000); Executive Coach B (corporate in-house
+  75,000/**97,500 derived midpoint**/120,000); Dir of Ops A (Memphis, 73,300/104,600/131,600);
+  HRBP A (62,300/100,500/162,000); Chaplain "Other" — **interpreted by me** as national band
+  with top-earner high, 48,500/63,600/91,000, stated to Todd before build, not objected to.
+- All 6 roles kept.
+
+### Didn't work as expected
+- **Five dots in one overview cell overflow it.** SKILL.md accepts up to four ("overlap but
+  stay in-cell, numbers legible"). At five, numbers 1–3 were illegible and the outer dots
+  crossed into the Operations and Finance columns. No delivered client had more than 3 per
+  cell (checked across all six report JSONs). Resolved by Todd re-placing a role, not by a
+  graph change. At four (final build) "1" is partly covered by dot 3 but readable.
+- **Verification near-miss, caught before reporting:** a "Time to acquire" page scan listed 3
+  pages where 4 were expected; the HRBP label had wrapped across a line ("Time\nto acquire").
+  Checked the page text before reporting — false alarm. The Corrections Log rule
+  (check the harness before reporting a failure) fired at the right moment this time.
+
+### Noticed (tentative — not for MEMORY without confirmation)
+- **Graph legibility influenced a function placement.** Todd moved Change Management partly
+  in response to the crowded overview. Possibly a gate-training signal: the landscape page
+  is part of how placements get judged, not only a rendering of them. One instance.
+- Todd asked whether `clients.id` is the email. The ID had to be looked up by email with a
+  read-only query mid-session. Possible friction worth smoothing (e.g. propose accepting an
+  email). Idea only — not proposed to Todd.
+- Bill's document had no Todd-facing text in client fields that I found (no Seniority Notes,
+  no inline flags). **Unknown** whether it was researched entirely after the Sept 12
+  template reinstall, so this is not evidence the upstream fix works until Todd confirms
+  the timing.
+- Work Preferences prints the salary floor unformatted ("125000"); Price's delivered report
+  does the same. Pipeline information, not a work item.
