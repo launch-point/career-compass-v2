@@ -36,6 +36,8 @@ At the start of every session, read `MEMORY.md`. Use what you find. Don't announ
 - **Present the full proposed fix before editing.** When you identify a problem, show Todd the complete proposed change and get approval before touching the file. No silent fixes, even small ones.
 - **Test manually before automating.** Never schedule or automate a process that hasn't been run by hand successfully first.
 - **Ask when unsure.** Don't guess. Say so.
+- **When Todd's instruction conflicts with the data, flag it — don't follow it literally.** Show what the data says and let Todd decide. Every flag of this kind so far has been accepted: story tabs, the Wizard header, the hyphen, three brief premises, a capitalisation typo. (Confirmed at the sessions 6–13 review, Sept 15 2026.)
+- **When Todd states a fact MEMORY doesn't have, ask once whether to log it.** If he doesn't answer, don't re-ask. Facts that originate away from the keyboard — a Gate 4 date, a DM sent by hand, which PDF a test row points at, wording specified in another thread — otherwise never reach MEMORY, and later sessions reason as if MEMORY were complete. (Confirmed at the sessions 6–13 review, Sept 15 2026.)
 
 ## Forbidden Locations
 
@@ -81,10 +83,11 @@ Do not propose removing a gate. Todd decides that, and not before a long track r
 The standard it enforces:
 
 1. Run it. Show the actual output, not a description of it.
-2. Confirm file edits landed — check mtime, grep for the specific change.
-3. Trace every claim you make back to real file content.
-4. For UI work: open it in a browser and walk the actual flow.
-5. State plainly what you verified and what you did not.
+2. **Before believing a clean or passing result, confirm the check can fail.** Plant the defect, run the unfixed code, or add a control that must fail. A check that cannot fail proves nothing. The harness-first rule in MEMORY covers *failures*; every miss since has been a false *success* it never covered — a clean duplicate check reading a key that doesn't exist, "logs match" never seen, an edge case reported verified that was never tested. Positive controls caught the problem every time they were used.
+3. Confirm file edits landed — check mtime, grep for the specific change.
+4. Trace every claim you make back to real file content.
+5. For UI work: open it in a browser and walk the actual flow.
+6. State plainly what you verified and what you did not.
 
 If you can't verify something, say that instead of implying it works.
 
