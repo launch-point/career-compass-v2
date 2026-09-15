@@ -1,6 +1,6 @@
 # Career Compass v2 — MEMORY.md
 
-*Last updated: Sept 10, 2026*
+*Last updated: Sept 15, 2026 (sessions 6–13 review)*
 
 This file holds **confirmed** facts, decisions, and gotchas. It is authoritative — read at the start of every session and treated as settled.
 
@@ -119,12 +119,15 @@ Keep this file short. If it's getting long, that usually means something belongs
   unreachable from the interface** — if one is ever needed, it exists and must be retrieved from
   storage directly. Do not conclude from the UI that it is gone.
 
-**The delivery chain is built except the Circle DM.** Intake → submit → report build →
-Gate 4 → Drive upload → screen 3 are verified in production, and the Mission Control embed is
-verified through the full client chain, Circle → mc → career (Sept 10 2026; see step 3 for
-exactly what that covered). The **Circle DM stays manual with its own human gate by decision** — not an
-unfinished piece. It is to be automated at Gate 4 later, once the chain has run cleanly across
-several real clients.
+**The delivery chain is built end to end, including the Circle DM — only its automation is
+deferred.** Intake → submit → report build → Gate 4 → Drive upload → screen 3 are verified in
+production, and the Mission Control embed is verified through the full client chain, Circle →
+mc → career (Sept 10 2026; see step 3 for exactly what that covered). **The Circle DM now has a
+built, tested script** (`send_circle_dm.py`, below) that Todd runs by hand with its own confirm
+prompt; no client has been sent one by the script yet. **Automating it at Gate 4 is deferred**,
+and needs the pre-send marker below first. (Corrected at the sessions 6–13 review, Sept 15
+2026: this used to say "built except the Circle DM" and "stays manual", written before the
+script existed.)
 
 *(Step numbering note: step 3 is the embed. An earlier entry called the Circle DM "step 3";
 that was before the embed was scheduled ahead of it. The Circle DM is now a later step.)*
@@ -181,7 +184,7 @@ still sent by hand. Page and role counts are from the PDFs and report JSONs on d
 
 | Client | Pages | Roles | Folder | Notes |
 |---|---|---|---|---|
-| Austin Scheiwe | 26 | 5 | `reports/scheiwe/` | v24 rebuild on disk too (30 pages, 8 roles) |
+| Austin Scheiwe | 26 | 5 | `reports/scheiwe/` | v24 rebuild on disk too (30 pages, 8 roles); which one Austin received is unresolved and closed — see Decisions |
 | Henry Johnson | 24 | 6 | `reports/johnson/` | Gate 4 Sept 8 2026. 6 of 7 researched roles; Adjunct Professor dropped at the judgment gate; both parse phases `FINDINGS: none` |
 | Jensen Harper | 27 | 7 | `reports/harper/` | |
 | Jaleesa McCreary | 33 | 9 | `reports/mccreary/` | Gate 4 Sept 10 2026 |
@@ -338,6 +341,12 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   seven rewrites, and the Circle DM sent by hand in the Circle app (not through Claude
   Code), per the standing decision that the DM stays manual. Any note anywhere reading as
   though his build is paused or in flight is stale. (Todd, Sept 14 2026)
+
+  **Bill Finnell's document is not evidence either way yet — its timing is UNKNOWN.** Session
+  13 found no Todd-facing text in his client-rendered fields (no Seniority Notes, no inline
+  flags). But **Todd does not know whether Bill's research was completed before or after the
+  template reinstall**, so it cannot count as the first post-reinstall test. Recorded as
+  unknown rather than guessed. (Todd, Sept 15 2026)
 - **Research-only clients get manual delivery; no `clients` rows are created for
   them.** *(Moved from Open Questions, Sept 10 2026.)* Every future client comes
   through the intake form, so each has a Supabase row and the full delivery chain
@@ -414,6 +423,13 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   by reading `client.top_functions`, which does not exist** — `Counter` over an empty list.
   The re-run asserts list shape first so that cannot recur silently.
 
+  **Re-run at the sessions 6–13 review, Sept 15 2026, after Bill Finnell was delivered** —
+  the entry above names six JSONs, so Bill was visibly not covered. Seven JSONs checked:
+  Scheiwe, Scheiwe v24, Johnson, Harper, McCreary, Price, **Finnell**. Every functions and
+  values list exactly 5 non-empty items; **no exact duplicates in any**. Positive control
+  first: Bill's slot 1 copied into slot 2 was caught (`{'Generating ideas, creating,
+  inventing, imagining': 2}`). The next delivered client is not covered until this is re-run.
+
   **The clean result is not reassurance — Henry Johnson is how close it came.** Three of his
   five top functions — `Performing, acting`, `Using personal charisma`, and `Presenting to
   people via TV, films, seminars, speeches` — each have an identical or near-identical twin
@@ -435,25 +451,64 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
 
   That is the argument for building the FAIL. (Todd, Sept 14 2026)
 
+- **No TOP 5 / NEXT 5 disjointness check in the parser.** *(Decided at the sessions 6–13
+  review, Sept 15 2026 — was an Open Question parked for this review since Sept 8.)* The
+  evidence gathered while it was parked argues against it: **Henry Johnson and Mike Farnsley
+  both had pairs split across the two tiers, and both were legitimate selections**, so a FAIL
+  would have blocked valid work. **The research agent's H0 check already covers this
+  upstream — and it over-fired on Farnsley**; duplicating an over-firing check downstream
+  makes it worse, not safer. Recorded so it is not revisited blind. (Todd)
+
+  *Precision on the evidence, noted at recording:* the parser compares labels exactly. An
+  exact-label check would have fired on **Johnson's** document as first received
+  (`Performing, acting` top #1 / next #10; `Presenting to people…` top #5 / next #6). It
+  would **not** have fired on Farnsley, whose split pairs have different labels ("Using
+  personal charisma" / "Using your personal charisma"; "Communicating verbally with groups…"
+  / "Communicating verbally with"). His case is evidence about near-match checks like H0
+  over-firing, not about an exact-label parser check.
+
+  **What this does not settle:** the separate short Additional Functions table — its cause is
+  Functional Mix bullets never naming the declared next-functions, which no disjointness
+  check would catch (SKILL.md Known Gaps). Still a known gap, unaddressed.
+
+- **Which Scheiwe PDF Austin received — UNRESOLVED, and not worth pursuing.** Two builds exist
+  (26-page Sept 4; 30-page v24 Sept 7) and it was never confirmed which one he got. **Closed
+  by Todd without an answer:** Austin is delivered and closed, nothing depends on which PDF
+  he has, and tracing it through old email is not worth the time. Do not raise it again.
+  (Todd, Sept 15 2026)
+
+- **Five dots in one overview cell: accepted — no graph change.** Same reasoning as the
+  existing four-dot limit: `_positions()` is proven collision logic and is not to be
+  destabilised for a rare edge case. Todd's stated reason: dots stay in-cell, so nothing is
+  misattributed. (Todd, Sept 15 2026)
+
+  **Conflicting observation, recorded beside the decision, not in place of it:** the only
+  five-dot render on record — Bill Finnell's first build, session 13 — showed **numbers 1–3
+  illegible and the outer dots crossing into the Operations and Finance columns**, i.e. not
+  in-cell. Todd re-placed a role instead, so no delivered report has five dots in a cell. This
+  was flagged to Todd at the review before recording; he directed the decision be recorded as
+  given. If five dots in a cell ever ships, look at the rendered page for a dot drawn in the
+  wrong column before Gate 4.
+
 ---
 
 ## Open Questions
 
 *Things that need Todd's input before they can be resolved. Remove once answered — move the answer to Decisions.*
 
-- **Should the parser check that TOP 5 and NEXT 5 FUNCTIONS are disjoint — and at what level?** No such check exists. The parser reads `TOP 5 FUNCTIONS` and `TOP 5 VALUES` and **never reads `NEXT 5 FUNCTIONS` at all**, so an overlap between the two lists passes silently; the only duplicate check in the file is `RANK_DUPLICATE`, which covers `Rank:` values.
-
-  It would distort a report because `additional_functions` is the *complement* of `top_functions` over the Functional Mix bullets, and the template renders that list under the heading **"ADDITIONAL FUNCTIONS ALIGNMENT"** (`report_template.py:777`). **"Functions 6-10" is internal-only** — it lives in a docstring at `report_template.py:569` and never reaches the page. Overlapping entries route to the Top 5 table and can never reach the additional table, so that table quietly renders fewer rows than the document declares. Because the rendered heading makes no row-count promise, the client-visible defect is milder than a table titled "Functions 6-10" would be: the report understates rather than contradicting itself. (Heading corrected Sept 8 2026, read off Henry Johnson’s rendered PDF.)
-
-  **The overlap and the short table are separate gaps, and fixing the first does not
-  fix the second.** Henry's document had its two duplicate NEXT 5 entries removed
-  upstream, leaving three declared. The built report still renders **exactly one** row
-  in the Additional Functions table on all six role pages — verified by cell-level
-  extraction across every page, not inferred. The shortfall's real cause is that the
-  Functional Mix bullets never name the other declared next-functions, which no
-  disjointness check would catch. Solve them separately. (Sept 8 2026)
-
-  Needs deciding: FAIL or WARN, and whether the check belongs parser-side or template-side. **Parked for the 5-session review — not to be added mid-build.** Detail in SKILL.md Known Gaps, where the originating example is recorded. (Logged Sept 8 2026 — verified by reading the parser, not inferred. Narrowed to the general question Sept 8 2026: the document that surfaced it was corrected upstream, so no client document is currently affected.)
+- **Seniority mapping: is Integrator about the altitude of the work, not managing people?
+  OPEN — Todd is thinking about it. REMIND TODD AT THE START OF THE NEXT SESSION.**
+  At Wesley Price's gate (session 10), Todd placed Product Manager, Program Manager and
+  Project Manager at **Integrator** although all three are individual contributors by
+  function: "their job is to integrate strategic decisions and pass them along to people who
+  are doing the front-line work"; a PM without reports still "work[s] with others and
+  determine[s] decisions and what gets worked on." **That contradicts the report skill's
+  SKILL.md mapping table** (Individual Contributor → Specialist) and its Seniority Note
+  section, which treats "individual contributor by function" as pointing to Specialist. Three
+  overrides in one report, same direction. Also from that gate: **Project and Program Manager
+  generally sit under Product**, not Operations. Needs deciding: change the mapping rule (and
+  SKILL.md) or keep treating these as per-client judgment. Not applied to the skill. (Raised
+  at the sessions 6–13 review, Sept 15 2026)
 
 - **A role priced on a different basis than its neighbours has nowhere to say so — this
   needs a real fix.** `salary_context` is parsed but never rendered (see Technical Notes),
@@ -487,12 +542,58 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
 
 - **The drift suite can only run against clients whose research markdown is still on disk
   — a standing limitation, not a one-off gap.** It takes `<research.md> <judgment.json>`
-  and mutates the document; the report JSON alone is not enough. As of Sept 14 2026 that is
-  **Harper, McCreary and Price** (`reports/<client>/*_Roles.md`). **Scheiwe and Johnson
-  cannot be tested** — their folders hold judgment files, report JSON and PDFs but no
-  research markdown. A parser change "verified by the drift suite" is verified against
-  those three documents only; say so rather than implying all delivered clients.
-  (Todd, Sept 14 2026)
+  and mutates the document; the report JSON alone is not enough. As of **Sept 15 2026** that
+  is **Harper, McCreary, Price and Finnell** — `Jensen_Harper_Roles.md`,
+  `McCreary_Jaleesa_Roles.md`, `Price_Wesley_Roles.md`, `Finnell_Bill_CareerCompass_Roles.md`
+  (note Finnell's filename differs, and his folder has no `.as-received` copy). **Scheiwe and
+  Johnson cannot be tested** — their folders hold judgment files, report JSON and PDFs but no
+  research markdown. A parser change "verified by the drift suite" is verified against the
+  named documents only; say so rather than implying all delivered clients. (Todd, Sept 14
+  2026)
+
+  **Finnell added by running it, not by editing the list** (sessions 6–13 review, Sept 15
+  2026): `drift_suite.py Finnell_Bill_CareerCompass_Roles.md finnell_judgment.json` →
+  **16/16**, exit 0; the only finding code is `TECH_TIME_NOT_FOUND`, matching session 13's
+  WARNs. Note that the earlier "As of Sept 14" list expired within a day — the pattern in
+  the next entry.
+
+- **Expired notes: entries accurate when written go quietly false as inputs change. Name the
+  inputs; never write "all".** A *wrong* note fails any honest check. An *expired* note passes
+  every check made against the inputs it was written about, and nothing ties it to those
+  inputs, so a change upstream doesn't flag it. Instances: the "cosmetic redundancy" note on
+  the "Immediate" label (true for Scheiwe's phrasing, false from Johnson on); the "shipped by
+  silence" placements note (superseded at Gate 4 the same session); the test row "nulled"
+  note (true Sept 9, false by Sept 15); "the delivery chain is built except the Circle DM";
+  the drift-suite list and the duplicate check, both expired by Bill Finnell's delivery.
+
+  **The countermeasure is lighter than formal input tracking:** a note about a set of
+  clients, documents or files **lists them by name**, never "all delivered" or "every report".
+  It has already worked twice by accident — the duplicate check named its six JSONs and the
+  drift-suite note named three clients, so a seventh client's absence was visible on sight.
+  "Verified across all five reports" gives no such signal. When a new client is delivered,
+  re-run any check whose named set it isn't in before trusting the note. (Confirmed at the
+  sessions 6–13 review, Sept 15 2026)
+
+- **PDF text extraction is unreliable for counting or for proving presence.** Three
+  independent instances: flat `extract_text()` interleaves wrapped table cells, so 63 of
+  1,046 strings read as "missing" when all were present (Sept 11 audit); bullet counts from
+  PDF text undercounted wrapped bullets — 25 / 10 / 55 against 33 / 12 / 54 from the data
+  (session 9); a "Time to acquire" scan found 3 of 4 because one label wrapped to
+  "Time\nto acquire" (session 13). **Rule: count from the report JSON; prove presence with
+  cell-level extraction and a column crop; look at the rendered page for anything visual.**
+  (Confirmed at the sessions 6–13 review, Sept 15 2026)
+
+- **Local dev of the intake app: `intake-app/.env.local` points at PRODUCTION.** It sets the
+  live Supabase project and the live Make.com webhook, so a plain `next dev` sends real
+  magic-link emails and writes drafts to production. **Start the dev server with
+  `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`,
+  `ORCHESTRATOR_WEBHOOK_URL` and `CAREER_COMPASS_WEBHOOK_SECRET` set to empty strings.**
+  `@next/env` only fills a variable that is `undefined`, so an empty override holds, and the
+  app falls back to dev mode (filesystem store in `.dev-data/`, cookie login). **Confirm
+  before seeding:** `POST /api/auth/dev-send` returns 200 with a dev link (it 404s when
+  Supabase is configured). **Back up `.dev-data/` first and restore it after** — it is
+  gitignored with no copy, and session 7 overwrote a dev record. Used this way in sessions 8
+  and 12. (Confirmed at the sessions 6–13 review, Sept 15 2026)
 
 - **Make.com: a scenario built by hand and never run against real traffic silently
   renders every field empty — and unprefixed `{{field}}` references are inert text.**
@@ -740,6 +841,15 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   working tree or the branch. Re-measure the gap; don't trust a number written here.
   (Sept 9 2026, directed by Todd; facts updated Sept 10 2026)
 
+  **The mechanics** (recurred sessions 8 and 12; confirmed at the sessions 6–13 review, Sept
+  15 2026): **local `main` is stale** (`3d8951e`) — ignore it. **`main-deploy` tracks
+  `origin/main`**; changes are cherry-picked onto it, the diff against `origin/main` is shown
+  to Todd, and it is pushed as `git push origin main-deploy:main` only on his go. **Switching
+  to `main-deploy` swaps in `main`'s older MEMORY.md and CLAUDE.md**, and the harness reports
+  them as "changed on disk" — not real edits; switching back restores them. **Migrations reach
+  `main` as file-only commits** (`0ea7714` for 0002, `ad8b51e` for 0003), never a cherry-pick
+  of a commit that also carries skill or doc files.
+
 - **Never conclude "absent" from a truncated command.** Ran `ls -R reports | head -40`;
   the pipe cut the output at exactly the `reports/scheiwe:` line, so the directory read as
   empty and Austin's finished 26-page report was reported to Todd as missing/unbuilt. All
@@ -768,6 +878,17 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   verification failure, re-derive the expectation and confirm the check can actually
   observe what it claims to — as an explicit step, not as something a note is trusted
   to trigger. (Sept 7 2026)
+
+  **Amended at the sessions 6–13 review, Sept 15 2026 — this entry covers failures; the
+  misses since were false SUCCESSES it never covered.** It held for failures (session 9's
+  check-script bugs; session 13's "Time\nto acquire" wrap, caught before reporting). Every
+  miss since was a clean or passing result believed too early: a duplicate check reading
+  `client.top_functions`, which does not exist, returned "none"; "the parser logs match" was
+  claimed without being seen; an edge case was reported verified when its mutation had
+  renamed the text it meant to test. **Before believing a clean or passing result, confirm the
+  check can fail** — plant the defect, run the unfixed code, or add a control that must fail.
+  Positive controls caught it every time they were used. The rule is behavioural, so it lives
+  in CLAUDE.md's Verification Standard; this entry keeps the history. (Todd)
 - **SESSION_LOG's session-2 "two approved SKILL.md edits never applied" entry is stale —
   both edits did land.** SKILL.md's mtime was Sept 4 17:34, after the 17:04 log entry;
   `## Setup`, `python3 -m venv`, `reportlab==`, `DejaVu Sans` and the role-mode docs are
@@ -795,6 +916,25 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   splitting them would let the scopes drift apart — the same reasoning that collapsed
   `TEMPLATE_GAP_NO_DESCRIPTION` into `FUNCTION_DESC_MISSING` rather than keeping both.
   (Sept 8 2026 — confirmed by Todd at the sessions 1-5 review)
+
+  **Widened at the sessions 6–13 review, Sept 15 2026: any fact headed for a commit message,
+  MEMORY or SKILL.md is re-derived from full output at the moment of writing** — not carried
+  from earlier in the session, not from a truncated or summarised read. Only one of the
+  instances was a number: colon counts first given as 25 / 10 / 55 from PDF text against 33 /
+  12 / 54 from the data (session 9). The others were a claim ("the parser logs match", never
+  seen), a scope (an edge case "verified" that was never tested) and a label (the delivered
+  table's intro calling every client research-only, false when written). Kept in this entry,
+  not a new one, for the same reason as above. (Todd)
+
+- **Name the path a test ran on next to the word "verified".** A test on a convenient path
+  silently takes on the scope of the path clients use. Instances: Phase 1 "Supabase-verified"
+  covered writes and RLS while local dev bypassed auth; the Sept 9 embed test opened mc
+  directly (two levels) while clients come through Circle (three); a copy walk ran in local
+  dev mode. **Countermeasure, applied three times since without a recurrence:** the embed was
+  upgraded only after Todd's sign-in through Circle; the picker context line is recorded as
+  "walked in local dev… verified live through Circle"; the Circle DM test names its test row
+  and test member. A completion claim for anything client-facing names its path, and MEMORY
+  records that path beside "verified". (Confirmed at the sessions 6–13 review, Sept 15 2026)
 
 ---
 

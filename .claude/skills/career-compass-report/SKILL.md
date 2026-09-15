@@ -294,6 +294,14 @@ At 10 roles the overview legend grows the image (504x456pt placed, against
 can share one grid cell; they overlap but stay in-cell and the numbers remain
 legible — a known, accepted cosmetic limit, not a defect to fix.
 
+**Five dots in one cell are also accepted — no graph change** (Todd, Sept 15 2026;
+`_positions()` is proven logic, not to be destabilised for a rare case). **But the
+only five-dot render observed (Bill Finnell's first build) showed numbers 1–3
+illegible and the outer dots crossing into the neighbouring columns** — not
+in-cell. If a report ships with five dots in a cell, look at the rendered overview
+for a dot drawn in the wrong function's column before Gate 4. Detail in MEMORY.md,
+Decisions.
+
 Do not confuse this with the client's **Top 5 functions** and **Top 5 values**,
 which are fixed at 5 by the report design and have nothing to do with how many
 roles the report contains.
@@ -669,10 +677,12 @@ Run before telling Todd anything is done. Show real output, never a description.
   declared next-functions, which is a separate gap from the overlap itself
   and is not addressed by fixing the overlap.
 
-  Open: whether the check belongs at FAIL or WARN, and whether an overlap is a
-  research-document fix (the likely answer, matching the `FUNCTION_DESC_MISSING`
-  precedent) or something the parser should reconcile. **Todd's call — not yet
-  decided, and no check has been written.**
+  **Decided Sept 15 2026: no parser check, by design** (Todd, sessions 6–13 review).
+  Johnson and Farnsley both had pairs split across the tiers as legitimate selections,
+  so a FAIL would block valid work; the research agent's H0 check already covers this
+  upstream and has over-fired, so a downstream copy would make it worse. The short
+  Additional Functions table above is a separate gap and stays open. Reasoning in
+  MEMORY.md, Decisions.
 
 - **The font URL the code uses is blocked in Claude Code remote sessions, and
   that kills the whole pipeline — not just graph styling.** Both modules fetch
