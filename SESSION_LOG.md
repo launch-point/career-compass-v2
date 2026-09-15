@@ -1761,3 +1761,11 @@ The script is now built and tested end to end; whether that meets the condition 
   landed. Possible rule: show a large new file's key behaviour before writing it.
 - Positive controls again did their job (harness controls, the 403/42703 reads). No first
   result this stretch was reported before its check was confirmed able to see it.
+
+### Session 12, continued — close (Todd, Sept 15 2026)
+- **The 5-session review is DUE now.** The Circle DM work is finished for its current scope.
+  The pre-send marker is a prerequisite for Gate 4 automation, which is separate future work;
+  the review is **not** held on it. Run it next session.
+- **Stale MEMORY entry fixed at Todd's direction:** the test row's `report_*` columns are
+  populated (Henry Johnson's PDF from Sept 9), not nulled. Todd named it the recurring
+  pattern: accurate when written, quietly false now.

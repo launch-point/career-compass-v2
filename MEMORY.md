@@ -37,8 +37,16 @@ Keep this file short. If it's getting long, that usually means something belongs
   **outside the repo** at `~/.config/career-compass/credentials.json`, mode 0600, and the scripts
   refuse to run if that file is readable beyond its owner. Supabase creds are *not* duplicated
   there — the uploader reads them from `intake-app/.env.local`. Migration `0002` is applied to
-  production. Verified against the test row `todd+careertest1@launchpoint.co`, whose columns were
-  nulled afterwards so it does not look like a real delivery.
+  production. Verified against the test row `todd+careertest1@launchpoint.co`.
+
+  **Corrected Sept 15 2026 — the test row's `report_*` columns are POPULATED, not nulled.**
+  This entry used to say they "were nulled afterwards so it does not look like a real
+  delivery." They are set: they point at **Henry Johnson's PDF from Sept 9**
+  (`report_drive_file_id` `1xv9huzca2XAZAUseR4P0SHjjnJ2F662y`, `report_uploaded_at`
+  2026-09-09 19:49 UTC). So the test login lands on screen 3 showing Henry's report, and the
+  row passes the Circle DM script's report checks — which is what the Sept 15 end-to-end DM
+  test ran against. **Same pattern as before: accurate when written, quietly false now.**
+  Read the row before trusting a note about its state. (Todd, Sept 15 2026)
 - **Phase 4 step 2 (screen 3, results ready): complete and verified in production, Sept 9 2026.**
   The intake app's third state — the report link, with the client's Career Highlight Stories
   below it as clickable tabs, each story rendered as four labelled parts rather than run
