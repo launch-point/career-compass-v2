@@ -1,6 +1,11 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
-import { functionCategories, functionItemLabel } from '@/lib/config';
+import {
+  functionCategories,
+  functionItemCategory,
+  functionItemLabel,
+  type FunctionCategory,
+} from '@/lib/config';
 import {
   LARGE_CHECK_NUDGE,
   TOP10_COUNT,
@@ -11,6 +16,21 @@ import {
 } from '@/lib/answers';
 import { useIntakeStore } from '@/store/intakeStore';
 import { CheckPill, Counter, Notice, PhaseIntro, ProgressBar, RatingRow, TextField } from '@/components/ui';
+
+// "Job category · branch" — the line above each category in the walk. The
+// rating and narrowing screens flatten the walk, and several labels only differ
+// (identical cross-listed entries) or only read as complete ("Communicating
+// verbally with") in this context, so every item there carries the same line.
+// One helper for all of them, so the walk and the flat screens cannot drift.
+function categoryContext(cat: FunctionCategory): string {
+  return cat.branchName ? `${cat.jobCategoryName} · ${cat.branchName}` : cat.jobCategoryName;
+}
+
+const categoryById = Object.fromEntries(functionCategories.map((c) => [c.id, c]));
+
+function itemContext(id: string): string {
+  return categoryContext(categoryById[functionItemCategory[id]]);
+}
 
 // Phase 1 — one category screen (one of 19 in the walk).
 export function FunctionsCategoryScreen({ categoryId }: { categoryId: string }) {
@@ -29,8 +49,7 @@ export function FunctionsCategoryScreen({ categoryId }: { categoryId: string }) 
       </PhaseIntro>
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-muted">
-          {cat.jobCategoryName}
-          {cat.branchName ? ` · ${cat.branchName}` : ''} · Category {cat.walkIndex} of 19
+          {categoryContext(cat)} · Category {cat.walkIndex} of 19
         </p>
         <h2 className="mt-1 text-xl font-bold">{cat.name}</h2>
       </div>
@@ -114,7 +133,10 @@ export function FunctionsRatingScreen() {
       <div className="space-y-2">
         {pageIds.map((id) => (
           <div key={id} className="flex flex-col gap-2 rounded-lg border border-border bg-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-            <span className="text-sm">{functionItemLabel[id]}</span>
+            <span className="text-sm">
+              {functionItemLabel[id]}
+              <span className="mt-0.5 block text-xs text-muted">{itemContext(id)}</span>
+            </span>
             <RatingRow value={items[id]?.rating ?? null} onChange={(n) => setRating(id, n)} />
           </div>
         ))}
@@ -179,6 +201,7 @@ export function FunctionsTop10Screen() {
             <CheckPill
               key={id}
               label={functionItemLabel[id]}
+              detail={itemContext(id)}
               selected={!!isSel}
               onToggle={() => toggle(id, TOP10_COUNT)}
               disabled={!isSel && selected.length >= TOP10_COUNT}
@@ -228,6 +251,7 @@ export function FunctionsTop5Screen() {
             <CheckPill
               key={id}
               label={functionItemLabel[id]}
+              detail={itemContext(id)}
               selected={!!isSel}
               onToggle={() => toggle(id, TOP5_COUNT)}
               disabled={!isSel && selected.length >= TOP5_COUNT}

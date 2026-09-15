@@ -61,12 +61,15 @@ export function CheckPill({
   onToggle,
   disabled,
   badge,
+  detail,
 }: {
   label: string;
   selected: boolean;
   onToggle: () => void;
   disabled?: boolean;
   badge?: ReactNode;
+  /** Optional muted second line under the label. */
+  detail?: string;
 }) {
   return (
     <button
@@ -88,7 +91,10 @@ export function CheckPill({
       >
         {selected ? '✓' : ''}
       </span>
-      <span className="flex-1">{label}</span>
+      <span className="flex-1">
+        {label}
+        {detail && <span className="mt-0.5 block text-xs text-muted">{detail}</span>}
+      </span>
       {badge}
     </button>
   );
