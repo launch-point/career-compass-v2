@@ -348,8 +348,9 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   re-verify. Bundling them would put a Slack nicety behind the same approval as a silent
   client-facing data defect. The research template stays label-based and needs no ids.
 
-  **Neither change prevents the collision** — only category context in the picker does
-  (scoped, not built; see the Technical Note below).
+  **Neither change prevents the collision.** Category context in the picker is now built and
+  live (`34dce25`, see the Technical Note below), and it does not prevent it either: it lets a
+  client tell two similar entries apart, but a client can still select both halves of a pair.
 
   **No delivered report carries a duplicate — checked, not assumed.** *(Moved from Open
   Questions, Sept 14 2026.)* All six report JSONs (Scheiwe and v24, Johnson, Harper,
@@ -616,11 +617,21 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
 
   **The app dedupes by ID and never by label.** Selection state is keyed by item id
   throughout (`items[id]`, `pool.includes(id)`, `toggle(id, ...)`), so two identical labels
-  are two fully independent selectable items. **The Top-10 and Top-5 pickers render the label
-  alone** — `FunctionScreens.tsx:230`, `label={functionItemLabel[id]}` — with no category or
-  branch, so a client narrowing 10 to 5 sees two byte-identical pills and cannot tell them
-  apart. Earlier phases are grouped under category headings, so the collision is visible
-  there; it is specifically the two narrowing screens that flatten.
+  are two fully independent selectable items.
+
+  **The Rating, Top-10 and Top-5 screens now show a context line under every item** — the
+  walk's own "job category · branch" text (e.g. "People-Oriented Functions · Primarily
+  One-on-One"), muted, under the label. Shipped in `34dce25` (Sept 14 2026), walked by Todd in
+  local dev at desktop and phone width, and **verified live by Todd through Circle.** Before
+  that, all three screens rendered the bare label — the audit's note named only the two
+  narrowing screens, but Rating flattened too — so byte-identical entries were
+  indistinguishable. The walk eyebrow and the three screens share one helper
+  (`categoryContext()` in `FunctionScreens.tsx`) so the wording cannot drift.
+
+  **The caveat:** the line helps a client tell two similar entries apart, but it does
+  **not** prevent selecting both halves of a pair. Mike Farnsley selected both halves of two
+  pairs (group versions in his top 5, one-on-one versions in his next 5); his selections
+  stand as submitted. (Todd, Sept 14 2026)
 
   **IDs are already stored in Supabase — nothing is lost at rest.**
   `intake_submissions.answers` is jsonb holding `IntakeAnswers`, whose `functions.items` and

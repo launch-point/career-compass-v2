@@ -1596,3 +1596,15 @@ decision before any fix is built.
   guard belongs at the moment a result is first believed.
 - Positive controls and "fail on the unfixed code first" worked every time they were used
   (duplicate recheck, drift scenario). The failures above were all checks run without one.
+
+### Session 12, close — Todd's answers (supersede the carry-forward items above)
+- **Session count:** numbered as session 12 (Todd left the numbering to me). On that count
+  session 10 was a review point. **The 5-session review is DUE and deferred by Todd** until the
+  Circle DM work is finished — not skipped. Next review covers the entries since
+  "— reviewed 2026-09-08, sessions 1–5 —".
+- **Farnsley: no longer open.** Todd had already sent his research through; his cross-tier
+  selections stand as submitted. Remove from open items.
+- **Both stale MEMORY entries updated at Todd's direction:** the picker note now records the
+  context line on Rating, Top-10 and Top-5, verified live through Circle, with the caveat that
+  it does not prevent selecting both halves; the duplicate-FAIL decision no longer calls picker
+  context "scoped, not built."
