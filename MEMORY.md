@@ -121,6 +121,23 @@ several real clients.
 *(Step numbering note: step 3 is the embed. An earlier entry called the Circle DM "step 3";
 that was before the embed was scheduled ahead of it. The Circle DM is now a later step.)*
 
+**Circle DM script: built, not yet used on a client (Sept 14 2026).**
+`send_circle_dm.py` in the report skill — standalone, run by hand, not wired to Gate 4.
+Circle Admin API v2 **can** send the DM: verified by one real send to Taylor
+(taylor@launchpoint.co, co-owner), HTTP 200. The sender is the token's owner (Todd).
+Message wording, first name from Circle's member record, no link, and migration `0003`
+(DM record tied to the report's Drive file id) are all Todd's decisions; detail in the
+skill's SKILL.md section 7. **Migration 0003 is written but NOT applied** — Todd applies it
+in the SQL editor, then a real `--dry-run` against a live row comes before any client send.
+Never run it for Wesley Price (DM sent by hand; columns deliberately empty).
+
+**KNOWN LIMITATION — must be closed before the DM runs unattended at Gate 4.** After an
+exit 2 (sent, not recorded), nothing in the database stops a plain re-run from sending a
+second DM, because the record the already-announced check reads was never written. The
+printed warning and the confirm prompt are the only guard, and they work only while Todd
+runs the command and reads the output. **The fix is a pre-send marker written before the
+send.** Deliberately not built while Todd is the one running it. (Todd, Sept 14 2026)
+
 **Do not mistake gitignore for absence.** The Austin Scheiwe report and all generated client artifacts live in `reports/scheiwe/`, and `reports/` is gitignored. They are absent from git and from any fresh clone, but they are real and present on Todd's Mac. A future session that cannot see them in git must not conclude the work was never done — check the filesystem.
 
 **Five client reports delivered through all four gates.** All research-only (manual
