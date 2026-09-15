@@ -365,6 +365,59 @@ Exit 3 means the refresh token is dead (revoked, or the password changed):
 re-run `authorize.py` and paste the new token in. Nothing retries automatically —
 a retry here would hide exactly the failures worth seeing.
 
+### 7. After the upload: the Circle DM
+
+**Standalone and run by hand. Not wired to Gate 4.** It tells the client their
+report is ready and records that it did.
+
+```bash
+$PY $SKILL/send_circle_dm.py --client-id <UUID> --dry-run   # every check, the message; sends nothing
+$PY $SKILL/send_circle_dm.py --client-id <UUID>             # asks you to type 'send'
+```
+
+The message, verbatim — only the first name varies, and there is **no link**: it
+points the client into Job Tracker, where screen 3 shows the report. A Drive link
+would bypass that chain.
+
+> Hey {first name}, your Career Compass report is ready! Head over to your Job
+> Tracker in the Career Compass section to see your results!
+
+**Setup.** Needs migration `0003_circle_dm.sql` applied (the script refuses and
+says so otherwise) and `circle_admin_v2_token` in the same credentials file as
+Google. The first name comes from the client's **Circle** member record — the
+database stores none — and is shown before sending.
+
+**Circle Admin API v2, as verified by a real send (Sept 14 2026):**
+`POST https://app.circle.so/api/admin/v2/messages`, `Authorization: Token …`,
+body `{user_email, rich_text_body}`. The sender is the **token's owner** — there
+is no sender field, the API cannot name the owner before sending, and Circle
+refuses a DM to the owner's own account (422 "You can't direct message
+yourself"). Cloudflare refuses Python's default User-Agent (403, error 1010), so
+`cc_config.http_json` identifies itself on every call.
+
+**Refuses before sending** when: no row or no email · `report_drive_link` empty ·
+this report already announced (`circle_dm_report_drive_file_id` equals
+`report_drive_file_id`) · not an active Circle member · Circle has no first name.
+The record is tied to the report, so a revised, re-uploaded report can be
+announced without clearing anything by hand. **Never run it for Wesley Price**:
+his DM was sent by hand and his `circle_dm_*` columns are deliberately empty.
+
+**Exit codes.** `0` ok or dry run · `1` precondition/validation/declined/usage ·
+`2` sent but NOT recorded · `3` Circle rejected the token. Usage errors exit 1,
+not argparse's 2, so a typo can never read as a DM that went out.
+
+Exit 2 prints the message id, chat room and Circle's `sent_at` under `SENT BUT
+NOT RECORDED`. Recover with `--record-only <MESSAGE_ID> <CHAT_ROOM_UUID>
+<SENT_AT>`, which writes the record and **never loads the Circle token or calls
+the send endpoint**.
+
+**Known limitation — must be closed before this runs unattended at Gate 4.**
+After an exit 2, nothing in the database stops a plain re-run from sending a
+second DM: the record check 6 reads was never written. Today the printed warning
+and the confirm prompt are the only guard, which works only while Todd runs the
+command and reads the output. The fix is a pre-send marker written before the
+send; deliberately not built yet. (Todd, Sept 14 2026)
+
 ---
 
 ## Durable Rules
