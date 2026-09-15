@@ -1824,3 +1824,117 @@ encoding authorization; internal vocabulary reintroduced from the spec.
   MEMORY.
 
 **Next review:** after five more sessions from here (session 14 onward).
+
+---
+
+## Session 12, continued — 2026-09-15 — D4 measurement: dots crossing column boundaries (IN PROGRESS)
+
+**Raw observations. Not authoritative.** Continues the conversation after the sessions 6–13 review
+marker above. **Unfinished — next session resumes here.**
+
+### Status in one line
+Evidence gathered; **no fix proposed, none approved, nothing changed.** `graph_generator.py` is
+untouched — no uncommitted changes, last commit touching it `20e754f` (2026-09-07). MEMORY's D4
+entry and SKILL.md's "up to four dots… stay in-cell" line are now known to be inaccurate and
+were **deliberately not edited** pending Todd's decision.
+
+### Why this was opened
+D4 was recorded at the review as "five dots accepted, dots stay in-cell", with session 13's
+five-dot render (outer dots crossing into Operations and Finance) written beside it as a
+conflict. Todd asked to see the real geometry before deciding anything.
+
+### Method (the scratchpad scripts will be gone after the restart — rebuild from this)
+- **Cases, built as scratch copies — nothing under `reports/` was written:**
+  - five dots: `finnell_bill_client_report_data.json` with rank 2 (Change Management) set to
+    `Human Resources`, so HR/Specialist holds ranks 1, 2, 3, 5, 6 — Bill's first build per
+    session 13;
+  - four dots: the shipped `finnell_bill_client_report_data.json` unchanged (HR/Specialist =
+    1, 3, 5, 6; rank 2 alone at Operations/Specialist);
+  - three dots: `johnson_henry_client_report_data.json` unchanged (HR/Specialist = 3, 4, 5).
+- **Render:** the real `graph_generator.render(roles, "overview", …)` via the skill venv, with
+  `ensure_fonts()`, 300 DPI, `bbox_inches="tight"`, `pad_inches=0.15`. `plt.close` was
+  monkeypatched to keep the figure for measurement.
+- **Positive control on the coordinate mapping:** display → PNG pixel as
+  `x − (tightbbox.x0 − pad)·DPI`, `(tightbbox.y1 + pad)·DPI − y`. Before trusting it, the
+  pixels at the predicted HR left and right gridlines, near the top of the row (clear of
+  dots), were read from the PNG: **(204, 208, 200) both sides = SAGE `#CCD0C8`**, in every render.
+- **Geometric measurement:** centres from `_positions()` through `ax.transData`; dot radius
+  `sqrt(SIZE_OVERVIEW=520)/2 · 300/72 = 47.5px` fill, **50.0px including the 1.2pt white
+  edge**; cell width 216.3px (0.231 cell widths per radius including edge). Edge positions
+  compared against the HR boundaries at x = 5.5 and 6.5.
+- **Pixel scan:** along the row-centre line of the saved PNG, pixels matching orange (R > 170,
+  70 < G < 130, B < 70). **Contiguous-run grouping:** orange pixels joined into runs across gaps
+  of ≤ 12px, so the white edge rings between cell-mates don't split a cluster, and only the run
+  containing the HR cell centre is counted.
+  - **Why the grouping exists:** the first four-dot scan reported orange 152px into Operations.
+    That was rank 2's *separate* dot in the Operations cell, caught inside a wide scan window —
+    a harness error, found before reporting. Regrouped, the four-dot runs are (1440–1528) =
+    rank 2 alone and (1561–1840) = the HR cluster.
+- **Visual:** crops of the HR column plus half of each neighbour; a 3× nearest-neighbour zoom on
+  dots 1–3 of the five-dot render; page 6 of Bill's **delivered** PDF rendered at 150 DPI.
+- **Draw order checked:** numeral `Text` is zorder 6, dot `PathCollection` is zorder 5 —
+  numerals are drawn above every dot (script output, not assumed).
+
+### Finding — as far as it is established
+**What `_positions()` does:** `span = min(0.42·(n−1), 0.88)`, offsets evenly spaced across
+`±span/2`. **The 0.88 cap bounds dot CENTRES, not dot edges.** With a radius of 0.231 cell widths
+(including edge), a centre beyond ±0.269 from the cell middle crosses the gridline. Offsets
+printed by the script: five `[-0.44, -0.22, 0, 0.22, 0.44]`; four `[-0.44, -0.147, 0.147,
+0.44]`; three `[-0.42, 0, 0.42]`.
+
+| Dots/cell | Case | Geometric: outer edge (incl. white ring) past gridline | Pixel scan: orange past gridline | Status |
+|---|---|---|---|---|
+| 5 | Finnell, rank 2 moved to HR | **0.171 cw = 37px, both sides** | **31px = 0.143 cw, both sides** | measured |
+| 4 | Finnell shipped JSON | **0.171 cw = 37px, both sides** | **31px = 0.143 cw, both sides** | measured |
+| 3 | Johnson shipped JSON | **not printed by the script** — unconfirmed | **26px = 0.120 cw, both sides** | pixel measured only |
+| 2 | — | not measured (hand arithmetic says inside; never run) | not measured | **unmeasured** |
+
+- **Four and five reach exactly as far past the gridline.** The cap pins the outer centres at
+  ±0.44 for every n ≥ 4. The 37 vs 31px difference between the methods is the white edge ring
+  plus anti-aliasing, which the orange threshold excludes. **"Up to four dots stay in-cell"
+  (SKILL.md, and the premise of the earlier no-change decision) is false at four and at three.**
+- **What changes at five is spacing, not spread:** centre spacing 0.220 cw = 47.6px against a
+  47.5px fill radius.
+- **Numeral legibility:**
+  - **Five: not legible, observed.** In the 3× zoom, the neighbouring dot's white outline arc
+    runs through the middle of numerals "1", "2", "3" and "5" (white arc over white digit). "6",
+    drawn last, is clean. Consistent with session 13's "numbers 1–3 illegible".
+  - **Four: judged at crop scale only, not zoomed.** The arc appears to skim the right side of
+    each numeral; they read as legible. Consistent with session 13's "1 partly covered but
+    readable". Not confirmed at zoom — treat as unconfirmed detail.
+  - **Three: legibility not examined.**
+- **Delivered artifact observed: one only.** Bill's delivered PDF page 6 (150 DPI): dot 1 sits on
+  the Operations | Human Resources gridline and dot 6 on Human Resources | Finance; "1" and "5"
+  are visibly sliced. **No other delivered PDF was rendered or inspected.**
+
+### Max dots per cell in delivered reports — from report JSON placement data, NOT from the PDFs
+
+| Report | Max | Cells with ≥ 3 |
+|---|---|---|
+| Scheiwe (v1) | 2 | none |
+| Scheiwe v24 | 3 | Operations/Strategist |
+| Johnson | 3 | Human Resources/Specialist |
+| Harper | 3 | Sales/Specialist |
+| McCreary | 3 | Human Resources/Specialist |
+| Price | 3 | Product/Integrator |
+| Finnell | 4 | Human Resources/Specialist |
+
+**No delivered report has five in a cell.** That every ≥ 3 cell crosses its gridlines in the
+delivered PDFs is an **inference** from this placement data plus the Johnson three-dot and Finnell
+four-dot renders. It was observed only in Finnell's page 6. (All six clients are closed; this is
+pipeline information, not a work item. Which Scheiwe PDF Austin received is unresolved and closed.)
+
+### Not measured
+- **Role mode** (`SIZE_TARGET` 700, `SIZE_CONTEXT` 170) and **compact mode** (80/38 at 2.8in)
+  use the same `_positions()` — crossing unmeasured in both.
+- The three-dot geometric figure; the two-dot case at all; four-dot numerals at zoom.
+- Any delivered PDF other than Finnell page 6.
+
+### Next session starts with, in order
+1. **Finish D4.** Todd has seen the geometry above and has **not** asked for a fix yet. Next: his
+   decision on what to do. Then correct MEMORY's D4 entry — it says the conflict applies at five,
+   but crossing begins at three — and SKILL.md's "up to four… stay in-cell" line, per that
+   decision. Rebuild the measurement from the method above if new numbers are needed.
+2. **D2 — the seniority mapping question** (Open Question in MEMORY: Integrator by the altitude of
+   the work; Project/Program Manager under Product). Remind Todd.
+3. **Phase 3.**
