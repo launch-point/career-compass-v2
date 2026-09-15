@@ -477,24 +477,50 @@ real work rather than being a rename. Verified by Todd against the actual Slack 
   he has, and tracing it through old email is not worth the time. Do not raise it again.
   (Todd, Sept 15 2026)
 
-- **Five dots in one overview cell: accepted — no graph change.** Same reasoning as the
-  existing four-dot limit: `_positions()` is proven collision logic and is not to be
-  destabilised for a rare edge case. Todd's stated reason: dots stay in-cell, so nothing is
-  misattributed. (Todd, Sept 15 2026)
-
-  **Conflicting observation, recorded beside the decision, not in place of it:** the only
-  five-dot render on record — Bill Finnell's first build, session 13 — showed **numbers 1–3
-  illegible and the outer dots crossing into the Operations and Finance columns**, i.e. not
-  in-cell. Todd re-placed a role instead, so no delivered report has five dots in a cell. This
-  was flagged to Todd at the review before recording; he directed the decision be recorded as
-  given. If five dots in a cell ever ships, look at the rendered page for a dot drawn in the
-  wrong column before Gate 4.
-
 ---
 
 ## Open Questions
 
 *Things that need Todd's input before they can be resolved. Remove once answered — move the answer to Decisions.*
+
+- **Overview dots crossing column gridlines — corrected finding; NO FIX DECIDED.**
+  *(Moved from Decisions, Sept 15 2026. It was recorded at the sessions 6–13 review as "five
+  dots accepted — dots stay in-cell", with session 13's five-dot render noted as a conflict.
+  Measured the same day; corrected at Todd's direction.)*
+
+  **Crossing starts at three dots per cell, not five.** `_positions()` spreads centres across
+  `min(0.42·(n−1), 0.88)`; the 0.88 cap bounds **centres**, not dot edges. **Every dot centre
+  stays inside its cell** (outermost ±0.44 of a ±0.5 cell), so the dot is still read against the
+  right column. **What crosses is the dot's edge** — cosmetic, not misattribution (Todd).
+  Measured on 300 DPI overview renders, cell = 216.3px: **three** dots, orange 26px (0.120 cell
+  widths) past each gridline (pixel scan; geometric figure not taken); **four and five, identical:**
+  37px (0.171 cw) geometric to the outer edge of the white ring, 31px (0.143 cw) by pixel scan.
+  The cap pins the outer centres at ±0.44 for any n ≥ 4, so four and five reach exactly as far.
+  **Two dots: not measured.** SKILL.md's "up to four dots… stay in-cell" is wrong on edges and has
+  not yet been corrected.
+
+  **The real defect is numeral legibility at five.** At five, centre spacing (0.220 cw = 47.6px)
+  equals the dot's fill radius (47.5px), so each neighbouring dot's **white outline arc runs
+  through the middle of the white numeral** — observed at 3× zoom slicing "1", "2", "3" and "5";
+  "6", drawn last, is clean. The numerals are drawn *above* the dots (zorder 6 over 5, checked),
+  so this is outline-over-digit, not a dot covering the digit. At four the arc skims each
+  numeral's side and they read as legible — **judged at crop scale only, not zoomed.** Three:
+  legibility not examined.
+
+  **No delivered report has five in a cell** (from report JSON placement data): Scheiwe v1 max 2;
+  Scheiwe v24, Johnson, Harper, McCreary, Price max 3; Finnell max 4. So every delivered report
+  except Scheiwe v1 has edge crossing; it was **observed** only on Finnell's delivered page 6 (dots
+  1 and 6 on the gridlines) and inferred for the rest.
+
+  **Tightening the cap would make the numerals worse.** A smaller span shrinks spacing for every
+  n where the cap binds (four and up; three too once it drops below 0.84), increasing overlap —
+  so it trades the cosmetic edge crossing for more of the actual defect. **Derived from the
+  formula, not rendered.**
+
+  **Not measured:** role mode (`SIZE_TARGET` 700 / `SIZE_CONTEXT` 170) and compact mode, which
+  share `_positions()`. Method and full figures: SESSION_LOG, "D4 measurement". No change has
+  been made to `graph_generator.py`, and **no fix is decided** — the next step is Todd's decision.
+  (Todd, Sept 15 2026)
 
 - **Seniority mapping: is Integrator about the altitude of the work, not managing people?
   OPEN — Todd is thinking about it. REMIND TODD AT THE START OF THE NEXT SESSION.**

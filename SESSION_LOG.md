@@ -1938,3 +1938,30 @@ pipeline information, not a work item. Which Scheiwe PDF Austin received is unre
 2. **D2 — the seniority mapping question** (Open Question in MEMORY: Integrator by the altitude of
    the work; Project/Program Manager under Product). Remind Todd.
 3. **Phase 3.**
+
+### D4 — close for this session (Todd, Sept 15 2026)
+- **MEMORY's D4 entry corrected at Todd's direction and moved from Decisions to Open Questions**,
+  because no fix is decided and a "Decisions" heading would read as settled. It now records:
+  - crossing starts at three dots, not five;
+  - the dot **edge** crosses while the centre stays in-cell — cosmetic, not misattribution
+    (Todd's judgment);
+  - numeral legibility at five is the real defect;
+  - no delivered report has five;
+  - tightening the cap would worsen the numerals.
+- **Wording kept precise against the measurements:**
+  - Todd said "numeral occlusion". The observed mechanism is the neighbour's white outline arc
+    over a white digit; numerals are drawn above the dots (zorder checked).
+  - "Tightening the cap worsens the numerals" is recorded as **derived from the formula, not
+    rendered**.
+  - Four-dot legibility is still crop-scale only; three-dot geometry and the two-dot case are
+    still unmeasured.
+- **Superseded by that correction:** the review marker's line above, "D4 — five dots in a cell
+  accepted, no graph change". MEMORY is the current record.
+- **Still inaccurate and NOT edited (SKILL.md was not part of Todd's instruction):** in the report
+  skill's SKILL.md, "Up to four dots can share one grid cell; they overlap but stay in-cell", and
+  the review-day note under it saying five dots are "accepted" and "not in-cell". Correct both
+  when D4 is decided.
+- `graph_generator.py` unchanged; no fix proposed or approved.
+
+**Next session, in order:** (1) finish D4 — Todd's decision on a fix, then the SKILL.md
+correction; (2) D2, the seniority mapping question — remind Todd; (3) Phase 3.
