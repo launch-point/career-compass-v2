@@ -2,10 +2,11 @@
 
 Two credential sources, deliberately separate:
 
-  * Google OAuth (client id/secret, refresh token) and the Drive folder id live
-    OUTSIDE the repo, at ~/.config/career-compass/credentials.json (override with
-    CAREER_COMPASS_CONFIG). Gitignored is not the same as protected — a long-lived
-    credential should not sit in a directory that might be copied or shared.
+  * Google OAuth (client id/secret, refresh token), the Drive folder id and the
+    Circle Admin API v2 token live OUTSIDE the repo, at
+    ~/.config/career-compass/credentials.json (override with CAREER_COMPASS_CONFIG).
+    Gitignored is not the same as protected — a long-lived credential should not
+    sit in a directory that might be copied or shared.
   * Supabase URL + service-role key stay in intake-app/.env.local, which is where
     the Next.js app already reads them in local dev. Moving those is a change to
     how the app loads config, which is a different change from adding an uploader.
@@ -34,6 +35,11 @@ SCOPE = "https://www.googleapis.com/auth/drive.file"
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ENV_LOCAL = REPO_ROOT / "intake-app" / ".env.local"
 
+# Sent on every call. Every client should identify itself — and Cloudflare in
+# front of app.circle.so refuses Python's default "Python-urllib/3.x" outright
+# (403, error 1010), before Circle's API ever sees the request.
+USER_AGENT = "career-compass-v2/1.0 (Launch Point; todd@launchpoint.co)"
+
 GOOGLE_KEYS = (
     "google_oauth_client_id",
     "google_oauth_client_secret",
@@ -55,14 +61,31 @@ def config_path():
     return Path.home() / ".config" / "career-compass" / "credentials.json"
 
 
+CIRCLE_TOKEN_KEY = "circle_admin_v2_token"
+
+
 def load_google(require=GOOGLE_KEYS):
-    """Read the out-of-repo credentials file, refusing loose file permissions.
+    """Google OAuth + Drive folder keys from the out-of-repo credentials file.
 
     `require` lists the keys that must be present and non-empty. authorize.py
     needs only the client pair; the uploader needs the refresh token and folder
     id too, so each caller states what it actually needs rather than every
     script demanding a fully-populated file.
     """
+    return load_credentials(require)
+
+
+def load_circle():
+    """The Circle Admin API v2 token, from the same credentials file.
+
+    Same file and the same permission check as Google, deliberately: a second
+    file would mean a second loader and a second check to keep in sync.
+    """
+    return load_credentials((CIRCLE_TOKEN_KEY,))[CIRCLE_TOKEN_KEY].strip()
+
+
+def load_credentials(require):
+    """Read the out-of-repo credentials file, refusing loose file permissions."""
     path = config_path()
     if not path.exists():
         die(f"no credentials file at {path}\n"
@@ -125,6 +148,7 @@ def http_json(url, method="GET", headers=None, body=None, raw_body=None,
     token, a folder the app cannot reach, a row that does not exist.
     """
     headers = dict(headers or {})
+    headers.setdefault("User-Agent", USER_AGENT)
     if raw_body is not None:
         data = raw_body
         headers.setdefault("Content-Type", content_type)
