@@ -149,9 +149,11 @@ send.** Deliberately not built while Todd is the one running it. (Todd, Sept 14 
 
 **Do not mistake gitignore for absence.** The Austin Scheiwe report and all generated client artifacts live in `reports/scheiwe/`, and `reports/` is gitignored. They are absent from git and from any fresh clone, but they are real and present on Todd's Mac. A future session that cannot see them in git must not conclude the work was never done — check the filesystem.
 
-**Five client reports delivered through all four gates.** All research-only (manual
-delivery, see Decisions). Page and role counts are from the PDFs and report JSONs on disk,
-Sept 14 2026:
+**Six client reports delivered through all four gates.** Scheiwe, Johnson, Harper and
+McCreary are research-only (no `clients` row, manual delivery — see Decisions). **Price and
+Finnell have real `clients` rows** and went through the Drive upload; both Circle DMs were
+still sent by hand. Page and role counts are from the PDFs and report JSONs on disk
+(Sept 14 2026; Finnell's read the same way):
 
 | Client | Pages | Roles | Folder | Notes |
 |---|---|---|---|---|
@@ -160,11 +162,12 @@ Sept 14 2026:
 | Jensen Harper | 27 | 7 | `reports/harper/` | |
 | Jaleesa McCreary | 33 | 9 | `reports/mccreary/` | Gate 4 Sept 10 2026 |
 | Wesley Price | 30 | 6 | `reports/price/` | Delivered Sept 14 2026; seven Todd-facing lines rewritten before build; Circle DM sent by hand |
+| Bill Finnell | 24 | 6 | `reports/finnell/` | Client row `128e45c1-…`; Drive upload 2026-09-15 01:01 UTC (Sept 14 local); built in another session; Circle DM sent by hand |
 
-The pipeline is proven across five clients with different role counts, function spreads
+The pipeline is proven across six clients with different role counts, function spreads
 and salary structures.
 
-**All five are delivered and CLOSED. None will be reissued.** They are not perfect, and this
+**All six are delivered and CLOSED. None will be reissued.** They are not perfect, and this
 file records several defects they carry — dangling colons on Day-to-Day bullets, fabricated
 "Time to acquire" labels, Harper's inline `**Flag:**` text. **Those are historical records of
 what shipped, not work items.** Anything found in a delivered report from here on is
