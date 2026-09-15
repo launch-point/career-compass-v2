@@ -1500,3 +1500,99 @@ decision before any fix is built.
   re-deriving the expectation before reporting a verification result did not fire on its own
   — it fired because Todd interrupted. Possible pattern: the guard needs to run *before* the
   first result is believed, not before the result is reported.
+
+---
+
+## Session 12 (count tentative — see session 10 note) — 2026-09-14 — Duplicate recheck; TOP_FUNCTION_DUPLICATE; Farnsley stored intake; picker context line shipped
+
+### What ran
+- **Duplicate top-5 recheck, done properly.** All six report JSONs against `client.functions`
+  / `client.values`, list shape asserted first (5 non-empty items): no exact duplicates, none
+  after normalizing case/punctuation/"your". Positive control (Johnson slot 1 copied to slot 2)
+  caught `{'Performing, acting': 2}`. Moved out of Open Questions in MEMORY (`d3c17a3`).
+- **MEMORY Current Status** now lists all five delivered clients with page/role counts read
+  from the PDFs and JSONs on disk. No Gate 4 date for Harper — none on record, left out.
+- **Parser: `TOP_FUNCTION_DUPLICATE`** (`be0552b`). Functions now test slot occupancy like
+  values. Scenario failed first on the unfixed parser (exit 0, no findings), then 16/16 on
+  Price, Harper, McCreary. Build JSON byte-identical to the previous parser for all three.
+  Propose footer points at the client's TOP 5 when a duplicate is among the failures; a
+  duplicate the research never names also prints `TOP_FUNCTION_ABSENT`.
+- **Farnsley's stored intake (read-only Supabase GETs).** Submitted and locked, no edits after
+  submit. He genuinely selected both halves of both pairs as distinct ids, split across tiers:
+  group versions (`influencing-and-persuading-a-group__02`, `__04`) in top 5, one-on-one
+  versions (`supporting-enabling-hosting-entertaining__12`,
+  `managing-informing-selling-general-administrativ__07`) in top 10 only. No exact label
+  repeats. Stored data alone explains the research agent's report — `serialize.ts` computes
+  next5 by id, then maps labels. **Not seen:** the pasted intake text itself.
+- **Intake picker context line** (`c4f05e7` on branch, cherry-picked to `main` as `34dce25`).
+  "Job category · branch" under every item on Rating, Top-10 and Top-5; the walk eyebrow uses
+  the same helper. Walked by Todd in local dev mode at desktop and phone width across four
+  seeded drafts, approved, pushed to `main`, **confirmed live by Todd through Circle.**
+
+### Decisions Todd made
+- **All five delivered clients are closed** — recorded defects are history, not work items;
+  none reissued (written to MEMORY at his direction).
+- Duplicate FAIL fires once per role, matching values: "divergence is how these drifted
+  apart to begin with."
+- **Every pill, not only ambiguous ones; field = job category · branch; Rating screen in;
+  walk eyebrow shares the helper.** Todd was willing to reconsider "no new strings" if the
+  long Groups line read heavy at phone width; after walking it: "reads well at both widths."
+- Johnson near-miss tightened in MEMORY: the byte-identical labels did land in his
+  selections, split across TOP 5 / NEXT 5; the tier boundary avoided the collision.
+- Drift suite limitation recorded in MEMORY: only clients with research markdown on disk
+  (Harper, McCreary, Price) can be tested.
+
+### What went wrong (mine)
+- **Claimed "the parser logs match" without seeing it.** The check's confirmation line never
+  printed (it had failed on the output-filename line); I reported the claim anyway. Caught
+  and disclosed the next turn.
+- **Reported an edge case as verified that was never tested.** The "research never names the
+  label" mutation used a whole-document `.replace()`, which renamed the Functional Mix
+  bullets too (label present 8 times). Caught while planning fix 3; rebuilt to touch only the
+  TOP 5 list and disclosed.
+- **MEMORY draft overclaimed twice before commit**: implied Johnson's list went through the
+  intake picker (he is research-only), and implied the charisma twin would trip `index()` (it
+  differs by "your"). Also wrote my own inference into MEMORY attributed to Todd ("not a
+  retrieval task"). All three caught before committing.
+- Seed script sent `PUT /api/draft` before the `GET` that creates the record → 500 ×3.
+  Harness error, read from the server log before drawing any conclusion about the app.
+
+### Brief premises corrected from the data (before building)
+- The three exact collisions are Information-Oriented vs People/Groups, not One-on-One vs
+  Groups (`branchName` is null for all 12 Information/Things categories).
+- Top-10 shows the whole rated-4/5 pool (Mike's was 23), not ~10; Top-5 shows 10.
+- Pools are in walk order, so twins are usually far apart — each pill must read standalone.
+
+### Technical gotchas hit (candidates for MEMORY, not yet written)
+- **Next's env loader only fills variables that are `undefined`.** Setting the Supabase and
+  webhook vars to empty strings in the shell overrides `.env.local`, giving true dev mode
+  (filesystem store, cookie login). Confirmed at runtime by `POST /api/auth/dev-send`
+  returning 200 with a dev link (it 404s when Supabase is configured). A plain `next dev`
+  here would have run against **production** Supabase.
+- **`git switch main-deploy` swaps MEMORY.md and CLAUDE.md to `main`'s stale copies**, and the
+  harness reports them as "changed on disk." Not real edits; switching back restores them.
+- `main-deploy` is the local branch tracking `origin/main`; local `main` is stale (`3d8951e`).
+- First `git push` was blocked by the auto-mode classifier; Todd ran it with `!`. A later
+  push from the tool succeeded. The Chrome extension was declined; Todd walked the UI himself.
+
+### Stale in MEMORY now (not edited — needs Todd's say-so)
+- Technical Notes, intake function list entry: "The Top-10 and Top-5 pickers render the label
+  alone — `FunctionScreens.tsx:230`" is no longer true as of `34dce25`.
+- Decisions, duplicate FAIL entry: "only category context in the picker does (scoped, not
+  built)" — it is now built and live. (Note it shows context; it does not *prevent* a
+  client selecting both twins.)
+
+### Unfinished — carry forward
+- **Farnsley is still blocked on Todd's call**: whether his cross-tier selections are
+  deliberate enough to proceed without asking him.
+- **Session count and the 5-session review.** Sessions 10–12 are all tentatively numbered;
+  the review flagged at session 10 has not been confirmed or run.
+
+### Noticed (tentative — not for MEMORY without confirmation)
+- The session-11 hypothesis recurred **three more times** this session: a first result was
+  believed before its check was confirmed able to observe it (logs "match", the edge-case
+  mutation, the MEMORY near-miss wording). In every case the catch came later, from re-reading
+  my own output, not from the Corrections Log rule firing up front. Stronger evidence that the
+  guard belongs at the moment a result is first believed.
+- Positive controls and "fail on the unfixed code first" worked every time they were used
+  (duplicate recheck, drift scenario). The failures above were all checks run without one.
