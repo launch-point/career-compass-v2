@@ -1663,3 +1663,101 @@ finished, per session 12 close). Not run this session.
   the timing.
 - Work Preferences prints the salary floor unformatted ("125000"); Price's delivered report
   does the same. Pipeline information, not a work item.
+
+---
+
+## Session 12, continued — 2026-09-14/15 — Circle DM: Admin v2 verified, send script, migration 0003, end-to-end test
+
+*Same conversation as session 12; session 13 (Bill Finnell, another session) was logged in between.*
+
+**The 5-session review is still due.** Todd deferred it "until the Circle DM work is finished."
+The script is now built and tested end to end; whether that meets the condition is Todd's call.
+
+### What ran
+- **Admin v2 messaging located** from the public OpenAPI spec
+  (`api-headless.circle.so/api/admin/v2/swagger.yaml`; the prose docs list no endpoints):
+  `POST /api/admin/v2/messages`, `Authorization: Token …`, `{user_email | user_emails,
+  rich_text_body}`; member lookup `GET /community_members/search?email=`.
+- **Credentials:** `load_circle()` reads `circle_admin_v2_token` from the existing
+  credentials file via a shared `load_credentials(require)`; example file updated. Todd's
+  paste left a missing comma, which broke `load_google` too; added with his OK (one char,
+  mode kept 0600, values never printed).
+- **Cloudflare 403 error 1010** on the first lookup: Python's default
+  `User-Agent: Python-urllib/3.9`. One retry with an honest client UA → 200. UA now set in
+  `http_json` for every call; Google token exchange and a Supabase GET re-verified.
+- **Self-DM → 422 "You can't direct message yourself."** Not treated as a no, per Todd. Test
+  DM to Taylor (co-owner) → 200; sender = token owner (Todd); Circle stored the tiptap body
+  as sent (added a trailing slash to the link href).
+- **`send_circle_dm.py`** built (`a426444`) after Todd reviewed wording, confirm screen,
+  precondition order and exit-2 path. **Migration 0003** (`circle_dm_sent_at`,
+  `_message_id`, `_chat_room_uuid`, `_report_drive_file_id`), additive/idempotent.
+- **Tests:** stubbed harness 19/19, two deliberately wrong expectations FAIL. Real dry run
+  before 0003 → refused at check 3 with "apply 0003". After Todd said 0003 was applied, the
+  columns were still absent on `duyojjvnjyhxqyhjomgp` (Postgres 42703, not a PostgREST cache
+  issue); **cause never established.** Todd then asked for the file printed to paste, and
+  next confirmed all four columns on `duyojjvnjyhxqyhjomgp` via `information_schema`; the dry
+  run then refused at check 9 (alias not a member).
+- **End to end, Sept 15:** Todd added the alias to Circle as "Todd Test" (92552919). Dry run
+  reached the confirm screen, wrote nothing. Todd ran a declined prompt, then a real send
+  (message `2152042476`). Row read back: all four columns, Circle's own `sent_at`, report file
+  id matching. Re-run refused at check 6 before token load or prompt. Test row columns
+  cleared (one row, read back NULL).
+- **0003 added to `main`** as a file-only commit (`ad8b51e`), pushed with Todd's go —
+  schema-history parity, since nothing on main reads the columns.
+- MEMORY: Bill Finnell added to the delivered table and closed (six clients); Price and
+  Finnell recorded as never-run for the DM script.
+
+### Decisions Todd made
+- Token lives in the existing `credentials.json`, not a second file or env var: one loader,
+  one permission check.
+- User-Agent in `http_json` for all calls, not Circle-only: "one place is better."
+- Message wording verbatim, "Career Compass" capitalized; **no link** (a Drive link bypasses
+  Job Tracker / screen 3); first name from Circle's member record, shown at confirm.
+- **The DM record is mandatory now**, not later — the confirm prompt guards against misreading,
+  not forgetting, and Gate 4 will have no prompt. Tied to the report's Drive file id.
+- Wesley Price and Bill Finnell: DMs sent by hand; columns stay NULL; never run the script
+  for them. A hand-written record would contradict what the columns mean.
+- **Exit-2 re-run gap logged as a known limitation**; a pre-send marker must close it before
+  unattended Gate 4. Not built while Todd runs the command himself.
+- Keep the "Todd Test" Circle member for future tests.
+
+### What went wrong (mine)
+- Proposed a separate token file and an env var before reading how `cc_config` already
+  loads credentials. Todd redirected to the existing file.
+- Suggested the confirm screen could show the sender from the member lookup. The lookup
+  returns the recipient; Admin v2 has no token-owner endpoint. Caught before building.
+- `argparse` exits 2 on usage errors, colliding with "sent but not recorded". Found while
+  planning tests; usage errors now exit 1.
+- **Wrote a false line into MEMORY earlier this session**: the delivered table's intro called
+  every client research-only, but Price (and now Finnell) have real rows. Caught while
+  adding Bill; corrected in `f91154b`.
+- Cosmetic churn in my own edits: `—` escaping in the committed example JSON and an
+  over-long docstring line. Both caught in the diff before commit.
+
+### Technical gotchas (candidates for MEMORY, not yet written)
+- **Circle's Admin v2 reference is only in the Swagger spec**, not the llms.txt/prose docs.
+- **Cloudflare blocks Python's default UA on app.circle.so (403, 1010)** before the API.
+- **Sender = token owner; no endpoint names the owner; self-DM is a 422.**
+- **Postgres `42703` on a PostgREST select means the column truly does not exist** — a stale
+  schema cache is a different error. That is what separated "0003 not applied" from "cache."
+- Captured output can print a script's stderr before its stdout; not an ordering bug.
+
+### Stale in MEMORY now (not edited — needs Todd's say-so)
+- Phase 4 step 1 entry: the test row's `report_*` columns "were nulled afterwards." They are
+  set today (`report_uploaded_at` 2026-09-09 19:49 UTC, file `1xv9huzc…`), probably from the
+  screen-3 check. Which PDF it points at has not been checked.
+
+### Still open
+- 5-session review: due (see top).
+- Pre-send marker for the exit-2 gap before any Gate 4 wiring.
+
+### Noticed (tentative — not for MEMORY without confirmation)
+- **Todd consistently chooses extending one existing mechanism over adding a parallel one**:
+  credentials file over a second file, UA in `http_json` over per-call, the walk eyebrow and
+  flat screens sharing one helper (session 12), duplicate FAIL matching the values pattern.
+  Four instances across this conversation.
+- **Todd stops long writes to see the content first.** The script write, a test harness run
+  and one lookup were interrupted; each time he asked to see or narrow the thing before it
+  landed. Possible rule: show a large new file's key behaviour before writing it.
+- Positive controls again did their job (harness controls, the 403/42703 reads). No first
+  result this stretch was reported before its check was confirmed able to see it.
